@@ -114,17 +114,14 @@ These are not instruction files and have no ai-kit conflict.
 Custom skills some teams added under `.github/` by analogy with
 `.github/instructions/`, before VS Code Copilot Chat standardized on
 `chat.useAgentSkills` reading from `.claude/`. ai-kit's canonical location is
-`.claude/skills/<category>/<name>/`.
+`.claude/skills/<name>/` — flat, no category folder (Claude Code only
+discovers skills one level deep).
 
-- For each skill directory, copy every file into
-  `.claude/skills/<category>/<name>/`. Default `category` is `misc`. The
-  migrator agent may override `category` per skill by emitting `category:
-  "<name>"` on the corresponding `github-skill-route` work-unit in the
-  routing JSON (e.g. set to `frontend` if the SKILL.md describes UI work).
+- For each skill directory, copy every file into `.claude/skills/<name>/`.
 - **Delete the originals** under `.github/skills/<name>/`.
-- If `.claude/skills/<category>/<name>/` already exists, mark
-  `hasCollision: true`, skip staging, and surface the source path under
-  the leave-as-is review unit so the user resolves manually.
+- If `.claude/skills/<name>/` already exists, mark `hasCollision: true`,
+  skip staging, and surface the source path under the leave-as-is review
+  unit so the user resolves manually.
 
 ### `.github/agents/<name>.agent.md`
 

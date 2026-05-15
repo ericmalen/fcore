@@ -69,6 +69,33 @@ test('init --skills dedupes when category and individual id overlap', () => {
   assert.equal(count, 1, 'refactor-module should appear exactly once');
 });
 
+test('init --skills <id>: opt-in skill installs flat at .claude/skills/{id}/', () => {
+  const dir = tmp();
+  // git-conventions source lives at .claude/skills/git/git-conventions in the scaffold;
+  // it must land flat (no category folder) in the consumer for Claude Code to discover it.
+  const result = runInit(dir, 'git-conventions');
+  assert.equal(result.status, 0, `init failed: ${result.stderr}\n${result.stdout}`);
+
+  assert.ok(existsSync(join(dir, '.claude/skills/git-conventions/SKILL.md')),
+    'flat install path exists');
+  assert.ok(!existsSync(join(dir, '.claude/skills/git/git-conventions/SKILL.md')),
+    'nested category path NOT created');
+  assert.ok(!existsSync(join(dir, '.claude/skills/git')),
+    'no leftover category directory');
+
+  const manifest = readManifest(dir);
+  // Manifest key is source-relative (nested); installedAs is consumer flat path.
+  const skillKey = Object.keys(manifest.files).find(
+    k => k.endsWith('git-conventions/SKILL.md')
+  );
+  assert.ok(skillKey, 'manifest has an entry for git-conventions SKILL.md');
+  assert.equal(skillKey, '.claude/skills/git/git-conventions/SKILL.md',
+    'manifest key tracks source-side nested path');
+  assert.equal(manifest.files[skillKey].installedAs,
+    '.claude/skills/git-conventions/SKILL.md',
+    'installedAs records flat consumer path');
+});
+
 test('init --skills skill-creator: base skill stays out of installed.skills', () => {
   const dir = tmp();
   // skill-creator is a base skill. Passing it via --skills must NOT duplicate

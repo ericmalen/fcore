@@ -52,14 +52,10 @@ all file I/O. This agent never edits files or runs Bash.
    - **`json-merge`**, **`agents-md-merge`**, **`leave-as-is`**, **`instructions-fold`** —
      Pass through unchanged. The CLI handles these deterministically.
    - **`github-skill-route`** — One source directory under `.github/skills/<name>`
-     copied to `.claude/skills/<category>/<name>`. The CLI handles the file
-     moves; you only need to pick a better `category` if the default `misc`
-     doesn't match the skill's domain. Read the source SKILL.md description and
-     emit `{ id, type: "github-skill-route", category: "<bucket>" }` in the
-     routing JSON only when overriding. Use existing categories from
-     `.claude/skills/` siblings when possible (e.g. `frontend`, `backend`,
-     `testing`). Skip the unit entirely when `hasCollision: true` — the CLI
-     surfaces it under leave-as-is.
+     copied to `.claude/skills/<name>` (flat, no category folder — Claude
+     Code only discovers skills one level deep). Pure passthrough; emit
+     nothing for this unit. Skip entirely when `hasCollision: true` — the
+     CLI surfaces it under leave-as-is.
    - **`github-agent-route`** — Move `.github/agents/<name>.agent.md` →
      `.claude/agents/<name>.agent.md`. No agent decisions needed; pass through.
 

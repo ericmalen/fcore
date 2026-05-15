@@ -733,12 +733,12 @@ test('work-units.enumerate — emits github-skill-route grouped by skill name', 
   const unit = units.find(u => u.id === 'github-skill-foo');
   assert.ok(unit, 'github-skill-foo unit emitted');
   assert.equal(unit.type, 'github-skill-route');
-  assert.equal(unit.category, 'misc');
-  assert.equal(unit.target, '.claude/skills/misc/foo');
+  assert.equal(unit.category, undefined, 'no category field on flat-install units');
+  assert.equal(unit.target, '.claude/skills/foo');
   assert.equal(unit.hasCollision, false);
   assert.equal(unit.files.length, 2);
-  assert.ok(unit.files.some(f => f.dst === '.claude/skills/misc/foo/SKILL.md'));
-  assert.ok(unit.files.some(f => f.dst === '.claude/skills/misc/foo/references/notes.md'));
+  assert.ok(unit.files.some(f => f.dst === '.claude/skills/foo/SKILL.md'));
+  assert.ok(unit.files.some(f => f.dst === '.claude/skills/foo/references/notes.md'));
   // Deletions: 2 source files + the leaf .github/skills/foo dir so apply-exec rmdirs it.
   assert.equal(unit.deletions.length, 3);
   assert.ok(unit.deletions.includes('.github/skills/foo'), 'leaf dir included for rmdir');
@@ -774,9 +774,8 @@ test('github-route — stages content for non-collision skill route', () => {
     type: 'github-skill-route',
     skillName: 'foo',
     source: '.github/skills/foo',
-    target: '.claude/skills/misc/foo',
-    category: 'misc',
-    files: [{ src: '.github/skills/foo/SKILL.md', dst: '.claude/skills/misc/foo/SKILL.md' }],
+    target: '.claude/skills/foo',
+    files: [{ src: '.github/skills/foo/SKILL.md', dst: '.claude/skills/foo/SKILL.md' }],
     hasCollision: false,
     deletions: ['.github/skills/foo/SKILL.md'],
     manifestDelta: [{ kind: 'resolveUnmanaged', path: '.github/skills/foo/SKILL.md' }],
@@ -784,7 +783,7 @@ test('github-route — stages content for non-collision skill route', () => {
 
   const { stagingFiles, premiseSnapshots } = stageGithubRoute(unit, dir);
   assert.equal(stagingFiles.length, 1);
-  assert.equal(stagingFiles[0].relPath, '.claude/skills/misc/foo/SKILL.md');
+  assert.equal(stagingFiles[0].relPath, '.claude/skills/foo/SKILL.md');
   assert.ok(stagingFiles[0].content.includes('body'));
   assert.equal(premiseSnapshots.length, 1);
 });
@@ -795,7 +794,7 @@ test('github-route — collision unit produces no staging', () => {
     id: 'github-skill-foo',
     type: 'github-skill-route',
     hasCollision: true,
-    files: [{ src: '.github/skills/foo/SKILL.md', dst: '.claude/skills/misc/foo/SKILL.md' }],
+    files: [{ src: '.github/skills/foo/SKILL.md', dst: '.claude/skills/foo/SKILL.md' }],
   };
   const { stagingFiles, premiseSnapshots } = stageGithubRoute(unit, dir);
   assert.equal(stagingFiles.length, 0);
@@ -835,7 +834,7 @@ test('e2e — github-skill-route + github-agent-route stage + apply', () => {
   const freshManifest = JSON.parse(readFileSync(join(dir, '.claude/ai-kit.json'), 'utf8'));
   applyMigration(dir, freshManifest, registry);
 
-  assert.ok(existsSync(join(dir, '.claude/skills/misc/foo/SKILL.md')), 'skill moved');
+  assert.ok(existsSync(join(dir, '.claude/skills/foo/SKILL.md')), 'skill moved');
   assert.ok(existsSync(join(dir, '.claude/agents/bar.agent.md')), 'agent moved');
   assert.ok(!existsSync(join(dir, '.github/skills/foo/SKILL.md')), 'github source deleted');
   assert.ok(!existsSync(join(dir, '.github/agents/bar.agent.md')), 'github agent deleted');
@@ -931,7 +930,7 @@ test('e2e — github-skill-route apply removes leaf .github/skills/<name> dir', 
   const freshManifest = JSON.parse(readFileSync(join(dir, '.claude/ai-kit.json'), 'utf8'));
   applyMigration(dir, freshManifest, registry);
 
-  assert.ok(existsSync(join(dir, '.claude/skills/misc/foo/SKILL.md')), 'skill moved');
+  assert.ok(existsSync(join(dir, '.claude/skills/foo/SKILL.md')), 'skill moved');
   assert.ok(!existsSync(join(dir, '.github/skills/foo')), 'leaf .github/skills/foo dir gone');
   assert.ok(!existsSync(join(dir, '.github/skills')), '.github/skills parent dir gone');
 });
@@ -1033,10 +1032,10 @@ test('github-route — stages agent with normalized model from array', () => {
 test('work-units.enumerate — flags collision when target already exists, skips deletions', () => {
   const dir = tmp();
   mkdirSync(join(dir, '.github/skills/foo'), { recursive: true });
-  mkdirSync(join(dir, '.claude/skills/misc/foo'), { recursive: true });
+  mkdirSync(join(dir, '.claude/skills/foo'), { recursive: true });
   writeFileSync(join(dir, '.github/skills/foo/SKILL.md'),
     '---\nname: foo\n---\n# Foo new\n');
-  writeFileSync(join(dir, '.claude/skills/misc/foo/SKILL.md'),
+  writeFileSync(join(dir, '.claude/skills/foo/SKILL.md'),
     '---\nname: foo\n---\n# Foo existing\n');
 
   const m = buildManifest({ sourceRepo: 'r', commit: null, mode: 'brownfield',

@@ -86,10 +86,14 @@ related conventions under one skill.
 
 ## Folder layout
 
-Opt-in skills may live at any depth — registered via the `path` field in
-`ai-kit.config.json`. ai-kit ships its own opt-ins grouped by category
-(`terraform/`, `kubernetes/`, `git/`, `frontend/`, ...). Base skills
-(`base.skills`) must stay at `.claude/skills/{name}/SKILL.md` — one level only.
+In the **scaffold source repo**, opt-in skills may be grouped by category
+(`terraform/`, `kubernetes/`, `git/`, `frontend/`, ...) for organization,
+registered via the `path` field in `ai-kit.config.json`. In a **consumer
+repo**, every installed skill lands flat at `.claude/skills/{id}/SKILL.md`
+— one level only — because Claude Code's native discovery doesn't recurse
+into category folders. The CLI flattens on install/migrate; the manifest's
+`installedAs` records the flat consumer path. Base skills (`base.skills`)
+are flat in both places.
 
 ## Adding skills
 
