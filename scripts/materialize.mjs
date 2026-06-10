@@ -192,18 +192,17 @@ export function materialize({ root, templatesDir, outRoot = null }) {
   // ── 4. Source-file lifecycle ───────────────────────────────────────────────
   // Extracted source files that are not keep-file and not regenerated as a
   // target are deleted (their nodes were dispositioned elsewhere).
+  // Deletion set is derived from the MANIFEST (inventoried, not kept, not
+  // regenerated) — recorded unconditionally so the bookkeeping is durable
+  // across re-materializations, not a side effect of what happened to exist.
   const keep = keepFiles(manifest);
   const deleted = [];
   for (const f of inventory.files) {
     if (keep.has(f.path)) continue;
     if (generated[f.path]) continue;
+    deleted.push(f.path);
     const abs = join(writeRoot, f.path);
-    if (outRoot == null && existsSync(abs)) {
-      rmSync(abs);
-      deleted.push(f.path);
-    } else if (outRoot != null) {
-      deleted.push(f.path); // dry-run: record intent
-    }
+    if (outRoot == null && existsSync(abs)) rmSync(abs);
   }
 
   const result = { schemaVersion: 1, generatedAt: new Date().toISOString(), generated, deleted };

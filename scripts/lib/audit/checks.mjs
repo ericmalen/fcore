@@ -5,7 +5,7 @@
 import { join, relative, dirname, basename } from 'node:path';
 import {
   readSafe, exists, isDir, walk, parseFrontmatter, frontmatterKeys,
-  nonBlankLines, stripFences, lineOf, parseJsonc, finding as F,
+  nonBlankLines, stripFences, lineOf, parseJsonc, finding as F, isAdoptionTooling,
 } from './util.mjs';
 
 // ── R-01..R-09: root instructions ───────────────────────────────────────────
@@ -160,6 +160,7 @@ export function checkSkills(ctx) {
   for (const abs of walk(skillsDir)) {
     if (basename(abs) !== 'SKILL.md') continue;
     const rel = relative(root, abs).replace(/\\/g, '/');
+    if (isAdoptionTooling(rel)) continue;
     const parts = rel.split('/'); // .claude/skills/<id>/SKILL.md → 4 parts
     if (parts.length !== 4) {
       out.push(F('R-26', 'error', rel,
@@ -232,6 +233,7 @@ export function checkAgents(ctx) {
   for (const abs of walk(agentsDir)) {
     if (!abs.endsWith('.md') || basename(abs) === 'README.md') continue;
     const rel = relative(root, abs).replace(/\\/g, '/');
+    if (isAdoptionTooling(rel)) continue;
     const name = basename(abs, '.md');
     const text = readSafe(abs);
     if (text == null) continue;
@@ -287,6 +289,7 @@ export function checkReferences(ctx) {
   if (exists(rootAgents)) targets.push({ abs: rootAgents, agentDocs: false });
   for (const abs of walk(root)) {
     const rel = relative(root, abs).replace(/\\/g, '/');
+    if (isAdoptionTooling(rel)) continue;
     const base = basename(abs);
     if (base === 'AGENTS.md' && rel !== 'AGENTS.md') targets.push({ abs, agentDocs: false });
     else if (rel.startsWith('.claude/rules/') && abs.endsWith('.md') && base !== 'README.md') targets.push({ abs, agentDocs: false });

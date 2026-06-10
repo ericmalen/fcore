@@ -60,3 +60,23 @@ or skill reference files, not into the root file.
 ```
 
 CLAUDE.md itself is then regenerated as the shim via `installs`.
+
+## Slot targeting: strip source headings (validation finding)
+
+A moved block carries its ORIGINAL heading bytes. When routing into a template
+slot whose skeleton heading replaces or re-homes it, split off the heading:
+
+```json
+{ "node": "n0002", "op": "split", "ranges": [
+  { "lines": [1, 2], "op": "drop", "reason": "<accurate reason — see below>" },
+  { "lines": [3, 4], "target": "AGENTS.md", "slot": "intro" } ] }
+```
+
+Drop reasons must be FACTUALLY ACCURATE per entry — the verifier checks them.
+"Subsumed by skeleton heading" is only true when the skeleton has an
+equivalent heading; if the body is being re-homed under a DIFFERENT section,
+say that: "heading discarded; body re-homed under Conventions (self-contained
+single rule)". Never reuse a boilerplate reason across entries.
+
+Mid-line edits (e.g. removing an inline parenthetical) cannot be expressed as
+a split — that is a justified `merge` with the change named in the note.

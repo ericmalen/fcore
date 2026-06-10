@@ -94,8 +94,9 @@ export function check({ root, templatesDir, skipRepro = false }) {
   }
 
   // ── 3. Targets, literals, scope ────────────────────────────────────────────
+  const inventoriedPaths = new Set(inventory.files.map((f) => f.path));
   const checkTarget = (t, where) => {
-    if (!isAllowedTarget(t)) v('scope', `${where}: target "${t}" outside AI-config surfaces`);
+    if (!isAllowedTarget(t, inventoriedPaths)) v('scope', `${where}: target "${t}" outside AI-config surfaces`);
   };
   for (const entry of manifest.entries) {
     if (entry.op === 'move' || entry.op === 'merge') checkTarget(entry.target, `node ${entry.node}`);

@@ -13,8 +13,8 @@ audit, then fixes findings by rule ID.
 The audit script ships with the ai-kit repo (single source of truth — this
 skill stays thin so checks never drift from the kit):
 
-1. Locate the kit: use `.claude/skills/ai-kit-adopt/scripts/audit.mjs` if the
-   adopt package is still present; otherwise shallow-clone the kit repo
+1. Locate the kit: use `.claude/ai-kit-adoption/scripts/audit.mjs` if the
+   adoption tooling is still present; otherwise shallow-clone the kit repo
    (URL in `.claude/ai-kit.json` → `kitRepo`) to a temp/cache directory.
 2. Run: `node <kit>/scripts/audit.mjs --root . --json`
 3. Exit 0 with no findings → report "clean" and stop.

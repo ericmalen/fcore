@@ -17,7 +17,19 @@ export function isDir(p) {
 const SKIP_DIRS = new Set([
   '.git', 'node_modules', '.adoption', 'dist', 'build', 'coverage',
   '.next', '.venv', 'target', 'out', '.turbo', '.cache', 'v1-reference',
+  'ai-kit-adoption', // adoption-time tooling dir (.claude/ai-kit-adoption)
 ]);
+
+// Adoption-time tooling — present only during migration; never audited
+// (mirrors the extractor's universe exclusion).
+const TOOLING_RE = [
+  /^\.claude\/ai-kit-adoption\//,
+  /^\.claude\/skills\/adopt-(inventory|plan|materialize|verify)\//,
+  /^\.claude\/agents\/adoption-verifier\.md$/,
+];
+export function isAdoptionTooling(rel) {
+  return TOOLING_RE.some((re) => re.test(rel));
+}
 
 // Recursive walk yielding absolute file paths; skips junk dirs.
 export function* walk(dir) {

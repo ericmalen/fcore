@@ -37,11 +37,16 @@ export const ALLOWED_TARGET_PATTERNS = [
   /^docs\/ai\//,
 ];
 
-export function isAllowedTarget(path) {
+export function isAllowedTarget(path, inventoriedPaths = null) {
   // Any kit-canonical target location, or any recognized AI-config surface
   // (the scope invariant is "no writes outside AI-config surfaces" — whether a
   // given surface SHOULD exist post-adoption is the audit's layer, not check's).
-  return ALLOWED_TARGET_PATTERNS.some((re) => re.test(path)) || classifySurface(path) !== null;
+  // Inventoried source files are also valid targets: forced-include MIXED files
+  // (an AI section inside a human doc) are reassembled in place with their AI
+  // sections routed out — without this, their non-AI content would be deleted.
+  if (ALLOWED_TARGET_PATTERNS.some((re) => re.test(path))) return true;
+  if (classifySurface(path) !== null) return true;
+  return inventoriedPaths != null && inventoriedPaths.has(path);
 }
 
 export function loadManifest(adoptionDir) {
