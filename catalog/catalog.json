@@ -12,6 +12,16 @@
     "git-conventions": {
       "path": "catalog/skills/git-conventions",
       "description": "Conventional Commits + team PR/branch conventions."
+    },
+    "docs": {
+      "path": "catalog/skills/docs",
+      "description": "Documentation standard: Di\u00e1taxis content model, ADR + changelog workflows, proportional bootstrap (docs setup). Pairs with the docs-auditor agent for heavy audit/migration."
+    }
+  },
+  "agents": {
+    "docs-auditor": {
+      "path": "catalog/agents/docs-auditor.md",
+      "description": "Read-only documentation audit/migration planner. Explicit invocation only."
     }
   }
 }
