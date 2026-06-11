@@ -7,7 +7,7 @@ description: Orchestration discovery gate B7 — checks an orchestration bluepri
 
 The gate between Discovery and Generation: a blueprint passes only if
 generation can run it deterministically with zero manual edits. Both checks
-run from the kit clone.
+run from the Agent Base clone.
 
 ## Checks
 

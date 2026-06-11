@@ -1,4 +1,4 @@
-# Kit-repo CI (ADO primary) — integrity + regression gate for ai-kit itself.
+# Kit-repo CI (ADO primary) — integrity + regression gate for agent-base itself.
 # Mirrored by .github/workflows/ci.yml. Keep the two in lockstep.
 #
 # Gates:

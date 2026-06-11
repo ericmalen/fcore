@@ -1,5 +1,5 @@
 // manifest.mjs — schema, loading, and syntactic validation for
-// .adoption/manifest.json. Semantic invariants live in check.mjs.
+// .setup/manifest.json. Semantic invariants live in check.mjs.
 //
 // Op vocabulary (complete by construction — keep verbatim / remove with
 // reason / replace with declared bytes):
@@ -14,9 +14,9 @@
 // Plus:
 //   jsonMerges: [ { file, base } ]                  — key-level merge against kit template
 //   installs:   [ { file, template } | { file, literal } ]
-//     — static file instantiation (greenfield wiring: shim, settings, marker,
+//     — static file instantiation (starter template install: shim, settings, marker,
 //       READMEs). Template slot markers are stripped. Output-side only.
-//       (ai-kit-check is NOT installed here — it ships via install-adoption.)
+//       (base-check is NOT installed here — it ships via install-setup.)
 //
 // Future maintainers: dispositions only. NEVER add input-classification ops.
 
@@ -41,7 +41,7 @@ const ALLOWED_TARGET_PATTERNS = [
 export function isAllowedTarget(path, inventoriedPaths = null) {
   // Any kit-canonical target location, or any recognized AI-config surface
   // (the scope invariant is "no writes outside AI-config surfaces" — whether a
-  // given surface SHOULD exist post-adoption is the audit's layer, not check's).
+  // given surface SHOULD exist after setup is the audit's layer, not check's).
   // Inventoried source files are also valid targets: forced-include MIXED files
   // (an AI section inside a human doc) are reassembled in place with their AI
   // sections routed out — without this, their non-AI content would be deleted.

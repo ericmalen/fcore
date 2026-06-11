@@ -24,7 +24,7 @@ test('validateShape: canonical manifest exercising every op validates clean', ()
     jsonMerges: [{ file: '.vscode/settings.json', base: 'templates/settings/vscode.json' }],
     installs: [
       { file: '.claude/settings.json', template: 'templates/settings/claude.json' },
-      { file: '.claude/ai-kit.json', literal: '{}' },
+      { file: '.claude/agent-base.json', literal: '{}' },
     ],
   };
   assert.deepEqual(validateShape(manifest), []);

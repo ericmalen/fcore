@@ -1,6 +1,6 @@
 # Conventions
 
-The do-and-don't sheet for ai-kit. One page, reference only — the practices
+The do-and-don't sheet for agent-base. One page, reference only — the practices
 for working *with* these conventions live in
 [`workflow-tips.md`](../how-to/workflow-tips.md); the rationale behind them in
 [`why-this-way.md`](../explanation/why-this-way.md).
@@ -66,11 +66,18 @@ The copy shipped into targets lives in
 | Skills     | `{kebab-case-name}/SKILL.md`     | `tdd-workflow/SKILL.md` |
 | Rules      | `{scope}.md` in `.claude/rules/` | `tests.md`              |
 
-New skills and agents for ai-kit follow the conventions in
+New skills and agents for agent-base follow the conventions in
 [`.claude/skills/README.md`](../../.claude/skills/README.md) and the "Adding
 agents" section of [`.claude/agents/README.md`](../../.claude/agents/README.md).
-What ships into adopted repos is decided by the installer allowlist in
-`scripts/install-adoption.mjs` — there is no separate distribution step.
+What ships into set-up projects is decided by the installer allowlist in
+`scripts/install-setup.mjs` — there is no separate distribution step.
+Every setup installs the baseline skills (`base-check`, `docs`,
+`git-conventions`, `skill-creator`, `agent-creator`) plus the orchestration
+lifecycle skills (`retro`, `log-report`, `eval-runner`) and the `docs-auditor`
+agent. The lifecycle skills are dormant until orchestration generation creates
+their surfaces (`docs/orchestration/`, generated agents). Orchestration
+discovery/generation meta-assets stay kit-side and run from a Agent Base clone against
+a target path — see [`spec/target-layout.md`](../../spec/target-layout.md).
 
 Directory- or layer-scoped conventions go in a path-scoped rules file at
 `.claude/rules/<scope>.md` with `paths:` glob frontmatter (R-52) — the default
@@ -87,9 +94,9 @@ files stay lean.
 
 ## Conformance tooling (and a name disambiguation)
 
-Conformance to these conventions is audited by the `ai-kit-check` skill: it
+Conformance to these conventions is audited by the `base-check` skill: it
 runs `node <kit>/scripts/audit.mjs --root .` and fixes findings by rule ID
 (usage tips: [`workflow-tips.md`](../how-to/workflow-tips.md#keeping-the-config-conformant)).
 Despite the similar names, `scripts/check.mjs` is unrelated — it enforces the
-manifest gates during adoption phase 3, while the `ai-kit-check` skill is the
-recurring post-adoption audit.
+manifest gates during setup phase 3, while the `base-check` skill is the
+recurring after setup audit.

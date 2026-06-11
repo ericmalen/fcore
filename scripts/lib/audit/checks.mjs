@@ -5,7 +5,7 @@
 import { join, relative, dirname, basename } from 'node:path';
 import {
   readSafe, exists, isDir, isGitRepo, walk, parseFrontmatter, frontmatterKeys,
-  nonBlankLines, stripFences, lineOf, parseJsonc, finding as F, isAdoptionTooling, isVendored,
+  nonBlankLines, stripFences, lineOf, parseJsonc, finding as F, isSetupTooling, isVendored,
   isPayloadSkeleton,
 } from './util.mjs';
 
@@ -94,7 +94,7 @@ export function checkPathScoping(ctx) {
     : [];
   const nestedAgents = [...walk(root)]
     .filter((p) => basename(p) === 'AGENTS.md' && relative(root, p) !== 'AGENTS.md')
-    // Payload skeletons (ai-kit slot/optional markers) are template payload, not
+    // Payload skeletons (agent-base slot/optional markers) are template payload, not
     // live config — they neither trigger compat mode nor get audited as nested
     // instructions (spec/rules.md: Audit exemptions).
     .filter((p) => !isPayloadSkeleton(readSafe(p)));
@@ -165,7 +165,7 @@ export function checkSkills(ctx) {
   for (const abs of walk(skillsDir)) {
     if (basename(abs) !== 'SKILL.md') continue;
     const rel = relative(root, abs).replace(/\\/g, '/');
-    if (isAdoptionTooling(rel)) continue;
+    if (isSetupTooling(rel)) continue;
     const parts = rel.split('/'); // .claude/skills/<id>/SKILL.md → 4 parts
     if (parts.length !== 4) {
       out.push(F('R-26', 'error', rel,
@@ -248,7 +248,7 @@ export function checkAgents(ctx) {
   for (const abs of walk(agentsDir)) {
     if (!abs.endsWith('.md') || basename(abs) === 'README.md') continue;
     const rel = relative(root, abs).replace(/\\/g, '/');
-    if (isAdoptionTooling(rel)) continue;
+    if (isSetupTooling(rel)) continue;
     const name = basename(abs, '.md');
     const text = readSafe(abs);
     if (text == null) continue;
@@ -304,7 +304,7 @@ export function checkReferences(ctx) {
   if (exists(rootAgents)) targets.push({ abs: rootAgents, agentDocs: false });
   for (const abs of walk(root)) {
     const rel = relative(root, abs).replace(/\\/g, '/');
-    if (isAdoptionTooling(rel)) continue;
+    if (isSetupTooling(rel)) continue;
     const base = basename(abs);
     if (base === 'AGENTS.md' && rel !== 'AGENTS.md') {
       if (!isPayloadSkeleton(readSafe(abs))) targets.push({ abs, agentDocs: false });
@@ -546,7 +546,7 @@ export function checkHygiene(ctx) {
       if (basename(abs) !== 'README.md') continue;
       const rel = relative(root, abs).replace(/\\/g, '/');
       if (rel === `.claude/${sub}/README.md`) continue; // the sanctioned folder README
-      if (isAdoptionTooling(rel)) continue;
+      if (isSetupTooling(rel)) continue;
       const segs = rel.split('/');
       if (sub === 'skills' && segs.length > 3
         && isVendored(root, [...segs.slice(0, 3), 'SKILL.md'].join('/'))) continue;
@@ -556,17 +556,25 @@ export function checkHygiene(ctx) {
 
   // R-50 maintenance surface — marker present AND carrying its required fields.
   if (!marker.present) {
-    out.push(F('R-50', 'warning', '.claude/ai-kit.json', 'Kit marker missing — record kit version, adoptedAt, githubCodeReview.'));
+    out.push(F('R-50', 'warning', '.claude/agent-base.json', 'Agent Base marker missing — record standard version, setupAt, githubCodeReview.'));
   } else if (marker.invalid) {
-    out.push(F('R-50', 'warning', '.claude/ai-kit.json', 'Kit marker is not valid JSON — re-record kit, adoptedAt, githubCodeReview.'));
+    out.push(F('R-50', 'warning', '.claude/agent-base.json', 'Agent Base marker is not valid JSON — re-record standard, setupAt, githubCodeReview.'));
   } else {
-    const missing = ['kit', 'adoptedAt', 'githubCodeReview'].filter((k) => marker[k] === undefined);
+    const missing = ['standard', 'toolRepo', 'setupAt', 'githubCodeReview'].filter((k) => marker[k] === undefined);
     if (missing.length > 0) {
-      out.push(F('R-50', 'warning', '.claude/ai-kit.json', `Kit marker missing required field(s): ${missing.join(', ')}.`));
+      out.push(F('R-50', 'warning', '.claude/agent-base.json', `Agent Base marker missing required field(s): ${missing.join(', ')}.`));
+    }
+    if (marker.standard != null && !/^\d+\.\d+\.\d+/.test(String(marker.standard))) {
+      out.push(F('R-50', 'warning', '.claude/agent-base.json', 'standard should be semver (e.g. 1.4.0), not a git sha.'));
+    }
+    for (const k of ['pin', 'lastSyncedAt']) {
+      if (marker[k] === undefined) {
+        out.push(F('R-50', 'info', '.claude/agent-base.json', `Release pin field "${k}" missing — add for baseline sync (sync-baseline).`));
+      }
     }
   }
-  if (!exists(join(root, '.claude', 'skills', 'ai-kit-check', 'SKILL.md'))) {
-    out.push(F('R-50', 'warning', '.claude/skills/ai-kit-check', 'Permanent ai-kit-check skill is not installed (post-adoption drift surface).'));
+  if (!exists(join(root, '.claude', 'skills', 'base-check', 'SKILL.md'))) {
+    out.push(F('R-50', 'warning', '.claude/skills/base-check', 'Permanent base-check skill is not installed (after setup drift surface).'));
   }
 
   return out;

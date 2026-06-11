@@ -1,6 +1,6 @@
 ---
 name: convention-detector
-description: Orchestration discovery step B3 — detects naming, branching, commit-style, and lint/format conventions in a target repo, with an explicit gap for every convention that has no evidence, filling the conventions fields of repo-profile.json. Use when orchestration discovery profiles a target repo. Not for auditing this kit's own rules.
+description: Orchestration discovery step B3 — detects naming, branching, commit-style, and lint/format conventions in a project, with an explicit gap for every convention that has no evidence, filling the conventions fields of repo-profile.json. Use when orchestration discovery profiles a project. Not for auditing this kit's own rules.
 ---
 
 # convention-detector

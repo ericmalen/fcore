@@ -61,8 +61,8 @@ function runNudge(dir, mode) {
   return spawnSync(execPath, args, { cwd: dir, env: isolatedEnv(), encoding: 'utf8' });
 }
 
-const baselineOf = (dir) => join(dir, '.git', 'ai-kit-docs-baseline');
-const nudgedOf = (dir) => join(dir, '.git', 'ai-kit-docs-nudged');
+const baselineOf = (dir) => join(dir, '.git', 'agent-base-docs-baseline');
+const nudgedOf = (dir) => join(dir, '.git', 'agent-base-docs-nudged');
 
 // ── matches(): direct unit tests ────────────────────────────────────────────
 // docs-nudge.mjs exports matches() but also runs its CLI at module top level,

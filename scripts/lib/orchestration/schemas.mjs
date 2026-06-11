@@ -212,14 +212,37 @@ export function validateBlueprint(blueprint) {
   } else {
     blueprint.specialists.forEach((s, i) => checkAgentConfig(s, `specialists[${i}]`, e));
     const seen = new Set();
-    for (const s of blueprint.specialists) {
-      if (!isPlainObject(s) || !isNonEmptyString(s.name)) continue;
-      if (seen.has(s.name)) e(`specialists: duplicate name "${s.name}"`);
-      seen.add(s.name);
-    }
+    const usedSkills = new Set();
+    blueprint.specialists.forEach((s, i) => {
+      if (!isPlainObject(s)) return;
+      if (isNonEmptyString(s.name)) {
+        if (seen.has(s.name)) e(`specialists: duplicate name "${s.name}"`);
+        seen.add(s.name);
+      }
+      if (!('pairedSkills' in s)) return;
+      const where = `specialists[${i}].pairedSkills`;
+      if (!Array.isArray(s.pairedSkills)) {
+        e(`${where} must be an array`);
+        return;
+      }
+      for (const skillId of s.pairedSkills) {
+        if (!isNonEmptyString(skillId)) {
+          e(`${where}: each entry must be a non-empty string`);
+          continue;
+        }
+        if (usedSkills.has(skillId)) {
+          e(`pairedSkills: duplicate skill "${skillId}" across specialists — assign each skill at most once`);
+        }
+        usedSkills.add(skillId);
+      }
+    });
   }
 
   checkAgentConfig(blueprint.orchestrator, 'orchestrator', e);
+
+  if (isPlainObject(blueprint.orchestrator) && 'pairedSkills' in blueprint.orchestrator) {
+    e('orchestrator.pairedSkills is not allowed');
+  }
 
   // The instantiators tell the orchestrator apart from specialists by name,
   // and every agent lands at .claude/agents/<name>.md — a specialist sharing

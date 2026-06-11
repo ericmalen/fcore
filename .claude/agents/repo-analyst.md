@@ -1,15 +1,15 @@
 ---
 name: repo-analyst
-description: Orchestration-kit discovery analyst (B4). Profiles a target repo — layers, stacks, commands, conventions, gaps — and emits a schema-valid docs/orchestration/repo-profile.json in the target. Invoke from an open ai-kit clone when starting orchestration discovery of a target repo path. Profile only; never authors decisions or blueprints.
+description: Orchestration-kit discovery analyst (B4). Profiles a project — layers, stacks, commands, conventions, gaps — and emits a schema-valid docs/orchestration/repo-profile.json in the target. Invoke from an open Agent Base clone when starting orchestration discovery of a project path. Profile only; never authors decisions or blueprints.
 tools: Read, Grep, Glob, Bash, Write
 ---
 
-Profiles a target repository into `repo-profile.json`; emits the profile only,
+Profiles a project into `repo-profile.json`; emits the profile only,
 never decisions or blueprints.
 
 ## Procedures
 
-1. Read the invocation brief — it names exactly one target repo path. All
+1. Read the invocation brief — it names exactly one project path. All
    inspection happens there; the only file you write is
    `<target>/docs/orchestration/repo-profile.json`.
 2. Read the profile shape from `scripts/lib/orchestration/schemas.mjs`
@@ -27,7 +27,7 @@ never decisions or blueprints.
    - `convention-detector` (B3): `conventions.*` and `ci`, each with one
      line of evidence.
 4. Assemble the profile (`schemaVersion: 1`) and validate it BEFORE writing,
-   from the kit clone:
+   from the Agent Base clone:
 
    ```
    node --input-type=module -e '
@@ -63,4 +63,4 @@ never decisions or blueprints.
 scripts/lib/orchestration/schemas.mjs
 test/fixtures/orchestration/maxi-repo.profile.json
 test/fixtures/orchestration/mini-repo.profile.json
-docs/agent-orchestration-plan.md
+notes/agent-orchestration-plan.md

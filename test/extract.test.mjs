@@ -185,7 +185,7 @@ function makeRepo(files) {
   return dir;
 }
 
-test('integration: inventory over a small brownfield repo', () => {
+test('integration: inventory over a small existing project repo', () => {
   const repo = makeRepo({
     'CLAUDE.md': '# Project\nUse strict mode.\n\n## Testing\nRun npm test before commit.\n',
     'README.md': '# App\nNormal readme.\nClaude should always use tabs here.\n',
@@ -196,7 +196,7 @@ test('integration: inventory over a small brownfield repo', () => {
   });
 
   try {
-    const inv = runInventory({ root: repo, outDir: '.adoption', allowDirty: false });
+    const inv = runInventory({ root: repo, outDir: '.setup', allowDirty: false });
 
     // surfaces
     const paths = inv.files.map((f) => f.path).sort();
@@ -204,7 +204,7 @@ test('integration: inventory over a small brownfield repo', () => {
 
     // CLAUDE.md split into blocks; node files tile the source
     const claude = inv.files.find((f) => f.path === 'CLAUDE.md');
-    const reassembled = claude.nodes.map((id) => readFileSync(join(repo, '.adoption', 'nodes', id), 'utf8')).join('');
+    const reassembled = claude.nodes.map((id) => readFileSync(join(repo, '.setup', 'nodes', id), 'utf8')).join('');
     assert.equal(reassembled, readFileSync(join(repo, 'CLAUDE.md'), 'utf8'));
 
     // vscode settings: whole-file node + key inventory
@@ -216,11 +216,11 @@ test('integration: inventory over a small brownfield repo', () => {
     assert.deepEqual(inv.sweepCandidates.map((c) => c.file), ['README.md']);
 
     // inventory.json written and parseable
-    const onDisk = JSON.parse(readFileSync(join(repo, '.adoption', 'inventory.json'), 'utf8'));
+    const onDisk = JSON.parse(readFileSync(join(repo, '.setup', 'inventory.json'), 'utf8'));
     assert.equal(onDisk.stats.nodes, inv.stats.nodes);
 
     // node IDs deterministic: re-run produces identical inventory (minus timestamp)
-    const inv2 = runInventory({ root: repo, outDir: '.adoption', allowDirty: true });
+    const inv2 = runInventory({ root: repo, outDir: '.setup', allowDirty: true });
     assert.deepEqual(inv2.nodes, inv.nodes);
     assert.deepEqual(inv2.files, inv.files);
   } finally {
@@ -243,7 +243,7 @@ test('integration: dirty tree fails precondition, --allow-dirty bypasses', () =>
       join(process.cwd(), 'scripts', 'inventory-extract.mjs'), '--root', repo, '--allow-dirty',
     ], { encoding: 'utf8' });
     assert.equal(r2.status, 0, r2.stderr);
-    assert.ok(existsSync(join(repo, '.adoption', 'inventory.json')));
+    assert.ok(existsSync(join(repo, '.setup', 'inventory.json')));
   } finally {
     rmSync(repo, { recursive: true, force: true });
   }
@@ -253,10 +253,10 @@ test('integration: crlf file bytes preserved exactly in nodes', () => {
   const crlfDoc = '# Win\r\nline one\r\n## Sub\r\nline two\r\n';
   const repo = makeRepo({ 'AGENTS.md': crlfDoc });
   try {
-    const inv = runInventory({ root: repo, outDir: '.adoption', allowDirty: false });
+    const inv = runInventory({ root: repo, outDir: '.setup', allowDirty: false });
     const f = inv.files.find((x) => x.path === 'AGENTS.md');
     assert.equal(f.lineEnding, 'crlf');
-    const joined = f.nodes.map((id) => readFileSync(join(repo, '.adoption', 'nodes', id), 'utf8')).join('');
+    const joined = f.nodes.map((id) => readFileSync(join(repo, '.setup', 'nodes', id), 'utf8')).join('');
     assert.equal(joined, crlfDoc);
   } finally {
     rmSync(repo, { recursive: true, force: true });

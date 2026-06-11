@@ -1,29 +1,29 @@
 # Project Instructions
 
-<!-- ai-kit:slot:intro -->
+<!-- agent-base:slot:intro -->
 
 ## Overview
-<!-- ai-kit:optional -->
+<!-- agent-base:optional -->
 
-<!-- ai-kit:slot:overview -->
+<!-- agent-base:slot:overview -->
 
 ## Architecture
-<!-- ai-kit:optional -->
+<!-- agent-base:optional -->
 
-<!-- ai-kit:slot:architecture -->
+<!-- agent-base:slot:architecture -->
 
 ## Conventions
 
-<!-- ai-kit:slot:conventions -->
+<!-- agent-base:slot:conventions -->
 
 ## Do Not
 
 <!-- Prohibitions the agent can't infer from code (e.g. "never run destructive cmd X against prod"); leave just this note if there are none. -->
-<!-- ai-kit:slot:do-not -->
+<!-- agent-base:slot:do-not -->
 
 ## More Context
 
-<!-- ai-kit:slot:more-context -->
+<!-- agent-base:slot:more-context -->
 
 For on-demand knowledge see `.claude/skills/`; for specialized roles see
 `.claude/agents/`; path-scoped rules, when present, live in `.claude/rules/`.

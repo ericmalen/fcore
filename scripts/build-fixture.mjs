@@ -35,7 +35,7 @@ const g = (args) => {
 };
 g(['init', '-q', '-b', 'main']);
 g(['add', '-A']);
-g(['-c', 'user.email=fixture@ai-kit', '-c', 'user.name=fixture', 'commit', '-qm', `fixture: ${name}`]);
+g(['-c', 'user.email=fixture@agent-base', '-c', 'user.name=fixture', 'commit', '-qm', `fixture: ${name}`]);
 console.log(`fixture "${name}" → ${target}`);
 console.log(`sentinels planted: ${def.sentinels.length}`);
-console.log('next: node <kit>/scripts/install-adoption.mjs ' + target);
+console.log('next: node <kit>/scripts/install-setup.mjs ' + target);

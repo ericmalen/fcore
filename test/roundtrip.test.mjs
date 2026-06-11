@@ -1,4 +1,4 @@
-// Round-trip tests: materializer, check gates, report generator.
+// Round-trip tests: applier, check gates, report generator.
 // Exit criterion: re-materializing from manifest + nodes reproduces the
 // working tree byte-for-byte (the round-trip property).
 
@@ -12,7 +12,7 @@ import { tmpdir } from 'node:os';
 
 import { buildFixture } from './fixtures/defs.mjs';
 import { runInventory } from '../scripts/inventory-extract.mjs';
-import { materialize } from '../scripts/materialize.mjs';
+import { apply } from '../scripts/apply.mjs';
 import { check } from '../scripts/check.mjs';
 import { generateReport } from '../scripts/report.mjs';
 
@@ -21,12 +21,12 @@ const EMPTY_TEMPLATES = mkdtempSync(join(tmpdir(), 'aikit-notmpl-'));
 
 function setup(fixture) {
   const repo = buildFixture(fixture);
-  const inv = runInventory({ root: repo, outDir: '.adoption', allowDirty: false });
+  const inv = runInventory({ root: repo, outDir: '.setup', allowDirty: false });
   return { repo, inv };
 }
 
 function writeManifest(repo, manifest) {
-  writeFileSync(join(repo, '.adoption', 'manifest.json'),
+  writeFileSync(join(repo, '.setup', 'manifest.json'),
     JSON.stringify({ schemaVersion: 1, kitVersion: '1.0.0', jsonMerges: [], ...manifest }, null, 2));
 }
 
@@ -46,12 +46,12 @@ function identityManifest(inv) {
 // ── THE round-trip property (Phase 1 exit criterion) ────────────────────────
 
 for (const fixture of ['claude-only', 'copilot-only', 'mixed-messy', 'adversarial', 'large']) {
-  test(`round-trip property [${fixture}]: extract → identity manifest → materialize ⇒ byte-identical`, () => {
+  test(`round-trip property [${fixture}]: extract → identity manifest → apply ⇒ byte-identical`, () => {
     const { repo, inv } = setup(fixture);
     try {
       const before = new Map(inv.files.map((f) => [f.path, readFileSync(join(repo, f.path), 'utf8')]));
       writeManifest(repo, identityManifest(inv));
-      materialize({ root: repo, templatesDir: EMPTY_TEMPLATES });
+      apply({ root: repo, templatesDir: EMPTY_TEMPLATES });
       for (const [path, orig] of before) {
         assert.equal(readFileSync(join(repo, path), 'utf8'), orig, `round-trip mutated ${path}`);
       }
@@ -70,7 +70,7 @@ test('round-trip variant: all keep-file ⇒ tree untouched, gates pass', () => {
     for (const c of inv.sweepCandidates) entries.push({ file: c.file, op: 'out-of-scope', reason: 'test' });
     writeManifest(repo, { entries });
     const before = new Map(inv.files.map((f) => [f.path, readFileSync(join(repo, f.path), 'utf8')]));
-    const res = materialize({ root: repo, templatesDir: EMPTY_TEMPLATES });
+    const res = apply({ root: repo, templatesDir: EMPTY_TEMPLATES });
     assert.deepEqual(res.generated, {});
     assert.deepEqual(res.deleted, []);
     for (const [path, orig] of before) {
@@ -82,7 +82,7 @@ test('round-trip variant: all keep-file ⇒ tree untouched, gates pass', () => {
   }
 });
 
-test('R-47: materialize ensures .gitignore covers settings.local.json, idempotently', () => {
+test('R-47: apply ensures .gitignore covers settings.local.json, idempotently', () => {
   const { repo, inv } = setup('claude-only');
   try {
     const entries = inv.files.map((f) => ({ file: f.path, op: 'keep-file' }));
@@ -90,29 +90,29 @@ test('R-47: materialize ensures .gitignore covers settings.local.json, idempoten
     writeManifest(repo, { entries });
     const LOCAL = '.claude/settings.local.json';
 
-    // brownfield: existing .gitignore lacking the line → line appended, existing kept
+    // existing project: existing .gitignore lacking the line → line appended, existing kept
     writeFileSync(join(repo, '.gitignore'), 'node_modules/\n');
-    const res = materialize({ root: repo, templatesDir: EMPTY_TEMPLATES });
+    const res = apply({ root: repo, templatesDir: EMPTY_TEMPLATES });
     let gi = readFileSync(join(repo, '.gitignore'), 'utf8');
     assert.ok(gi.includes('node_modules/'), 'existing entries preserved');
     assert.ok(gi.split('\n').filter((l) => l.trim() === LOCAL).length === 1, 'line added once');
     assert.ok(!(LOCAL in res.generated), '.gitignore is not sha-tracked (partial ownership)');
 
-    // idempotent: a second materialize does not duplicate the line
-    materialize({ root: repo, templatesDir: EMPTY_TEMPLATES });
+    // idempotent: a second apply does not duplicate the line
+    apply({ root: repo, templatesDir: EMPTY_TEMPLATES });
     gi = readFileSync(join(repo, '.gitignore'), 'utf8');
-    assert.equal(gi.split('\n').filter((l) => l.trim() === LOCAL).length, 1, 'no duplicate on re-materialize');
+    assert.equal(gi.split('\n').filter((l) => l.trim() === LOCAL).length, 1, 'no duplicate on re-apply');
 
-    // greenfield: no .gitignore → created with the line
+    // starter: no .gitignore → created with the line
     rmSync(join(repo, '.gitignore'));
-    materialize({ root: repo, templatesDir: EMPTY_TEMPLATES });
-    assert.equal(readFileSync(join(repo, '.gitignore'), 'utf8'), LOCAL + '\n', 'greenfield .gitignore created');
+    apply({ root: repo, templatesDir: EMPTY_TEMPLATES });
+    assert.equal(readFileSync(join(repo, '.gitignore'), 'utf8'), LOCAL + '\n', 'starter .gitignore created');
   } finally {
     rmSync(repo, { recursive: true, force: true });
   }
 });
 
-// ── materializer behaviors ──────────────────────────────────────────────────
+// ── applier behaviors ──────────────────────────────────────────────────
 
 test('slot assembly: nodes land under template headings, markers vanish, source deleted', () => {
   const { repo, inv } = setup('claude-only');
@@ -136,10 +136,10 @@ test('slot assembly: nodes land under template headings, markers vanish, source 
       jsonMerges: [{ file: '.vscode/settings.json', base: 'settings/vscode/settings.json' }],
     });
 
-    materialize({ root: repo, templatesDir: KIT_TEMPLATES });
+    apply({ root: repo, templatesDir: KIT_TEMPLATES });
 
     const agents = readFileSync(join(repo, 'AGENTS.md'), 'utf8');
-    assert.ok(!agents.includes('ai-kit:slot'), 'slot markers must be gone');
+    assert.ok(!agents.includes('agent-base:slot'), 'slot markers must be gone');
     // both Conventions-slot nodes present, in manifest order, under the heading
     const conv = agents.indexOf('## Conventions');
     const t1 = agents.indexOf('SENTINEL-002-cobalt-otter'); // Testing section
@@ -173,7 +173,7 @@ test('json key-merge preserves source-only keys, kit keys win', () => {
       entries,
       jsonMerges: [{ file: '.vscode/settings.json', base: 'settings/vscode/settings.json' }],
     });
-    materialize({ root: repo, templatesDir: KIT_TEMPLATES });
+    apply({ root: repo, templatesDir: KIT_TEMPLATES });
     const vs = JSON.parse(readFileSync(join(repo, '.vscode/settings.json'), 'utf8'));
     assert.equal(vs['editor.fontSize'], 13, 'source-only key preserved');
     assert.equal(vs['workbench.colorTheme'], 'Default Dark');
@@ -188,7 +188,7 @@ test('split: ranges route to different targets; explicit drop-range allowed', ()
   try {
     const claude = inv.files.find((f) => f.path === 'CLAUDE.md');
     const testing = claude.nodes.find((id) => inv.nodes[id].heading === 'Testing');
-    const nodeLineCount = readFileSync(join(repo, '.adoption', 'nodes', testing), 'utf8').split('\n').length - 1; // ends with \n
+    const nodeLineCount = readFileSync(join(repo, '.setup', 'nodes', testing), 'utf8').split('\n').length - 1; // ends with \n
     const entries = [
       { node: testing, op: 'split', ranges: [
         { lines: [1, 1], target: 'docs/ai/testing.md' },             // heading line
@@ -202,7 +202,7 @@ test('split: ranges route to different targets; explicit drop-range allowed', ()
     for (const f of inv.files) if (f.path !== 'CLAUDE.md') entries.push({ file: f.path, op: 'keep-file' });
     for (const c of inv.sweepCandidates) entries.push({ file: c.file, op: 'out-of-scope', reason: 'test' });
     writeManifest(repo, { entries });
-    materialize({ root: repo, templatesDir: EMPTY_TEMPLATES });
+    apply({ root: repo, templatesDir: EMPTY_TEMPLATES });
     const out = readFileSync(join(repo, 'docs/ai/testing.md'), 'utf8');
     assert.ok(out.startsWith('## Testing'));
     assert.ok(out.includes('SENTINEL-002-cobalt-otter'));
@@ -212,15 +212,15 @@ test('split: ranges route to different targets; explicit drop-range allowed', ()
   }
 });
 
-// ── greenfield: installs produce an audit-clean repo ────────────────────────
+// ── starter: installs produce an audit-clean repo ────────────────────────
 
-test('greenfield end-to-end: installs + jsonMerges ⇒ gates pass AND audit clean', async () => {
+test('starter end-to-end: installs + jsonMerges ⇒ gates pass AND audit clean', async () => {
   const { audit } = await import('../scripts/audit.mjs');
-  const { repo } = setup('greenfield-empty');
+  const { repo } = setup('starter-empty');
   try {
-    mkdirSync(join(repo, '.adoption', 'literals'), { recursive: true });
-    writeFileSync(join(repo, '.adoption', 'literals', 'marker.json'),
-      '{ "kit": "1.0.0", "adoptedAt": "2026-06-10", "githubCodeReview": false }\n');
+    mkdirSync(join(repo, '.setup', 'literals'), { recursive: true });
+    writeFileSync(join(repo, '.setup', 'literals', 'marker.json'),
+      '{ "standard": "1.0.0", "toolRepo": "https://github.com/ericmalen/agent-base", "pin": "v1.0.0", "lastSyncedAt": "2026-06-10", "setupAt": "2026-06-10", "githubCodeReview": false }\n');
     writeManifest(repo, {
       entries: [],
       installs: [
@@ -229,20 +229,20 @@ test('greenfield end-to-end: installs + jsonMerges ⇒ gates pass AND audit clea
         { file: '.gitignore', template: 'gitignore' },
         { file: '.claude/settings.json', template: 'settings/claude/settings.json' },
         { file: '.claude/skills/README.md', template: 'readmes/skills/README.md' },
-        { file: '.claude/ai-kit.json', literal: 'literals/marker.json' },
+        { file: '.claude/agent-base.json', literal: 'literals/marker.json' },
       ],
       jsonMerges: [{ file: '.vscode/settings.json', base: 'settings/vscode/settings.json' }],
     });
-    materialize({ root: repo, templatesDir: KIT_TEMPLATES });
+    apply({ root: repo, templatesDir: KIT_TEMPLATES });
 
-    // ai-kit-check is a permanent baseline skill shipped verbatim from
-    // .claude/skills/ (by install-adoption / build-starter), not the manifest.
+    // base-check is a permanent baseline skill shipped verbatim from
+    // .claude/skills/ (by install-setup / build-starter), not the manifest.
     // Mirror that here so the R-50 presence check stays satisfied.
-    cpSync(join(process.cwd(), '.claude/skills/ai-kit-check'),
-      join(repo, '.claude/skills/ai-kit-check'), { recursive: true });
+    cpSync(join(process.cwd(), '.claude/skills/base-check'),
+      join(repo, '.claude/skills/base-check'), { recursive: true });
 
     const agents = readFileSync(join(repo, 'AGENTS.md'), 'utf8');
-    assert.ok(!agents.includes('ai-kit:slot'), 'install strips slot markers');
+    assert.ok(!agents.includes('agent-base:slot'), 'install strips slot markers');
     assert.ok(agents.includes('## Do Not'));
 
     assert.deepEqual(check({ root: repo, templatesDir: KIT_TEMPLATES }).violations, []);
@@ -261,8 +261,8 @@ test('report: risk-ordered, drops carry full text, merge side-by-side, merged-by
   try {
     const claude = inv.files.find((f) => f.path === 'CLAUDE.md');
     const deploy = claude.nodes.find((id) => inv.nodes[id].heading === 'Deployment');
-    mkdirSync(join(repo, '.adoption', 'literals'), { recursive: true });
-    writeFileSync(join(repo, '.adoption', 'literals', 'deploy.md'),
+    mkdirSync(join(repo, '.setup', 'literals'), { recursive: true });
+    writeFileSync(join(repo, '.setup', 'literals', 'deploy.md'),
       '## Deployment\n\nCondensed: blue/green script only.\n');
     const entries = [
       { node: deploy, op: 'merge', literal: 'literals/deploy.md', target: 'docs/ai/deploy.md', note: 'condensed' },

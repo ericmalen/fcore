@@ -1,6 +1,6 @@
 ---
 name: dependency-mapper
-description: Orchestration discovery step B2 — maps internal package dependencies and the key external dependencies per layer of a target repo, refining layer stacks and revealing dispatch ordering for the repo profile. Use when orchestration discovery runs, after structure detection. Not a security or license audit.
+description: Orchestration discovery step B2 — maps internal package dependencies and the key external dependencies per layer of a project, refining layer stacks and revealing dispatch ordering for the repo profile. Use when orchestration discovery runs, after structure detection. Not a security or license audit.
 ---
 
 # dependency-mapper

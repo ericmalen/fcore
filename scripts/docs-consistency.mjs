@@ -16,12 +16,24 @@ import { join, dirname, resolve, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const BANNED_TERMS = [
-  "bin/ai-kit.mjs",
-  "ai-kit init",
-  "ai-kit update",
-  "ai-kit audit",
-  "ai-kit.config.json",
-  ".ai-kit-migration-routing",
+  "bin/agent-base.mjs",
+  "agent-base init",
+  "agent-base update",
+  "agent-base audit",
+  "agent-base.config.json",
+  ".agent-base-migration-routing",
+  "ai-kit",
+  "greenfield",
+  "brownfield",
+  "adopt-inventory",
+  "adopt-plan",
+  "adopt-materialize",
+  "adopt-verify",
+  "ai-kit-adopt",
+  "ai-kit-check",
+  "ai-kit-orchestrate",
+  "kit clone",
+  "factory, not the house",
   "/optimize",
   "/migrate",
   "layer-agents",
@@ -29,7 +41,7 @@ export const BANNED_TERMS = [
   ".github/prompts",
   ".prompt.md",
   "sub-agent",
-  "the CLI", // v1 had a CLI; v2 distribution is install-adoption.mjs
+  "the CLI", // v1 had a CLI; v2 distribution is install-setup.mjs
   "new-agent",
   "catalog/", // retired v1 zone (assets live under .claude/ now)
 ];
@@ -38,6 +50,11 @@ export const BANNED_TERMS = [
 export const ALLOW = new Set([
   // documents the VS Code BUILT-IN /create-prompt, annotated as out-of-surface (R-54)
   "docs/reference/built-in-reference.md .prompt.md",
+  // retired-term glossary — lists banned vocabulary on purpose
+  "docs/reference/terminology.md ai-kit",
+  "docs/reference/terminology.md greenfield",
+  "docs/reference/terminology.md brownfield",
+  "docs/reference/terminology.md kit clone",
 ]);
 
 const SCAN_DIRS = ["docs", "templates", ".claude"];

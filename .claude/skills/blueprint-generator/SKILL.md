@@ -1,24 +1,30 @@
 ---
 name: blueprint-generator
-description: Orchestration discovery step B7 — the rulebook for synthesizing docs/orchestration/blueprint.json from a repo profile plus decisions doc, mapping layers to specialist templates, policies to reviewer/QA specialists, and defaults for tiers, turn limits, and tools. Use when synthesizing an orchestration blueprint (typically driven by the plan-synthesizer agent). Not for instantiating templates.
+description: Orchestration discovery step B7 — the rulebook for synthesizing docs/orchestration/blueprint.json from a repo profile plus decisions doc, mapping layers to generic-specialist with optional paired skills, policies to reviewer/QA specialists, and defaults for tiers, turn limits, and tools. Use when synthesizing an orchestration blueprint (typically driven by the plan-synthesizer agent). Not for instantiating templates.
 ---
 
 # blueprint-generator
 
 Maps `repo-profile.json` + `decisions.json` onto a `blueprint.json`
 (`validateBlueprint` shape). Deterministic rules, no taste calls — when a
-rule does not cover the repo, pick `generic-specialist` rather than invent.
+rule does not cover the repo, use `generic-specialist` with `pairedSkills:
+[]`; never invent.
 
 ## Specialist selection
 
-One engineer specialist per CODE layer, template by stack evidence:
+One engineer specialist per CODE layer. Every layer uses `templateId:
+generic-specialist`; stack evidence selects optional `pairedSkills`:
 
-| Layer evidence (stack/deps) | templateId |
+| Layer evidence (stack/deps) | pairedSkills |
 | --- | --- |
-| React / Vue / frontend build tool | `ui-engineer` |
-| HTTP server framework (Express, Fastify, …) | `api-engineer` |
-| ORM / migrations (Prisma, …) | `db-engineer` |
-| anything else (shared libs, CLIs, tools) | `generic-specialist` |
+| React / Vue / frontend build tool | `["ui-component-pattern"]` |
+| HTTP server framework (Express, Fastify, …) | `["api-testing"]` |
+| ORM / migrations (Prisma, …) | `["db-migration"]` |
+| anything else | `[]` |
+
+**Dedup rule:** each skill id may appear on at most one specialist per
+blueprint. If a second layer matches the same skill, assign `[]` and report
+the collision in synthesis output — do not silently duplicate.
 
 Policy-driven additions from `decisions.json`:
 
@@ -30,7 +36,7 @@ Always: one `feature-orchestrator` (templateId `orchestrator`).
 
 Names are derived, not invented — the same inputs must yield the same
 roster: engineer specialists are `<layer-name>-engineer` (layer name from
-the profile, e.g. `ui-engineer`, `shared-engineer`, `cli-engineer`);
+the profile, e.g. `frontend-engineer`, `shared-engineer`, `cli-engineer`);
 policy agents keep their templateId as name (`code-reviewer`, `qa-agent`,
 `security-reviewer`); the orchestrator is always `feature-orchestrator`.
 
@@ -49,7 +55,7 @@ Orchestrator: `tasks-path` (`tasks.md`), `handoff-log-path`
 
 | Agent | modelTier | turnLimit | tools |
 | --- | --- | --- | --- |
-| engineer specialists | sonnet | 30 (20 for db) | Read, Grep, Glob, Edit, Write, Bash |
+| engineer specialists | sonnet | 30 (20 when db-migration paired) | Read, Grep, Glob, Edit, Write, Bash |
 | code-reviewer / security-reviewer | opus | 15 | Read, Grep, Glob |
 | qa-agent | sonnet | 20 | Read, Grep, Glob, Bash |
 | feature-orchestrator | opus | 60 | Read, Grep, Glob, Edit, Write, Bash, Agent |
@@ -62,8 +68,8 @@ hand-ordered: `deriveDispatchOrder(profile.layers, profile.internalEdges)`
 in [dispatch-order.mjs](../../../scripts/lib/orchestration/dispatch-order.mjs);
 `[]` when the profile
 has no edges; a cycle is an error — stop and report, don't reorder.
-`docs`: dispatch-rules.md, tasks-format.md,
-handoff-logging.md (under `docs/orchestration/`). Never set
+`docs`: dispatch-rules.md, tasks-format.md, handoff-logging.md,
+agent-teams.md, triage-rules.md (under `docs/orchestration/`). Never set
 `templateVersion` — pins live in the generation manifest.
 
 ## Gate

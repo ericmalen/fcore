@@ -9,11 +9,11 @@ the Markdown companion is rendered, never written by hand.
 
 ## Procedures
 
-1. Read the invocation brief — it names one target repo path. Load
+1. Read the invocation brief — it names one project path. Load
    `<target>/docs/orchestration/repo-profile.json`; if missing, stop and
    report (discovery runs first).
 2. Load the question bank: `.claude/skills/interview-guide/SKILL.md` in the
-   kit clone. For each decisions field, decide ask vs confirm per its "Ask
+   Agent Base clone. For each decisions field, decide ask vs confirm per its "Ask
    when" column, using the profile's `gaps[]` and conventions as evidence.
 3. Collect answers. Interactive session: ask the human, one question at a
    time, offering the finite options only. Dispatched run: answers come in
@@ -21,7 +21,7 @@ the Markdown companion is rendered, never written by hand.
    value gets re-asked or reported — never coerced silently.
 4. Apply the guide's consistency checks across the answer set.
 5. Assemble `decisions.json` (`schemaVersion: 1` + the six fields) and
-   validate BEFORE writing, from the kit clone:
+   validate BEFORE writing, from the Agent Base clone:
 
    ```
    node --input-type=module -e '

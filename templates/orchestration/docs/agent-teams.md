@@ -29,7 +29,8 @@ From the repo root (interactive or headless `-p`):
 CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 claude --agent feature-orchestrator \
   -p "Work task T-### from tasks.md per your procedures. The scope count
 selects the agent-team tier: spawn one teammate per scoped layer using the
-generated layer agents (e.g. shared-engineer, db-engineer, api-engineer),
+generated layer agents (e.g. shared-lib-engineer, data-engineer,
+gateway-engineer),
 break the task into per-layer team tasks honoring provider-first ordering,
 then stop at the human gate." \
   --allowedTools "Read" "Write" "Edit" "Glob" "Grep" "Bash" "Agent" \

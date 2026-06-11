@@ -1,6 +1,6 @@
 ---
 name: structure-detector
-description: Orchestration discovery step B1 — walks a target repo and identifies its layers/packages, the stack per layer, and test/build commands, producing the structural fields of repo-profile.json. Use when orchestration discovery of a target repo path begins (typically driven by the repo-analyst agent). Not for ai-kit adoption inventory and not general code search.
+description: Orchestration discovery step B1 — walks a project and identifies its layers/packages, the stack per layer, and test/build commands, producing the structural fields of repo-profile.json. Use when orchestration discovery of a project path begins (typically driven by the repo-analyst agent). Not for agent-base setup inventory and not general code search.
 ---
 
 # structure-detector
@@ -11,7 +11,7 @@ Detects the structural half of a repo profile: `name`, `type`, `layers[]`,
 
 ## Procedure
 
-All inspection happens in the target repo path named by the caller.
+All inspection happens in the project path named by the caller.
 
 1. **Repo identity.** `name` from the root manifest (`package.json` `name`,
    or the directory name if unnamed). `packageManager` from lockfiles

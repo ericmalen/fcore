@@ -58,7 +58,7 @@ doc into the README.
   state that, or ask the author.
 - Ambiguous intent → ask the human. Never guess.
 
-## docs setup (bootstrap — run at adoption)
+## docs setup (bootstrap — run at setup)
 
 Verify, don't just ask: inspect the repo first — size and file count,
 language(s), package manifests and their private/public flags, publish
@@ -142,4 +142,4 @@ update the affected docs and changelog per the rules above, and list any
 changes you judged non-behavioral so the human can veto. This is the
 standard repair path for the CI docs-impact gate.
 
-Adopting this package: [adopting](references/adopting.md).
+Integrating this package: [integration](references/integration.md).

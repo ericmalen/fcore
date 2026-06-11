@@ -25,19 +25,19 @@ export function isGitRepo(root) {
 }
 
 const SKIP_DIRS = new Set([
-  '.git', 'node_modules', '.adoption', 'dist', 'build', 'coverage',
+  '.git', 'node_modules', '.setup', 'dist', 'build', 'coverage',
   '.next', '.venv', 'target', 'out', '.turbo', '.cache',
-  'ai-kit-adoption', // adoption-time tooling dir (.claude/ai-kit-adoption)
+  'agent-base-setup', // setup-time tooling dir (.claude/agent-base-setup)
 ]);
 
-// Adoption-time tooling — present only during migration; never audited
+// Setup-time tooling — present only during setup; never audited
 // (mirrors the extractor's universe exclusion).
 const TOOLING_RE = [
-  /^\.claude\/ai-kit-adoption\//,
-  /^\.claude\/skills\/adopt-(inventory|plan|materialize|verify)\//,
-  /^\.claude\/agents\/adoption-verifier\.md$/,
+  /^\.claude\/agent-base-setup\//,
+  /^\.claude\/skills\/base-(inventory|plan|apply|verify)\//,
+  /^\.claude\/agents\/setup-verifier\.md$/,
 ];
-export function isAdoptionTooling(rel) {
+export function isSetupTooling(rel) {
   return TOOLING_RE.some((re) => re.test(rel));
 }
 
@@ -48,11 +48,11 @@ export function isVendored(root, rel) {
   return existsSync(join(root, dirname(rel), 'UPSTREAM'));
 }
 
-// Template payload skeletons — files carrying ai-kit slot/optional markers are
+// Template payload skeletons — files carrying agent-base slot/optional markers are
 // kit payload, not live configuration; live-config checks skip them
 // (spec/rules.md: Audit exemptions).
 export function isPayloadSkeleton(text) {
-  return /<!--\s*ai-kit:(slot|optional)/.test(text ?? '');
+  return /<!--\s*agent-base:(slot|optional)/.test(text ?? '');
 }
 
 // Recursive walk yielding absolute file paths; skips junk dirs.
@@ -129,9 +129,9 @@ export function finding(rule, severity, file, message, extra = {}) {
   return { rule, severity, file, message, ...extra };
 }
 
-// Read the kit marker (.claude/ai-kit.json). Returns {} when absent/unparseable.
+// Read the kit marker (.claude/agent-base.json). Returns {} when absent/unparseable.
 export function readMarker(root) {
-  const text = readSafe(join(root, '.claude', 'ai-kit.json'));
+  const text = readSafe(join(root, '.claude', 'agent-base.json'));
   if (!text) return { present: false };
   const parsed = parseJsonc(text);
   if (!parsed) return { present: true, invalid: true };

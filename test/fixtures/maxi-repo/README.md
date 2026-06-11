@@ -1,7 +1,7 @@
 # maxi-repo (test fixture)
 
 Four-layer npm-workspaces monorepo fixture for orchestration-kit discovery
-verification (ai-kit plan, fixture spec in the build plan). Dependencies are
+verification (agent-base plan, fixture spec in the build plan). Dependencies are
 declared in manifests but never installed; tests use only Node built-ins;
 build scripts are stubs.
 

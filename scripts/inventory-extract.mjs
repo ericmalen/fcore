@@ -45,10 +45,10 @@ export function runInventory({ root, outDir, allowDirty = false, include = [] })
   // Universe: tracked + untracked-but-not-ignored. Never a raw fs walk.
   // Adoption-time tooling is not repo content — never inventory it.
   const TOOLING = [
-    /^\.adoption\//,
-    /^\.claude\/ai-kit-adoption\//,
-    /^\.claude\/skills\/adopt-(inventory|plan|materialize|verify)\//,
-    /^\.claude\/agents\/adoption-verifier\.md$/,
+    /^\.setup\//,
+    /^\.claude\/agent-base-setup\//,
+    /^\.claude\/skills\/base-(inventory|plan|apply|verify)\//,
+    /^\.claude\/agents\/setup-verifier\.md$/,
   ];
   const universe = git(root, ['ls-files', '--cached', '--others', '--exclude-standard', '-z'])
     .split('\0')
@@ -138,7 +138,7 @@ const isMain = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(imp
 
 if (isMain) {
   const args = process.argv.slice(2);
-  const opt = { root: process.cwd(), out: '.adoption', allowDirty: false, json: false, include: [] };
+  const opt = { root: process.cwd(), out: '.setup', allowDirty: false, json: false, include: [] };
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--root') opt.root = args[++i];
     else if (args[i] === '--out') opt.out = args[++i];

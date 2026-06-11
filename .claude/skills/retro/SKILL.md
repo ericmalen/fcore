@@ -22,7 +22,7 @@ orchestration-generated repo, with enough detail to know what went wrong.
    the fix there — do NOT add a checklist item. The checklist is for review
    judgment, not for papering over generation defects.
 2. **Read the existing checklist** at
-   `docs/orchestration/checklists/review-checklist.md` in the target repo. If
+   `docs/orchestration/checklists/review-checklist.md` in the project. If
    absent, create it containing only a `# Review checklist` heading.
 3. **Number.** Next CHK number = max existing CHK-### + 1; `CHK-001` if none
    exist. Never renumber or rewrite existing items.

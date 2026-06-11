@@ -1,6 +1,6 @@
 // parse-tasks.mjs — tasks.md ⇄ structured backlog (A4, DD-3).
 //
-// tasks.md is the work-intake file in a target repo (canonical format:
+// tasks.md is the work-intake file in a project (canonical format:
 // templates/orchestration/docs/tasks-format.md). The parser is STRICT: it
 // accepts exactly the canonical form the renderer emits, so
 // renderTasksMd(parseTasksMd(text)) round-trips losslessly and the

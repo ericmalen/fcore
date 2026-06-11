@@ -7,7 +7,7 @@
 //   SessionStart → `node .claude/skills/docs/scripts/docs-nudge.mjs session-start`
 //   Stop         → `node .claude/skills/docs/scripts/docs-nudge.mjs stop`
 //
-// Spec: baseline = HEAD recorded at SessionStart (.git/ai-kit-
+// Spec: baseline = HEAD recorded at SessionStart (.git/agent-base-
 // docs-baseline). At Stop, changed = commits baseline..HEAD plus uncommitted
 // working-tree paths, matched against .claude/docs-paths.json
 // { tier, codePaths, docsPaths } (prefix or "*.ext" patterns). Fires iff
@@ -37,8 +37,8 @@ const isMain = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(imp
 if (isMain) try {
   const mode = process.argv[2];
   const gitDir = git('rev-parse', '--git-dir');
-  const baselineFile = `${gitDir}/ai-kit-docs-baseline`;
-  const nudgedFile = `${gitDir}/ai-kit-docs-nudged`;
+  const baselineFile = `${gitDir}/agent-base-docs-baseline`;
+  const nudgedFile = `${gitDir}/agent-base-docs-nudged`;
 
   if (mode === 'session-start') {
     let head = 'EMPTY';

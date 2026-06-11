@@ -24,7 +24,7 @@ function slotMapFor(agent) {
 
 test('instantiateTemplate: mid-line slot substitutes inside a sentence', () => {
   const { content, errors } = instantiateTemplate(
-    'Run `<!-- ai-kit:slot:test-cmd -->` before reporting.',
+    'Run `<!-- agent-base:slot:test-cmd -->` before reporting.',
     { 'test-cmd': 'npm test --workspace api' },
   );
   assert.deepEqual(errors, []);
@@ -33,7 +33,7 @@ test('instantiateTemplate: mid-line slot substitutes inside a sentence', () => {
 
 test('instantiateTemplate: repeated marker fills every occurrence', () => {
   const { content, errors } = instantiateTemplate(
-    '<!-- ai-kit:slot:layer-path -->: edits stay under <!-- ai-kit:slot:layer-path -->.',
+    '<!-- agent-base:slot:layer-path -->: edits stay under <!-- agent-base:slot:layer-path -->.',
     { 'layer-path': 'apps/api' },
   );
   assert.deepEqual(errors, []);
@@ -42,7 +42,7 @@ test('instantiateTemplate: repeated marker fills every occurrence', () => {
 
 test('instantiateTemplate: marker whitespace variants all match', () => {
   const { content, errors } = instantiateTemplate(
-    '<!--ai-kit:slot:a--> <!--  ai-kit:slot:a  -->',
+    '<!--agent-base:slot:a--> <!--  agent-base:slot:a  -->',
     { a: 'x' },
   );
   assert.deepEqual(errors, []);
@@ -53,7 +53,7 @@ test('instantiateTemplate: marker whitespace variants all match', () => {
 
 test('instantiateTemplate: unfilled slot fails with name and line, content null', () => {
   const { content, errors } = instantiateTemplate(
-    'line one\nuses <!-- ai-kit:slot:stack --> here',
+    'line one\nuses <!-- agent-base:slot:stack --> here',
     {},
   );
   assert.equal(content, null);
@@ -62,7 +62,7 @@ test('instantiateTemplate: unfilled slot fails with name and line, content null'
 
 test('instantiateTemplate: every unfilled occurrence reports its own line', () => {
   const { errors } = instantiateTemplate(
-    '<!-- ai-kit:slot:a -->\n<!-- ai-kit:slot:b -->\n<!-- ai-kit:slot:a -->',
+    '<!-- agent-base:slot:a -->\n<!-- agent-base:slot:b -->\n<!-- agent-base:slot:a -->',
     {},
   );
   assert.deepEqual(errors, [
@@ -83,7 +83,7 @@ test('instantiateTemplate: unused slot value is an error', () => {
 
 test('instantiateTemplate: invalid value reports once, not also as unfilled', () => {
   const { content, errors } = instantiateTemplate(
-    'uses <!-- ai-kit:slot:stack -->',
+    'uses <!-- agent-base:slot:stack -->',
     { stack: '  ' },
   );
   assert.equal(content, null);
@@ -92,7 +92,7 @@ test('instantiateTemplate: invalid value reports once, not also as unfilled', ()
 
 test('instantiateTemplate: non-string value rejected', () => {
   const { errors } = instantiateTemplate(
-    'limit: <!-- ai-kit:slot:turn-limit -->',
+    'limit: <!-- agent-base:slot:turn-limit -->',
     { 'turn-limit': 30 },
   );
   assert.deepEqual(errors, ['slots["turn-limit"] must be a non-empty string']);
@@ -100,12 +100,12 @@ test('instantiateTemplate: non-string value rejected', () => {
 
 test('instantiateTemplate: malformed marker is a template defect', () => {
   const { content, errors } = instantiateTemplate(
-    'ok <!-- ai-kit:slot:good -->\nbad <!-- ai-kit:slot:BadName -->',
+    'ok <!-- agent-base:slot:good -->\nbad <!-- agent-base:slot:BadName -->',
     { good: 'x' },
   );
   assert.equal(content, null);
   assert.deepEqual(errors, [
-    'malformed slot marker <!-- ai-kit:slot:BadName --> (line 2) — slot names must be kebab-case',
+    'malformed slot marker <!-- agent-base:slot:BadName --> (line 2) — slot names must be kebab-case',
   ]);
 });
 
@@ -115,13 +115,13 @@ test('instantiateTemplate: bad argument shapes rejected outright', () => {
   assert.deepEqual(instantiateTemplate('', ['a']), { content: null, errors: ['slots must be an object'] });
 });
 
-// ── api-engineer template × A3 blueprint fixture ────────────────────────────
+// ── generic-specialist template × A3 blueprint fixture ──────────────────────
 
-const template = readFileSync(join(TEMPLATES, 'api-engineer.template.md'), 'utf8');
+const template = readFileSync(join(TEMPLATES, 'generic-specialist.template.md'), 'utf8');
 const blueprint = JSON.parse(readFileSync(join(FIXTURES, 'maxi-repo.blueprint.json'), 'utf8'));
 const apiEngineer = blueprint.specialists.find((s) => s.name === 'api-engineer');
 
-test('api-engineer template: blueprint fixture entry instantiates clean', () => {
+test('generic-specialist template: blueprint fixture entry instantiates clean', () => {
   const { content, errors } = instantiateTemplate(template, slotMapFor(apiEngineer));
   assert.deepEqual(errors, []);
   assert.match(content, /^name: api-engineer$/m);
@@ -129,17 +129,17 @@ test('api-engineer template: blueprint fixture entry instantiates clean', () => 
   assert.match(content, /^model: sonnet$/m);
   assert.match(content, /`npm test --workspace api`/);
   assert.match(content, /^apps\/api\/package\.json$/m);
-  assert.ok(!content.includes('ai-kit:slot'), 'no marker text survives instantiation');
+  assert.ok(!content.includes('agent-base:slot'), 'no marker text survives instantiation');
 });
 
-test('api-engineer template: repeat run is byte-identical', () => {
+test('generic-specialist template: repeat run is byte-identical', () => {
   const first = instantiateTemplate(template, slotMapFor(apiEngineer));
   const second = instantiateTemplate(template, slotMapFor(apiEngineer));
   assert.deepEqual(first.errors, []);
   assert.equal(first.content, second.content);
 });
 
-test('api-engineer template: dropping one blueprint slot fails instantiation', () => {
+test('generic-specialist template: dropping one blueprint slot fails instantiation', () => {
   const slots = slotMapFor(apiEngineer);
   delete slots['test-cmd'];
   const { content, errors } = instantiateTemplate(template, slots);

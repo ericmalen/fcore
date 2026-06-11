@@ -26,8 +26,8 @@ test('planGeneration: maxi synthesized blueprint plans the full asset set', () =
   const { files, errors } = planGeneration(loadFixture('maxi-repo.synthesized.blueprint.json'), registry, readTemplate);
   assert.deepEqual(errors, []);
   const paths = files.map((f) => f.path);
-  // 8 agents + 3 paired skills (ui/api/db engineers) + README + 3 docs
-  assert.equal(files.length, 15);
+  // 8 agents + 3 paired skills (ui/api/db engineers) + README + 5 docs
+  assert.equal(files.length, 17);
   assert.ok(paths.includes('docs/orchestration/README.md'));
   assert.ok(paths.includes('.claude/agents/feature-orchestrator.md'));
   assert.ok(paths.includes('.claude/skills/api-testing/SKILL.md'));
@@ -108,9 +108,9 @@ test('planGeneration: registry sha pin mismatch refuses to generate', () => {
   ]);
 });
 
-test('planGeneration: duplicate-templateId specialists collide on skill paths, all-or-nothing', () => {
+test('planGeneration: duplicate pairedSkills collide on skill paths, all-or-nothing', () => {
   const bp = loadFixture('maxi-repo.synthesized.blueprint.json');
-  const clone = JSON.parse(JSON.stringify(bp.specialists.find((s) => s.templateId === 'api-engineer')));
+  const clone = JSON.parse(JSON.stringify(bp.specialists.find((s) => s.name === 'api-engineer')));
   clone.name = 'api2-engineer';
   bp.specialists.push(clone);
   const { files, errors } = planGeneration(bp, registry, readTemplate);

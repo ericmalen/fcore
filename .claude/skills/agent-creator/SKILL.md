@@ -27,7 +27,7 @@ and Copilot read.
    Bash, Edit, Write`) as a comma-separated list; Copilot maps them to its own
    tools automatically. Omitting `tools` grants all tools.
 3. Generate the agent file at `.claude/agents/{name}.md` using
-   [`./templates/agent-template.md`](./templates/agent-template.md).
+   [`./templates/agent.template.md`](./templates/agent.template.md).
 4. Compose the role statement: one line — what the agent does **and** what it
    never does.
 5. Fill `## Procedures` with numbered steps the agent follows.
@@ -57,7 +57,7 @@ and Copilot read.
 
 ## Flat orchestration reminder
 
-ai-kit prefers flat orchestration: orchestrators call every specialist
+agent-base prefers flat orchestration: orchestrators call every specialist
 directly. Nesting is possible but compounds token cost and is harder to debug —
 it should be a deliberate choice. If this agent is part of an orchestrated
 workflow, default to having the orchestrator call it directly rather than
@@ -65,5 +65,5 @@ chaining it under another specialist.
 
 ## References
 
-- [Custom agents in ai-kit](../../agents/README.md)
+- [Custom agents in agent-base](../../agents/README.md)
 - [Tool tiers](./references/tool-tiers.md)

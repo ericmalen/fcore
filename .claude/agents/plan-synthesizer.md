@@ -9,14 +9,15 @@ only file it writes.
 
 ## Procedures
 
-1. Read the invocation brief — it names one target repo path. Load
+1. Read the invocation brief — it names one project path. Load
    `<target>/docs/orchestration/repo-profile.json` and
    `<target>/docs/orchestration/decisions.json`; if either is missing, stop
    and report which discovery step must run first.
 2. Apply the synthesis rulebook: `.claude/skills/blueprint-generator/SKILL.md`
-   in the kit clone — specialist selection per layer evidence, policy-driven
+   in the Agent Base clone — specialist selection per layer evidence, policy-driven
    additions, slot values from the profile, the defaults table. Where no
-   rule covers a layer, use `generic-specialist`; never invent a slot value
+   rule covers a layer, use `generic-specialist` with `pairedSkills: []`;
+   never invent a slot value
    the profile cannot evidence (report instead). Compute
    `dispatch_rules.dispatch_order` with
    `deriveDispatchOrder(profile.layers, profile.internalEdges)`
@@ -24,11 +25,12 @@ only file it writes.
    never hand-order; a cycle error aborts synthesis with the errors
    reported verbatim.
 3. Gate the candidate with `.claude/skills/handoff-validator/SKILL.md`
-   (schema check + slot dry-run, from the kit clone). REJECT → fix the
+   (schema check + slot dry-run, from the Agent Base clone). REJECT → fix the
    candidate per the error lines and re-gate; never write a rejected
    blueprint. Report any SKIP lines (templates not yet authored) verbatim.
 4. Only on PASS: write `<target>/docs/orchestration/blueprint.json`, then
-   stop. Report the specialist roster (name, templateId, tier, turn limit),
+   stop. Report the specialist roster (name, templateId, pairedSkills, tier,
+   turn limit),
    the dispatch rules, and the validator output.
 
 ## Never

@@ -2,79 +2,80 @@
   "schemaVersion": 1,
   "agents": {
     "orchestrator": {
-      "version": "1.1.0",
-      "sha256": "1bafd235cd197c0b664c6acb72aaf578daa82c22443f3cfc81baae3a49ed894d"
-    },
-    "ui-engineer": {
-      "version": "1.0.0",
-      "sha256": "4ed23be7c354c5b2898f9651e6ce5f1c1925a4192fa2c36e51a2e2bf26656b68"
-    },
-    "api-engineer": {
-      "version": "1.0.0",
-      "sha256": "e3f3dd6d11650ad8027176b231f8ba61abaf9d1ed60a5f3460c29dd82a6b6e8b"
-    },
-    "db-engineer": {
-      "version": "1.0.0",
-      "sha256": "a681f2625d63bdba42ff94eb90e82c62102e0b9544e07ea23649419b90108073"
+      "version": "1.2.1",
+      "sha256": "27a85a721db1f61f2952e3f00f9db1bbf501780da82f8dd7d9427ee4aae8ff61"
     },
     "generic-specialist": {
-      "version": "1.0.0",
-      "sha256": "52c04f06506139e20f787a3335e0b66b9ca0119ae21106c8ffa3692478ca3fc9"
+      "version": "1.0.1",
+      "sha256": "1ad5cc095db2459c214cea18e77e7e2291bcff846ba51c254c95264827b26d51"
     },
     "code-reviewer": {
-      "version": "1.0.0",
-      "sha256": "30035bfe5a79d4f9da126125886445dbd501e34e7460790ea9d217e4d834f182"
+      "version": "1.0.1",
+      "sha256": "6153b40e0fdf21eedae573be168ebe76006ec1ea3dad312cb6f53f0dce682f0c"
     },
     "qa-agent": {
-      "version": "1.0.0",
-      "sha256": "14abc9fcc78e0f51461b921fc0577a1a3425dd10303aba002fa6c775512c053d"
+      "version": "1.0.1",
+      "sha256": "04eeac9bd212e2324d6dabaab71d2b16e7eb7375061e8479a832246f1f0a4404"
     },
     "security-reviewer": {
-      "version": "1.0.0",
-      "sha256": "7680f4e9de7dd854f9279276711e11b693a86026467b4614b0cb245c617a496c"
+      "version": "1.0.1",
+      "sha256": "b6452d0f23168f3d9a87e0d5636faa073b1dc08946c4c2389fc4fb32c2e99048"
     }
   },
   "skills": {
     "api-testing": {
-      "version": "1.0.0",
-      "pairsWith": "api-engineer",
-      "sha256": "e3747ca037dcb9bd09b185199731863dd1e7f405ccc38cf292fba62dc48a212e"
+      "version": "1.1.1",
+      "stackEvidence": [
+        "express",
+        "fastify",
+        "http server"
+      ],
+      "sha256": "a168e1e9251099f32a5ce9bd8ba3ea9521cc4efe2aeca68a9522faf92a45f946"
     },
     "ui-component-pattern": {
-      "version": "1.0.0",
-      "pairsWith": "ui-engineer",
-      "sha256": "7720667984591ca5fb39d5648dc7875b2e161181a1a9979a726291100a864837"
+      "version": "1.1.1",
+      "stackEvidence": [
+        "react",
+        "vue",
+        "vite",
+        "frontend"
+      ],
+      "sha256": "8f2f376350558b8b9ac9050083c8d93a65dbe5853f8142d52130fc2f15ca09f4"
     },
     "db-migration": {
-      "version": "1.0.0",
-      "pairsWith": "db-engineer",
-      "sha256": "7e2df3e6066941afb917611e015ed754ec2e37036b0ed37588ac376eb5838f42"
+      "version": "1.1.1",
+      "stackEvidence": [
+        "prisma",
+        "orm",
+        "migration"
+      ],
+      "sha256": "edb083faff8c830ad07e28cabbb4d0910844964f07c4eb9b171fb2370a5ef33b"
     }
   },
   "docs": {
     "dispatch-rules": {
-      "version": "1.1.0",
-      "sha256": "8ae2ff69eaa4ee755488227eb214007ff3bf85b26fb7c8c63d7b37c51fd0379d"
+      "version": "1.2.0",
+      "sha256": "437cfbd7def2662765c08ffde92ec38b5b0282416aa5ade01bb81491620fc25d"
     },
     "tasks-format": {
-      "version": "1.0.0",
-      "sha256": "f8c638384d206e459f3e7b9c4cb31f1a35f55fc1202b2e15cbdd5f575734e1af"
+      "version": "1.1.0",
+      "sha256": "3a6b60957d7986db916b31697807c43d4471a96a2122ce91f181488450a3a2f0"
     },
     "handoff-logging": {
       "version": "1.1.0",
       "sha256": "75ea1ad7db5d9fe801e9bc315f640f6eb32ebe872ce14181011e891cae1974fa"
     },
     "README": {
-      "version": "1.0.0",
-      "sha256": "4424438fd3197f1a5d021152e84c8995b99ae0cdd1114cce6800343a99c6afcf"
+      "version": "1.1.1",
+      "sha256": "7f25cb442c771b683260411834535012bda0fc80949096e0447a9a785bcbe258"
     },
     "triage-rules": {
       "version": "1.0.0",
       "sha256": "93597737de504dc7b8ee9c6be4c4a29564dd91cb565ec0dce39f54e4d614bf32"
     },
     "agent-teams": {
-      "version": "1.0.0",
-      "sha256": "ed88bb5ec8996787935025eea14d62187fb6c857f01dc093168e743352a41b1f"
+      "version": "1.1.0",
+      "sha256": "593c2acbef6df58b375e4328d3c7ec4a05ccc8c6b205bdaf39b9cfa26546c051"
     }
   }
 }

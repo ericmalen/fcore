@@ -51,3 +51,34 @@ versioned with the code and needs no external tracker.
   referencing the handoff-log entry — never silent retries.
 - Keep the file canonical (this exact layout): the orchestrator edits it via
   the kit's parser/renderer, which accepts only this shape.
+
+## Bootstrapping tasks.md
+
+After orchestration generation, create `tasks.md` at the repo root if it does
+not exist yet. Start from this skeleton and replace layer names with those from
+your `repo-profile.json`:
+
+```markdown
+# Tasks
+
+## Backlog
+
+- [ ] T-001 | scope: <layer> | <first feature title>
+  - AC: <measurable criterion>
+
+## In Progress
+
+## Done
+```
+
+Rules for the first item:
+
+- Use layer names exactly as in `scope:` — they must match blueprint
+  specialists (e.g. `shared`, `api`, not path globs).
+- Assign `T-001` and increment; ids are never reused.
+- Keep all three sections present even when empty.
+- Only `feature-orchestrator` edits this file after bootstrap — specialists
+  report in their final message.
+
+Canonical examples also live in `test/fixtures/orchestration/tasks-canonical.md`
+in the kit repo.

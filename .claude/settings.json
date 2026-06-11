@@ -13,8 +13,8 @@
       "Edit(./.vscode/settings.json)",
       "Write(./.vscode/settings.json)",
       "Edit(./.claude/settings.json)",
-      "Edit(./.claude/ai-kit.json)",
-      "Write(./.claude/ai-kit.json)"
+      "Edit(./.claude/agent-base.json)",
+      "Write(./.claude/agent-base.json)"
     ],
     "ask": [],
     "deny": [

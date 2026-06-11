@@ -1,6 +1,6 @@
 ---
 name: drift-checker
-description: Detects drift in an orchestration-generated target repo by re-instantiating every generation-manifest entry from the CURRENT kit templates plus the stored blueprint and comparing sha256 digests, and by re-rendering decisions.md — separating TEMPLATE-DRIFT (kit template moved on; remedy is re-scaffold) from USER-EDIT (generated file or rendered companion touched on disk; remedy is human conflict resolution). Use when checking whether a target's generated agents, skills, docs, or decisions.md still match what generation would produce today. Not git diff, not the ai-kit adoption reproducibility audit, and not for repos without docs/orchestration/generation-manifest.json.
+description: Detects drift in an orchestration-generated project by re-instantiating every generation-manifest entry from the CURRENT kit templates plus the stored blueprint and comparing sha256 digests, and by re-rendering decisions.md — separating TEMPLATE-DRIFT (kit template moved on; remedy is re-scaffold) from USER-EDIT (generated file or rendered companion touched on disk; remedy is human conflict resolution). Use when checking whether a target's generated agents, skills, docs, or decisions.md still match what generation would produce today. Not git diff, not the agent-base setup reproducibility audit, and not for repos without docs/orchestration/generation-manifest.json.
 ---
 
 # drift-checker
@@ -32,11 +32,11 @@ Slot maps for re-instantiation, paired via
   is the SAME function the scaffolder uses, so re-instantiation here cannot
   drift from what generation wrote — never re-derive the slot map by hand.
 - **skills** (`.claude/skills/<id>/SKILL.md`) — the OWNING specialist's
-  `slots` only, no quartet; the owner is the specialist whose `templateId`
-  equals the skill template's `pairsWith` in the registry.
+  `slots` only, no quartet; the owner is the specialist whose `pairedSkills`
+  lists that skill id in the blueprint.
 - **docs** — verbatim copies; hash the kit doc file directly.
 
-From the kit clone root, target path as the argument:
+From the Agent Base clone root, target path as the argument:
 
 ```
 node --input-type=module -e '
@@ -59,7 +59,7 @@ for (const en of manifest.generated) {
     if (!a) { console.log(`ERROR ${en.path}: no blueprint entry`); continue; }
     fresh = sha(instantiateTemplate(readFileSync(`templates/orchestration/agents/${en.templateId}.template.md`, "utf8"), agentSlots(a, bp)).content ?? "");
   } else if (en.path.startsWith(".claude/skills/")) {
-    const owner = agents.find((x) => x.templateId === reg.skills[en.templateId]?.pairsWith);
+    const owner = bp.specialists.find((x) => (x.pairedSkills ?? []).includes(en.templateId));
     if (!owner) { console.log(`ERROR ${en.path}: no owning specialist`); continue; }
     fresh = sha(instantiateTemplate(readFileSync(`templates/orchestration/skills/${en.templateId}.template.md`, "utf8"), owner.slots).content ?? "");
   } else {
@@ -67,7 +67,7 @@ for (const en of manifest.generated) {
   }
   console.log(`${onDisk !== en.sha256 ? "USER-EDIT" : fresh !== en.sha256 ? "TEMPLATE-DRIFT" : "MATCH"} ${en.path}`);
 }
-' <target-repo-path>
+' <project-path>
 ```
 
 `ERROR` lines mean the manifest, blueprint, and registry disagree — report
@@ -89,7 +89,7 @@ const fresh = renderDecisionsMd(JSON.parse(readFileSync(`${t}/docs/orchestration
 console.log(fresh === readFileSync(`${t}/docs/orchestration/decisions.md`, "utf8")
   ? "MATCH docs/orchestration/decisions.md"
   : "USER-EDIT docs/orchestration/decisions.md (hand-edited rendered companion)");
-' <target-repo-path>
+' <project-path>
 ```
 
 ## Report

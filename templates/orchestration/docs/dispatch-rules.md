@@ -10,7 +10,7 @@ thresholds are data, not judgment — they live in
   "agent_team_min_scopes": 3,
   "agent_team_on_cross_repo": true,
   "pipeline_when": ["scheduled", "multi_day"],
-  "dispatch_order": ["shared", "ui", "api", "db"]
+  "dispatch_order": ["shared-lib", "frontend", "gateway", "data"]
 }
 ```
 
@@ -27,16 +27,19 @@ The orchestrator counts the layers in a task's `scope:` line (see
 | scopes ≥ `agent_team_min_scopes`, or cross-repo work | Agent team — one orchestrator session plus per-layer specialist sessions on a shared task list |
 | scheduled or multi-day work (`pipeline_when`) | Headless pipeline run |
 
-## Examples (4-layer monorepo: ui / api / db / shared)
+## Examples (four-layer monorepo)
 
-- `scope: api` — one layer → subagent path; dispatch the api specialist
-  in-session.
-- `scope: ui, shared` — two layers → still subagents; dispatch both
-  specialists in-session, in `dispatch_order` (shared before ui — the
-  provider changes first).
-- `scope: api, db, shared` — three layers → agent team; per-layer sessions
-  coordinate on the shared task list, and only the orchestrator session
-  writes `tasks.md` and the handoff log.
+Layer names in your repo come from discovery — these examples use neutral
+names only:
+
+- `scope: gateway` — one layer → subagent path; dispatch the gateway
+  specialist in-session.
+- `scope: frontend, shared-lib` — two layers → still subagents; dispatch
+  both specialists in-session, in `dispatch_order` (shared-lib before
+  frontend — the provider changes first).
+- `scope: gateway, data, shared-lib` — three layers → agent team;
+  per-layer sessions coordinate on the shared task list, and only the
+  orchestrator session writes `tasks.md` and the handoff log.
 
 ## Runtime caveat
 

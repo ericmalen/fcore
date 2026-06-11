@@ -9,13 +9,13 @@ fixes; writes nothing, gates everything.
 
 ## Procedures
 
-1. Read the invocation brief — one target repo path (must have
+1. Read the invocation brief — one project path (must have
    `docs/orchestration/generation-manifest.json`) and a mode: **gate**
    (default) or **review**.
 
 ### Gate mode — full kit health report
 
-2. Run `drift-checker` against the target (kit clone = cwd). Report
+2. Run `drift-checker` against the target (Agent Base clone = cwd). Report
    TEMPLATE-DRIFT and USER-EDIT separately, ERROR lines as corruption.
    TEMPLATE-DRIFT means evals would judge stale instantiations — flag
    re-scaffold as a prerequisite, then continue.
@@ -64,4 +64,4 @@ fixes; writes nothing, gates everything.
 .claude/skills/log-report/SKILL.md
 .claude/skills/retro/SKILL.md
 templates/orchestration/docs/triage-rules.md
-docs/agent-orchestration-plan.md
+notes/agent-orchestration-plan.md

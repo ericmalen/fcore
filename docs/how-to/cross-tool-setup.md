@@ -2,8 +2,8 @@
 
 How to wire a repository so **one set of instructions, agents, and skills
 loads in both Claude Code and GitHub Copilot (VS Code)** — and how to verify
-it works. Adoption produces this wiring automatically
-([`adoption-guide.md`](./adoption-guide.md)); follow these steps when building
+it works. Setup produces this wiring automatically
+([`setup-guide.md`](./setup-guide.md)); follow these steps when building
 or repairing the setup by hand.
 
 Which tool reads which surface: see the
@@ -80,7 +80,7 @@ Known tool caveat: path-scoped rules trigger when matching files are *read* —
 they may not load while creating a brand-new matching file. Keep universal
 musts in root `AGENTS.md`.
 
-For the **compat variant** (chosen at adoption when the team also uses other
+For the **compat variant** (chosen at setup when the team also uses other
 AGENTS.md-ecosystem tools): place a nested `AGENTS.md` in the subtree it
 governs, and give every nested `AGENTS.md` a sibling `CLAUDE.md` containing
 `@AGENTS.md`, mirroring the root-level pairing — Copilot reads nested
@@ -90,7 +90,7 @@ governs, and give every nested `AGENTS.md` a sibling `CLAUDE.md` containing
 ## Verify it works
 
 - **Copilot (VS Code):** the `/` menu lists the skills; the agent picker
-  shows `docs-auditor` (installed in every adopted repo); `AGENTS.md` loads.
+  shows `docs-auditor` (installed in every set-up project); `AGENTS.md` loads.
   Confirm via **Chat: Open Diagnostics**.
 - **Claude Code:** the `/` menu lists the same skills; `docs-auditor` is
   available as a subagent; `CLAUDE.md` (→ `AGENTS.md`) appears in context.

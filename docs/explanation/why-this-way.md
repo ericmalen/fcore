@@ -1,17 +1,17 @@
 # Why This Way
 
 Optional reading. Design rationale for readers curious about the choices baked
-into ai-kit. Skip this and go to [`conventions.md`](../reference/conventions.md) if
+into agent-base. Skip this and go to [`conventions.md`](../reference/conventions.md) if
 you just want the rules.
 
-## Why ai-kit, not a fork
+## Why agent-base, not a fork
 
-The author of ai-kit maintains a mature Copilot setup in a production
+The author of agent-base maintains a mature Copilot setup in a production
 repo. Copying it wholesale would ship stack-specific and domain-specific
 content — layering rules, framework conventions, internal workflow names — that
 would require subtraction before addition in any other project.
 
-ai-kit inverts that. You start with the structure and conventions, then add
+agent-base inverts that. You start with the structure and conventions, then add
 your own content. No deleting before building.
 
 ## Why a shared `.claude/` home
@@ -42,7 +42,7 @@ just imports it) would double-load the content.
 
 ## Why meta-skills
 
-The headline feature of ai-kit is **skills-as-tooling**. Two meta-skills
+The headline feature of agent-base is **skills-as-tooling**. Two meta-skills
 — `skill-creator` and `agent-creator` — walk you through
 producing new assets that conform to the conventions. (`skill-creator` is
 Anthropic's official skill-authoring tool, shipped here as a baseline skill.)
@@ -83,7 +83,7 @@ you what to type and why it belongs there.
 The meta-skills provide the templates (paste-ready, stub content). The
 example assets (like `example-reviewer.md`) provide the annotated versions with
 inline comments explaining the non-obvious choices — they are kit-side examples
-to copy from, not assets installed into adopted repos. Together they cover both
+to copy from, not assets installed into set-up projects. Together they cover both
 modes — "I just need a starting point" and "I want to see a real one."
 
 ## Why flat orchestration (by default)
@@ -92,7 +92,7 @@ Both Copilot and Claude Code support nested subagents (a subagent invoking
 subagents). Token cost compounds with depth, and recursive chains are easy to
 introduce by accident and hard to debug.
 
-ai-kit prefers a **flat topology** as the default: one orchestrator
+agent-base prefers a **flat topology** as the default: one orchestrator
 calls every specialist directly. Reasons:
 
 - Easier to debug — every call appears in the orchestrator's transcript.
@@ -101,7 +101,7 @@ calls every specialist directly. Reasons:
 - Harder to accidentally make recursive — flat agents can't chain into a
   five-deep loop.
 
-ai-kit does not ship an orchestration layer. When you add one,
+agent-base does not ship an orchestration layer. When you add one,
 review loops and human gates go in the orchestrator, not between specialists.
 Nesting is available when a specialist legitimately needs its own helpers —
 treat it as a deliberate choice, not the default.

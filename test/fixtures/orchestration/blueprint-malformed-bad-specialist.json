@@ -13,7 +13,7 @@
     },
     {
       "name": "api-engineer",
-      "templateId": "api-engineer",
+      "templateId": "generic-specialist",
       "slots": { "layer-path": "apps/api" },
       "modelTier": "sonnet",
       "turnLimit": 30,

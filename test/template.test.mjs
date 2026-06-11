@@ -9,16 +9,16 @@ const KIT_ROOT = new URL('..', import.meta.url).pathname;
 const TPL = [
   '# Title',
   '',
-  '<!-- ai-kit:slot:intro -->',
+  '<!-- agent-base:slot:intro -->',
   '',
   '## Overview',
-  '<!-- ai-kit:optional -->',
+  '<!-- agent-base:optional -->',
   '',
-  '<!-- ai-kit:slot:overview -->',
+  '<!-- agent-base:slot:overview -->',
   '',
   '## Do Not',
   '',
-  '<!-- ai-kit:slot:do-not -->',
+  '<!-- agent-base:slot:do-not -->',
   '',
 ].join('\n');
 
@@ -26,15 +26,15 @@ test('empty optional section is removed; mandatory section stays', () => {
   const out = instantiate(TPL, () => undefined); // nothing filled
   assert.ok(!out.includes('## Overview'), 'empty optional Overview should be gone');
   assert.ok(out.includes('## Do Not'), 'mandatory Do Not stays even when empty (R-03)');
-  assert.ok(!out.includes('ai-kit:optional'), 'optional markers are stripped');
-  assert.ok(!out.includes('ai-kit:slot'), 'slot markers are stripped');
+  assert.ok(!out.includes('agent-base:optional'), 'optional markers are stripped');
+  assert.ok(!out.includes('agent-base:slot'), 'slot markers are stripped');
 });
 
 test('filled optional section is kept with its content and no markers', () => {
   const out = instantiate(TPL, (name) => (name === 'overview' ? 'Real overview text.' : undefined));
   assert.ok(out.includes('## Overview'), 'filled optional section stays');
   assert.ok(out.includes('Real overview text.'));
-  assert.ok(!out.includes('ai-kit:optional'));
+  assert.ok(!out.includes('agent-base:optional'));
 });
 
 test('stripEmptyOptionalSections preserves byte content of kept sections', () => {
@@ -43,7 +43,7 @@ test('stripEmptyOptionalSections preserves byte content of kept sections', () =>
   assert.ok(pruned.includes('## Overview'));
   assert.ok(pruned.includes('## Do Not'));
   // intro/do-not are mandatory (no optional marker) → never removed
-  assert.ok(pruned.includes('<!-- ai-kit:slot:intro -->'));
+  assert.ok(pruned.includes('<!-- agent-base:slot:intro -->'));
 });
 
 test('no optional markers → text is returned unchanged', () => {
@@ -51,16 +51,16 @@ test('no optional markers → text is returned unchanged', () => {
   assert.equal(stripEmptyOptionalSections(plain, new Set()), plain);
 });
 
-test('greenfield AGENTS template drops Overview/Architecture, keeps Do Not + More Context footer', () => {
+test('starter AGENTS template drops Overview/Architecture, keeps Do Not + More Context footer', () => {
   const tpl = readFileSync(join(KIT_ROOT, 'templates', 'instructions', 'AGENTS.md'), 'utf8');
-  const out = instantiate(tpl); // greenfield: nothing filled
+  const out = instantiate(tpl); // starter: nothing filled
   for (const gone of ['## Overview', '## Architecture']) {
-    assert.ok(!out.includes(gone), `${gone} should be removed in greenfield`);
+    assert.ok(!out.includes(gone), `${gone} should be removed in starter`);
   }
   assert.ok(out.includes('## Do Not'), 'Do Not stays (R-03)');
   // More Context is non-optional: its footer always points adopters at the
-  // installed .claude/ assets, even on a greenfield repo with no routed content.
-  assert.ok(out.includes('## More Context'), 'More Context stays in greenfield');
+  // installed .claude/ assets, even on a starter repo with no routed content.
+  assert.ok(out.includes('## More Context'), 'More Context stays in starter');
   assert.ok(out.includes('.claude/skills/'), 'footer points at installed assets');
-  assert.ok(!out.includes('ai-kit:'), 'no leftover ai-kit markers');
+  assert.ok(!out.includes('agent-base:'), 'no leftover agent-base markers');
 });

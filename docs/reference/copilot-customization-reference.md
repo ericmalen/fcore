@@ -71,7 +71,7 @@ You type /feature (user-invocable skill)
 
 ### Repo-wide instructions: `AGENTS.md`
 
-ai-kit uses `AGENTS.md` at the repo root as the canonical repo-wide instructions file. `AGENTS.md` is an [open standard](https://agents.md) supported by Copilot, Claude Code, Cursor, Codex, Aider, Gemini CLI, Windsurf, and ~20 other tools. Enabled in VS Code with:
+agent-base uses `AGENTS.md` at the repo root as the canonical repo-wide instructions file. `AGENTS.md` is an [open standard](https://agents.md) supported by Copilot, Claude Code, Cursor, Codex, Aider, Gemini CLI, Windsurf, and ~20 other tools. Enabled in VS Code with:
 
 ```jsonc
 {
@@ -79,12 +79,12 @@ ai-kit uses `AGENTS.md` at the repo root as the canonical repo-wide instructions
 }
 ```
 
-`chat.useNestedAgentsMdFiles` extends discovery to **nested** `AGENTS.md` files placed inside subdirectories — the compat mechanism for path-scoped instructions (the default is `.claude/rules/`, R-52/R-53). Set it `true` only in repos using the compat variant (R-45); ai-kit itself does not set it. See [Path-specific instructions](#path-specific-instructions) below.
+`chat.useNestedAgentsMdFiles` extends discovery to **nested** `AGENTS.md` files placed inside subdirectories — the compat mechanism for path-scoped instructions (the default is `.claude/rules/`, R-52/R-53). Set it `true` only in repos using the compat variant (R-45); agent-base itself does not set it. See [Path-specific instructions](#path-specific-instructions) below.
 
 **Trade-offs to know:**
 
 - **Claude Code reads `CLAUDE.md`, not `AGENTS.md`.** This repo ships a `CLAUDE.md` that imports `AGENTS.md` via `@AGENTS.md`, so both tools share one source of truth. Edit `AGENTS.md`; leave `CLAUDE.md` alone. See [`cross-tool-setup.md`](../how-to/cross-tool-setup.md).
-- **`/init`** still generates `.github/copilot-instructions.md`, not `AGENTS.md`. ai-kit's pattern: run `/init`, move the generated content into `AGENTS.md`, delete the generated file.
+- **`/init`** still generates `.github/copilot-instructions.md`, not `AGENTS.md`. agent-base's pattern: run `/init`, move the generated content into `AGENTS.md`, delete the generated file.
 - **GitHub.com surfaces** — Copilot code review and the cloud coding agent reliably read `.github/copilot-instructions.md` and `.github/instructions/*.instructions.md` (the latter supports `applyTo` globs and `excludeAgent`). Their support for `AGENTS.md` — especially _nested_ `AGENTS.md` — is newer and less uniform. If your team depends on those server-side surfaces, keep a root `.github/copilot-instructions.md` alongside `AGENTS.md`.
 
 ### Content template
@@ -117,7 +117,7 @@ Brief description, tech stack (1–2 sentences each), monorepo structure.
 
 ### Path-specific instructions
 
-When a convention applies to one directory or layer rather than the whole repo, scope it with a **path-scoped rules file** — ai-kit's default mechanism (R-52). Create `.claude/rules/<scope>.md` with `paths:` glob frontmatter; both Claude Code and Copilot load it automatically when working on matching files, on top of the root `AGENTS.md`. One scope per file.
+When a convention applies to one directory or layer rather than the whole repo, scope it with a **path-scoped rules file** — agent-base's default mechanism (R-52). Create `.claude/rules/<scope>.md` with `paths:` glob frontmatter; both Claude Code and Copilot load it automatically when working on matching files, on top of the root `AGENTS.md`. One scope per file.
 
 ```
 repo/
@@ -143,9 +143,9 @@ paths: ["packages/api/**"]
 
 Known tool caveat: path-scoped rules trigger when matching files are *read* — they may not load while creating a brand-new matching file. Keep universal musts in root `AGENTS.md`.
 
-The **compat variant** is a nested `AGENTS.md` placed inside the subdirectory it applies to (enabled via `chat.useNestedAgentsMdFiles: true`, which adoption sets only on compat-variant repos — R-45/R-53). It has no frontmatter and no glob — scope is by *location* — and it is the cross-tool open standard, discovered by Copilot, Cursor, Codex, Aider, and Gemini CLI alike (Claude Code needs a sibling `CLAUDE.md` shim, R-15). Choose it at adoption when the team uses other AGENTS.md-ecosystem tools; a repo uses rules XOR nested AGENTS.md, never both (R-53).
+The **compat variant** is a nested `AGENTS.md` placed inside the subdirectory it applies to (enabled via `chat.useNestedAgentsMdFiles: true`, which setup sets only on compat-variant repos — R-45/R-53). It has no frontmatter and no glob — scope is by *location* — and it is the cross-tool open standard, discovered by Copilot, Cursor, Codex, Aider, and Gemini CLI alike (Claude Code needs a sibling `CLAUDE.md` shim, R-15). Choose it at setup when the team uses other AGENTS.md-ecosystem tools; a repo uses rules XOR nested AGENTS.md, never both (R-53).
 
-> **Tradeoff:** the alternative — `.github/instructions/*.instructions.md` with an `applyTo` glob — is Copilot-specific but is the mechanism GitHub.com's Copilot code review and cloud coding agent read most reliably. ai-kit does **not** ship `.github/instructions/` by default; if you depend on those server-side surfaces, add `.github/instructions/` files alongside — the mechanisms coexist (R-09/R-49).
+> **Tradeoff:** the alternative — `.github/instructions/*.instructions.md` with an `applyTo` glob — is Copilot-specific but is the mechanism GitHub.com's Copilot code review and cloud coding agent read most reliably. agent-base does **not** ship `.github/instructions/` by default; if you depend on those server-side surfaces, add `.github/instructions/` files alongside — the mechanisms coexist (R-09/R-49).
 
 ### Monorepo parent-folder discovery
 
@@ -214,7 +214,7 @@ docs/coding-standards.md
 | **Never** (boundaries) | Explicit rules — what the agent must not do                                                 |
 | **Documents**          | Plain-text paths for lazy-load. The agent reads these via the Read tool only when needed.   |
 
-**Note on the Documents section:** ai-kit uses plain-text paths (not Markdown links) by convention. The agent reads them on demand via the Read tool, never up-front, which keeps the agent's always-on context small. Plain-text paths also visually distinguish agent Documents sections from skill bodies (which intentionally use Markdown links for progressive disclosure).
+**Note on the Documents section:** agent-base uses plain-text paths (not Markdown links) by convention. The agent reads them on demand via the Read tool, never up-front, which keeps the agent's always-on context small. Plain-text paths also visually distinguish agent Documents sections from skill bodies (which intentionally use Markdown links for progressive disclosure).
 
 ### Tools list — controls what the agent can do
 
@@ -262,7 +262,7 @@ hooks:
 - Keep agents lean — behavior and references, not inlined knowledge.
 - Documents section is a checklist of what to consult, not what to memorize.
 - One agent, one responsibility — no "do everything" agents.
-- ai-kit prefers **flat orchestration** as a default — orchestrators call all specialists directly. Nested subagents are available (`chat.subagents.allowInvocationsFromSubagents`, enabled here) up to a depth cap of 5, but there is **no cycle detection** and token cost compounds with depth. Reach for nesting only when a specialist genuinely needs its own specialists.
+- agent-base prefers **flat orchestration** as a default — orchestrators call all specialists directly. Nested subagents are available (`chat.subagents.allowInvocationsFromSubagents`, enabled here) up to a depth cap of 5, but there is **no cycle detection** and token cost compounds with depth. Reach for nesting only when a specialist genuinely needs its own specialists.
 
 ---
 
@@ -377,7 +377,7 @@ One agent (orchestrator) coordinates multiple specialists through a defined work
 
 ### Key design decisions
 
-- **Flat architecture (default).** The orchestrator calls every specialist directly. This is ai-kit's preferred shape — easier to debug, easier to reason about, and observability is straightforward (every call shows up in the orchestrator's transcript). Nested subagents are technically supported (`chat.subagents.allowInvocationsFromSubagents`, enabled here; depth cap = 5; no cycle detection); use them only when a specialist legitimately needs its own helpers.
+- **Flat architecture (default).** The orchestrator calls every specialist directly. This is agent-base's preferred shape — easier to debug, easier to reason about, and observability is straightforward (every call shows up in the orchestrator's transcript). Nested subagents are technically supported (`chat.subagents.allowInvocationsFromSubagents`, enabled here; depth cap = 5; no cycle detection); use them only when a specialist legitimately needs its own helpers.
 - **Human gates.** Mandatory approval checkpoints. Without these, autonomous orchestration is risky.
 - **Validation gates.** Automated checks (compile, test, lint) between phases. A layer must pass its gate before the next phase starts.
 - **Post-agent verification.** After every subagent call, the orchestrator checks `git diff` to confirm work was actually done. Catches silent failures.
@@ -403,8 +403,8 @@ Autopilot is powerful for scripted orchestrations but unsuitable for exploratory
 | Command               | What it does                                                                                                        |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `/init`               | Auto-generate repo-wide instructions for your project                                                               |
-| `/skill-creator` | Generate, modify, and benchmark skills (Anthropic's official meta-skill, shipped by ai-kit; VS Code also has a built-in `/create-skill`) |
-| `/agent-creator`     | Generate an agent file from a description (ai-kit's meta-skill; VS Code also has a built-in `/create-agent`) |
+| `/skill-creator` | Generate, modify, and benchmark skills (Anthropic's official meta-skill, shipped by agent-base; VS Code also has a built-in `/create-skill`) |
+| `/agent-creator`     | Generate an agent file from a description (agent-base's meta-skill; VS Code also has a built-in `/create-agent`) |
 | `/skills`             | Open the Configure Skills menu                                                                                      |
 | `/compact`            | Compress conversation history to free context space                                                                 |
 | `/troubleshoot`       | Diagnose why instructions, skills, or agents didn't behave as expected; accepts `#session` to analyze past sessions |
@@ -425,7 +425,7 @@ Drop these into `.vscode/settings.json` to enable the customization features con
   // Instructions
   "chat.useAgentsMdFile": true,
   // Compat-variant repos ONLY (R-45/R-53): nested AGENTS.md discovery.
-  // Omit on rules-based repos — including ai-kit itself.
+  // Omit on rules-based repos — including agent-base itself.
   // "chat.useNestedAgentsMdFiles": true,
   // Off: CLAUDE.md only imports AGENTS.md, which Copilot already reads.
   "chat.useClaudeMdFile": false,
@@ -448,7 +448,7 @@ Drop these into `.vscode/settings.json` to enable the customization features con
 }
 ```
 
-Review each flag — some are preview features. Enable them deliberately. `.vscode/settings.json` in ai-kit is a live example with inline commentary — it omits the compat-only nested key and adds editor file-nesting keys beyond this set (R-45 pins the required keys).
+Review each flag — some are preview features. Enable them deliberately. `.vscode/settings.json` in agent-base is a live example with inline commentary — it omits the compat-only nested key and adds editor file-nesting keys beyond this set (R-45 pins the required keys).
 
 ---
 

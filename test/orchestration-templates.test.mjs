@@ -47,7 +47,7 @@ for (const fixture of BLUEPRINTS) {
       assert.ok(existsSync(path), `template ${agent.templateId}.template.md missing`);
       const { content, errors } = instantiateTemplate(readFileSync(path, 'utf8'), slotMapFor(agent, bp));
       assert.deepEqual(errors, []);
-      assert.ok(!content.includes('ai-kit:slot'), 'no marker text survives');
+      assert.ok(!content.includes('agent-base:slot'), 'no marker text survives');
       assert.match(content, new RegExp(`^name: ${agent.name}$`, 'm'));
     });
   }
@@ -60,18 +60,18 @@ const registry = JSON.parse(
   readFileSync(join(import.meta.dirname, '..', 'templates', 'orchestration', 'template-registry.json'), 'utf8'),
 );
 
-for (const [skillId, meta] of Object.entries(registry.skills)) {
+for (const [skillId] of Object.entries(registry.skills)) {
   test(`C2 lint: ${skillId} instantiates from its paired specialist's slots`, () => {
     const bp = loadFixture('maxi-repo.synthesized.blueprint.json');
-    const specialist = bp.specialists.find((s) => s.templateId === meta.pairsWith);
-    assert.ok(specialist, `no maxi specialist uses template ${meta.pairsWith}`);
+    const specialist = bp.specialists.find((s) => (s.pairedSkills ?? []).includes(skillId));
+    assert.ok(specialist, `no maxi specialist lists pairedSkills "${skillId}"`);
     const tpl = readFileSync(join(SKILL_TEMPLATES, `${skillId}.template.md`), 'utf8');
     // C2 invariant stated directly, not via the fixture: exactly these 4 slots
-    const markers = new Set([...tpl.matchAll(/<!--\s*ai-kit:slot:([a-z0-9-]+)\s*-->/g)].map((m) => m[1]));
+    const markers = new Set([...tpl.matchAll(/<!--\s*agent-base:slot:([a-z0-9-]+)\s*-->/g)].map((m) => m[1]));
     assert.deepEqual([...markers].sort(), ['conventions', 'layer-path', 'stack', 'test-cmd']);
     const { content, errors } = instantiateTemplate(tpl, specialist.slots);
     assert.deepEqual(errors, []);
-    assert.ok(!content.includes('ai-kit:slot'));
+    assert.ok(!content.includes('agent-base:slot'));
     assert.match(content, new RegExp(`^name: ${skillId}$`, 'm'));
   });
 }
@@ -82,7 +82,8 @@ test('C2 lint: registry and shipped templates cover each other exactly', () => {
   assert.deepEqual(agentFiles.sort(), Object.keys(registry.agents).sort());
   assert.deepEqual(skillFiles.sort(), Object.keys(registry.skills).sort());
   for (const [skillId, meta] of Object.entries(registry.skills)) {
-    assert.ok(registry.agents[meta.pairsWith], `${skillId} pairsWith unknown template ${meta.pairsWith}`);
+    assert.ok(Array.isArray(meta.stackEvidence) && meta.stackEvidence.length > 0,
+      `${skillId} must declare stackEvidence hints for synthesis`);
   }
   const docFiles = readdirSync(join(import.meta.dirname, '..', 'templates', 'orchestration', 'docs'))
     .filter((f) => f.endsWith('.md'))
@@ -167,9 +168,7 @@ test('C3: skill-instantiator SKILL.md embedded script matches planGeneration byt
   try {
     for (const specialist of bp.specialists) {
       const res = runEmbedded(script, specialist.name, target);
-      const paired = Object.entries(registry.skills)
-        .filter(([, meta]) => meta.pairsWith === specialist.templateId)
-        .map(([id]) => id);
+      const paired = specialist.pairedSkills ?? [];
       if (paired.length === 0) {
         assert.match(res.stdout, /nothing to write/, `${specialist.name}: zero-pairs path should report and exit 0`);
         continue;
@@ -194,7 +193,7 @@ test('C3: skill-instantiator SKILL.md embedded script matches planGeneration byt
 
 const driftScript = () => {
   const md = readFileSync(join(ROOT, '.claude', 'skills', 'drift-checker', 'SKILL.md'), 'utf8');
-  const m = md.match(/node --input-type=module -e '\n([\s\S]*?)\n' <target-repo-path>/);
+  const m = md.match(/node --input-type=module -e '\n([\s\S]*?)\n' <project-path>/);
   assert.ok(m, 'manifest-entries script not found in drift-checker/SKILL.md');
   return m[1]; // first block = the agent/skill/doc classifier (uses agentSlots)
 };
@@ -252,7 +251,7 @@ test('E3: drift-checker flags a hand-edited generated file as USER-EDIT only', (
 // ── generation-manifest validator (C4 contract) ─────────────────────────────
 
 const SHA = 'a'.repeat(64);
-const ENTRY = { path: '.claude/agents/api-engineer.md', templateId: 'api-engineer', templateVersion: '1.0.0', sha256: SHA };
+const ENTRY = { path: '.claude/agents/api-engineer.md', templateId: 'generic-specialist', templateVersion: '1.0.0', sha256: SHA };
 
 test('validateGenerationManifest: well-formed manifest validates clean', () => {
   assert.deepEqual(validateGenerationManifest({ schemaVersion: 1, generated: [ENTRY] }), []);

@@ -1,6 +1,6 @@
 ---
 name: scaffolder
-description: Orchestration generation agent (C4). Deterministically materializes a validated blueprint into a target repo — agents, paired skills, payload docs — and records every generated file in docs/orchestration/generation-manifest.json. Invoke when a blueprint has passed the handoff gate and the target's orchestration assets must be generated or regenerated. Pure slot substitution; never authors content, never overwrites user-edited generated files.
+description: Orchestration generation agent (C4). Deterministically materializes a validated blueprint into a project — agents, paired skills, payload docs — and records every generated file in docs/orchestration/generation-manifest.json. Invoke when a blueprint has passed the handoff gate and the target's orchestration assets must be generated or regenerated. Pure slot substitution; never authors content, never overwrites user-edited generated files.
 tools: Read, Bash, Write
 ---
 
@@ -9,12 +9,12 @@ manifest is the only state it owns.
 
 ## Procedures
 
-1. Read the invocation brief — it names one target repo path with a
+1. Read the invocation brief — it names one project path with a
    `docs/orchestration/blueprint.json`. Gate it first via
-   `.claude/skills/handoff-validator/SKILL.md` (kit clone = cwd). At
+   `.claude/skills/handoff-validator/SKILL.md` (Agent Base clone = cwd). At
    generation time a SKIP (missing template) is as fatal as a FAIL — every
    referenced template must exist. REJECT → stop and report.
-2. Generate, from the kit clone (all-or-nothing; the script refuses to
+2. Generate, from the Agent Base clone (all-or-nothing; the script refuses to
    touch a target whose previously generated files were hand-edited):
 
    ```

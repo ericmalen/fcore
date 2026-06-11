@@ -1,6 +1,6 @@
 ---
 name: log-report
-description: Orchestration handoff-log analytics — aggregates a target repo's docs/orchestration/handoff-log.jsonl into a per-agent markdown table (dispatch count, failure rate, avg duration, turn utilization) and flags agents with failure rate > 20% or turn utilization > 80%. Use when asked to summarize, analyze, or report on an orchestration handoff log. Only for handoff-log.jsonl produced by orchestration-generated agents; not for generic log files, CI logs, kit test output, or tasks.md status.
+description: Orchestration handoff-log analytics — aggregates a project's docs/orchestration/handoff-log.jsonl into a per-agent markdown table (dispatch count, failure rate, avg duration, turn utilization) and flags agents with failure rate > 20% or turn utilization > 80%. Use when asked to summarize, analyze, or report on an orchestration handoff log. Only for handoff-log.jsonl produced by orchestration-generated agents; not for generic log files, CI logs, kit test output, or tasks.md status.
 ---
 
 # log-report
@@ -26,10 +26,10 @@ invalid lines are reported with their line number and excluded from stats.
 
 ## Run
 
-Locate a kit root first (same resolution as ai-kit-check): a kit clone if you
-are in one; else the target's `.claude/ai-kit-adoption/` while the adoption
+Locate a kit root first (same resolution as base-check): a Agent Base clone if you
+are in one; else the target's `.claude/agent-base-setup/` while the setup
 tooling is still present (it carries `scripts/lib/` verbatim); else
-shallow-clone the kit repo (URL in `.claude/ai-kit.json` → `kitRepo`). From
+shallow-clone the kit repo (URL in `.claude/agent-base.json` → `toolRepo`). From
 that root, with the target's log path as the argument:
 
 ```

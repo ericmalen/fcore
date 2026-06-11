@@ -4,21 +4,21 @@
     {
       "id": 0,
       "eval_name": "valid-blueprint-passes",
-      "prompt": "Gate the orchestration blueprint at test/fixtures/orchestration/maxi-repo.blueprint.json before it is handed to generation. Run from the kit clone root. Report a PASS or REJECT verdict with any error lines verbatim.",
+      "prompt": "Gate the orchestration blueprint at test/fixtures/orchestration/maxi-repo.blueprint.json before it is handed to generation. Run from the Agent Base clone root. Report a PASS or REJECT verdict with any error lines verbatim.",
       "expected_output": "PASS verdict; schema ok and generation dry-run ok",
       "files": ["test/fixtures/orchestration/maxi-repo.blueprint.json"]
     },
     {
       "id": 1,
       "eval_name": "missing-slot-rejects",
-      "prompt": "Gate the orchestration blueprint at <workspace>/bp-missing-slot.json (maxi blueprint with specialists[0].slots[\"test-cmd\"] deleted). Run from the kit clone root. Report a PASS or REJECT verdict with any error lines verbatim.",
+      "prompt": "Gate the orchestration blueprint at <workspace>/bp-missing-slot.json (maxi blueprint with specialists[0].slots[\"test-cmd\"] deleted). Run from the Agent Base clone root. Report a PASS or REJECT verdict with any error lines verbatim.",
       "expected_output": "REJECT verdict citing unfilled slot \"test-cmd\"",
       "files": ["reports/handoff-validator-workspace/bp-missing-slot.json"]
     },
     {
       "id": 2,
       "eval_name": "docs-typo-rejects",
-      "prompt": "Gate the orchestration blueprint at <workspace>/bp-docs-typo.json (maxi blueprint with docs entry dispatch-rules.md misspelled dispatch-rule.md). Run from the kit clone root. Report a PASS or REJECT verdict with any error lines verbatim.",
+      "prompt": "Gate the orchestration blueprint at <workspace>/bp-docs-typo.json (maxi blueprint with docs entry dispatch-rules.md misspelled dispatch-rule.md). Run from the Agent Base clone root. Report a PASS or REJECT verdict with any error lines verbatim.",
       "expected_output": "REJECT verdict citing \"dispatch-rule\" not in registry (old skill passes this blueprint — the gap this iteration closes)",
       "files": ["reports/handoff-validator-workspace/bp-docs-typo.json"]
     }

@@ -4,6 +4,10 @@ State and reference docs for this repo's generated orchestration setup.
 Generated agents live in `.claude/agents/`, paired skills in
 `.claude/skills/`; work intake is `tasks.md` at the repo root.
 
+Kit how-to (discovery, generation, execution):
+`docs/how-to/orchestration-guide.md` in the Agent Base clone — not copied into
+targets; link from your team's internal docs if needed.
+
 ## Files
 
 | File | Owner | Role |

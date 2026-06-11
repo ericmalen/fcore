@@ -36,22 +36,26 @@ If your `SKILL.md` body runs past ~200 lines, it probably needs decomposition.
 
 Two groups, both loaded here because both are wanted while developing the kit:
 
-**Kit tooling** — the adoption engine and self-checks. The four `adopt-*`
-skills and `ai-kit-check` are installed into every target by
-`scripts/install-adoption.mjs`; TWO skills are deliberately kit-side only and
-never installed (installer allowlist): `ai-kit-adopt` and `validate-adoption`.
+**Agent Base tooling** — the setup engine and self-checks. The four `base-*`
+setup phase skills and `base-check` are installed into every project by
+`scripts/install-setup.mjs`; TWO skills are deliberately kit-side only and
+never installed (installer allowlist): `base-setup`, `base-orchestrate`,
+and `validate-setup`.
 
-- [`ai-kit-adopt`](./ai-kit-adopt/SKILL.md) — the adoption entry point and
-  orchestrator. Run from this kit clone against a target repo path. Kit-side
+- [`base-setup`](./base-setup/SKILL.md) — the setup entry point and
+  orchestrator. Run from this Agent Base clone against a project path. Kit-side
   only.
-- `adopt-inventory`, `adopt-plan`, `adopt-materialize`, `adopt-verify` — the
-  four-phase adoption pipeline. Installed for the adoption window; removed
+- [`base-orchestrate`](./base-orchestrate/SKILL.md) — orchestration entry
+  point (discovery → generation). Run from this Agent Base clone against a set-up
+  project path. Kit-side only.
+- `base-inventory`, `base-plan`, `base-apply`, `base-verify` — the
+  four-phase setup pipeline. Installed for the setup window; removed
   again before merge.
-- `validate-adoption` — runs the full adoption validation end-to-end. Kit-side
+- `validate-setup` — runs the full setup validation end-to-end. Kit-side
   only.
-- `ai-kit-check` — audits a repo's AI configuration against ai-kit conventions
+- `base-check` — audits a repo's AI configuration against agent-base conventions
   (the mandatory check; source of truth is this folder — shipped verbatim by
-  install-adoption).
+  install-setup).
 
 **Baseline assets** — shipped path-for-path into every target alongside the
 tooling, and held to the kit's own conventions because they load here too:
@@ -71,6 +75,29 @@ tooling, and held to the kit's own conventions because they load here too:
   have it. Do not edit — re-sync from upstream instead. Exempt from house-style
   audit rules: it follows upstream's conventions, not the kit's.
 
+**Orchestration meta-skills** — discovery, generation, and quality. Kit-side
+only except the lifecycle trio (`retro`, `log-report`, `eval-runner`), which
+install into every adopted repo. Entry point:
+[`base-orchestrate`](./base-orchestrate/SKILL.md). How-to:
+[`docs/how-to/orchestration-guide.md`](../../docs/how-to/orchestration-guide.md).
+
+Discovery (driven by meta-agents in fresh contexts):
+
+- `structure-detector`, `dependency-mapper`, `convention-detector` — repo
+  profile fields.
+- `interview-guide` — gap-driven policy questions.
+- `blueprint-generator`, `handoff-validator` — blueprint synthesis and gate.
+
+Generation (driven by `scaffolder`):
+
+- `agent-instantiator`, `skill-instantiator` — pure slot substitution into the
+  target's `.claude/`.
+
+Quality / lifecycle:
+
+- `eval-runner`, `drift-checker` — regression and template drift (Agent Base clone).
+- `retro`, `log-report` — flywheel intake and handoff analytics (project;
+  installed at setup).
 
 ## A worked example: `git-conventions`
 

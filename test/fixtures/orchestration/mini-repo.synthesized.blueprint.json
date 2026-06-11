@@ -4,6 +4,7 @@
     {
       "name": "cli-engineer",
       "templateId": "generic-specialist",
+      "pairedSkills": [],
       "slots": {
         "layer-path": ".",
         "stack": "Node.js CLI (zero-dependency)",
@@ -51,6 +52,8 @@
   "docs": [
     "docs/orchestration/dispatch-rules.md",
     "docs/orchestration/tasks-format.md",
-    "docs/orchestration/handoff-logging.md"
+    "docs/orchestration/handoff-logging.md",
+    "docs/orchestration/agent-teams.md",
+    "docs/orchestration/triage-rules.md"
   ]
 }

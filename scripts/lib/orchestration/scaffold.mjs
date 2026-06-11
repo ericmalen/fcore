@@ -96,10 +96,13 @@ export function planGeneration(blueprint, registry, readTemplate) {
   }
 
   for (const specialist of blueprint.specialists) {
-    const paired = Object.entries(registry.skills)
-      .filter(([, meta]) => meta.pairsWith === specialist.templateId)
-      .sort(([a], [b]) => a.localeCompare(b));
-    for (const [skillId, meta] of paired) {
+    const paired = [...(specialist.pairedSkills ?? [])].sort();
+    for (const skillId of paired) {
+      const meta = registry.skills[skillId];
+      if (!meta) {
+        e(`skill ${skillId} (for ${specialist.name}): not in registry`);
+        continue;
+      }
       const source = readTemplate('skill', skillId);
       if (source === null) {
         e(`skill ${skillId}: template missing from kit`);

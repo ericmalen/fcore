@@ -2,7 +2,7 @@
 // check — mechanical gates over manifest + inventory.
 //   1. Completeness: every node and sweep candidate has exactly one disposition
 //   2. Tiling: split ranges exactly cover the node (gaps = explicit drops)
-//   3. Reproducibility: re-materializing equals the working tree byte-for-byte
+//   3. Reproducibility: re-applying equals the working tree byte-for-byte
 //   4. Scope: targets confined to AI-config surfaces
 //
 // The AI converges these gates by editing manifest/literals ONLY — never
@@ -22,20 +22,20 @@ import {
   keepFiles, outOfScopeFiles, isAllowedTarget,
 } from './lib/manifest.mjs';
 import { splitLinesKeepEnds } from './lib/extract.mjs';
-import { materialize } from './materialize.mjs';
+import { apply } from './apply.mjs';
 
 const sha = (t) => createHash('sha256').update(t).digest('hex');
 
 export function check({ root, templatesDir, skipRepro = false }) {
   root = resolve(root);
-  const adoptionDir = join(root, '.adoption');
+  const setupDir = join(root, '.setup');
   const violations = [];
   const v = (gate, message) => violations.push({ gate, message });
 
   let manifest, inventory;
   try {
-    manifest = loadManifest(adoptionDir);
-    inventory = loadInventory(adoptionDir);
+    manifest = loadManifest(setupDir);
+    inventory = loadInventory(setupDir);
   } catch (e) {
     return { violations: [{ gate: 'load', message: e.message }] };
   }
@@ -73,7 +73,7 @@ export function check({ root, templatesDir, skipRepro = false }) {
   // ── 2. Tiling ──────────────────────────────────────────────────────────────
   for (const entry of manifest.entries) {
     if (entry.op !== 'split') continue;
-    const nodePath = join(adoptionDir, 'nodes', entry.node);
+    const nodePath = join(setupDir, 'nodes', entry.node);
     if (!existsSync(nodePath)) { v('tiling', `split node ${entry.node} bytes missing`); continue; }
     const total = splitLinesKeepEnds(readFileSync(nodePath, 'utf8')).length;
     const ranges = [...entry.ranges].sort((a, b) => a.lines[0] - b.lines[0]);
@@ -104,8 +104,8 @@ export function check({ root, templatesDir, skipRepro = false }) {
     if (entry.op === 'split') {
       for (const r of entry.ranges) if (r.target) checkTarget(r.target, `node ${entry.node}`);
     }
-    if (entry.op === 'merge' && !existsSync(join(adoptionDir, entry.literal))) {
-      v('scope', `merge literal "${entry.literal}" does not exist under .adoption/`);
+    if (entry.op === 'merge' && !existsSync(join(setupDir, entry.literal))) {
+      v('scope', `merge literal "${entry.literal}" does not exist under .setup/`);
     }
     if (entry.op === 'drop' && !entry.reason?.trim()) {
       v('scope', `drop of ${entry.node} has an empty reason`);
@@ -114,8 +114,8 @@ export function check({ root, templatesDir, skipRepro = false }) {
   for (const jm of manifest.jsonMerges ?? []) checkTarget(jm.file, 'jsonMerges');
   for (const ins of manifest.installs ?? []) {
     checkTarget(ins.file, 'installs');
-    if (ins.literal && !existsSync(join(adoptionDir, ins.literal))) {
-      v('scope', `install literal "${ins.literal}" does not exist under .adoption/`);
+    if (ins.literal && !existsSync(join(setupDir, ins.literal))) {
+      v('scope', `install literal "${ins.literal}" does not exist under .setup/`);
     }
     if (ins.template && templatesDir && !existsSync(join(templatesDir, ins.template))) {
       v('scope', `install template "${ins.template}" does not exist in templates dir`);
@@ -124,28 +124,28 @@ export function check({ root, templatesDir, skipRepro = false }) {
 
   // ── 4. Reproducibility ─────────────────────────────────────────────────────
   if (!skipRepro && violations.length === 0) {
-    const genPath = join(adoptionDir, 'generated.json');
+    const genPath = join(setupDir, 'generated.json');
     if (!existsSync(genPath)) {
-      v('reproducibility', 'no generated.json — run materialize first');
+      v('reproducibility', 'no generated.json — run apply first');
     } else {
       const recorded = JSON.parse(readFileSync(genPath, 'utf8'));
       const tmp = mkdtempSync(join(tmpdir(), 'aikit-repro-'));
       try {
-        const fresh = materialize({ root, templatesDir, outRoot: tmp });
+        const fresh = apply({ root, templatesDir, outRoot: tmp });
         const paths = new Set([...Object.keys(recorded.generated), ...Object.keys(fresh.generated)]);
         for (const p of paths) {
           const wtAbs = join(root, p);
           if (!existsSync(wtAbs)) { v('reproducibility', `generated file missing from working tree: ${p}`); continue; }
           const wtSha = sha(readFileSync(wtAbs, 'utf8'));
           if (fresh.generated[p] !== wtSha) {
-            v('reproducibility', `${p}: working tree differs from re-materialized output — route the change through manifest/literals, never edit generated files`);
+            v('reproducibility', `${p}: working tree differs from re-applied output — route the change through manifest/literals, never edit generated files`);
           }
         }
         for (const p of recorded.deleted ?? []) {
-          if (existsSync(join(root, p))) v('reproducibility', `source file ${p} should have been removed by materialize but exists`);
+          if (existsSync(join(root, p))) v('reproducibility', `source file ${p} should have been removed by apply but exists`);
         }
       } catch (e) {
-        v('reproducibility', `re-materialize failed: ${e.message}`);
+        v('reproducibility', `re-apply failed: ${e.message}`);
       } finally {
         rmSync(tmp, { recursive: true, force: true });
       }

@@ -19,7 +19,7 @@ const fence = (text) => '```\n' + text.replace(/```/g, '`​``') + (text.endsWit
 
 export function generateReport({ root }) {
   root = resolve(root);
-  const adoptionDir = join(root, '.adoption');
+  const adoptionDir = join(root, '.setup');
   const manifest = loadManifest(adoptionDir);
   const inventory = loadInventory(adoptionDir);
 
@@ -61,7 +61,7 @@ export function generateReport({ root }) {
   const pct = (n) => sourceBytes === 0 ? '0.0' : ((n / sourceBytes) * 100).toFixed(1);
 
   const L = [];
-  L.push('# Adoption review report');
+  L.push('# Setup review report');
   L.push('');
   L.push('Generated mechanically from the manifest. Sections are RISK-ORDERED —');
   L.push('review top to bottom; the top sections are where content can be lost.');
@@ -184,7 +184,7 @@ if (isMain) {
     else { console.error(`report: unknown flag ${args[i]}`); process.exit(2); }
   }
   const md = generateReport({ root: opt.root });
-  const outPath = opt.out ?? join(opt.root, '.adoption', 'report.md');
+  const outPath = opt.out ?? join(opt.root, '.setup', 'report.md');
   writeFileSync(outPath, md, 'utf8');
   console.log(`report: written → ${outPath}`);
 }

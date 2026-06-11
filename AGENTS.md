@@ -1,42 +1,43 @@
-# ai-kit (kit development repo)
+# Agent Base (setup tool repo)
 
-This is the **factory, not the house**: the repo that builds and ships AI-config
-setups into other repositories. Nobody starts a project by cloning this repo —
-adoption runs *from a target repo* against a shared clone of this kit.
+This is the **setup tool, not your application repo**: the repo that builds and
+ships AI-config setups into other repositories. Nobody starts a project by
+cloning this repo — setup runs *from a project* against a shared Agent Base
+clone.
 
 ## Overview
 
-ai-kit installs a conformant AI-coding setup — Claude Code + GitHub Copilot
-(VS Code), one set of files — into consumer repos via a four-phase adoption pipeline
-(inventory → plan → materialize → verify). Zero-dependency Node ≥ 20 (.mjs),
+Agent Base installs a conformant AI-coding setup — Claude Code + GitHub Copilot
+(VS Code), one set of files — into projects via a four-phase setup pipeline
+(inventory → plan → apply → verify). Zero-dependency Node ≥ 20 (.mjs),
 unit-tested, shell-agnostic.
 
 ## Architecture
 
 - [`spec/rules.md`](./spec/rules.md) — single source of truth (R-IDs). Never
   restate a rule; reference its ID.
-- [`spec/target-layout.md`](./spec/target-layout.md) — what an adopted repo
+- [`spec/target-layout.md`](./spec/target-layout.md) — what a set-up project
   looks like.
 
 ## Repo zones
 
 | Zone | Role |
 |---|---|
-| `templates/` | Payload materialized into every adopted repo: `instructions/` (AGENTS.md/CLAUDE.md skeletons + slot bases), `settings/`, `readmes/`, `ci/`, `gitignore`. |
-| `scripts/` + `test/` | The engine. Dev tooling here; adoption copies ONLY the five adoption scripts (inventory-extract, materialize, check, report, audit) + `scripts/lib/` + `templates/` into targets as `.claude/ai-kit-adoption/` — `test/` never ships. |
-| `.claude/` | This repo's live config AND the baseline shipped to every target. The `adopt-*` skills, `adoption-verifier` agent, and the baseline `ai-kit-check`, `docs`, `git-conventions`, `skill-creator`, `agent-creator` skills + `docs-auditor` agent are dual-role: loaded here AND installed path-for-path into targets (see `scripts/install-adoption.mjs`, the allowlist that decides what ships). `ai-kit-adopt` is the adoption entry point — run from this clone against a target path; deliberately NOT installed into targets. |
+| `templates/` | Payload copied into every project: `instructions/` (AGENTS.md/CLAUDE.md skeletons + slot bases), `settings/`, `readmes/`, `ci/`, `gitignore`. |
+| `scripts/` + `test/` | The engine. Dev tooling here; setup copies ONLY the five setup scripts (inventory-extract, apply, check, report, audit) + `scripts/lib/` + `templates/` into projects as `.claude/agent-base-setup/` — `test/` never ships. |
+| `.claude/` | This repo's live config AND the baseline shipped to every project. The `base-*` setup skills, `setup-verifier` agent, and the baseline `base-check`, `docs`, `git-conventions`, `skill-creator`, `agent-creator`, `retro`, `log-report`, `eval-runner` skills + `docs-auditor` agent are dual-role: loaded here AND installed path-for-path into projects (see `scripts/install-setup.mjs`, the allowlist that decides what ships). Orchestration discovery/generation meta-assets (`repo-analyst`, `scaffolder`, `evaluator`, and their paired skills) stay Agent Base-side — run from an Agent Base clone against a project path, same pattern as `base-setup`. `base-setup` is the setup entry point — run from this clone against a project path; deliberately NOT installed into projects. |
 | `docs/` | Consumer-facing guides. |
 | `reports/` | Generated outputs (validation/audit reports). Gitignored. |
 
 ## Conventions
 
 - Rule-ID indirection (R-51): docs and templates cite rules by R-ID only.
-- All scripts zero-dependency Node ≥ 20; the kit's own test suite (`npm test`) needs Node ≥ 22.
-- Self-audit: `node scripts/audit.mjs` (this repo is itself adopted — marker in
-  `.claude/ai-kit.json`).
+- All scripts zero-dependency Node ≥ 20; Agent Base's own test suite (`npm test`) needs Node ≥ 22.
+- Self-audit: `node scripts/audit.mjs` (this repo is itself set up — marker in
+  `.claude/agent-base.json`).
 - Generated reports go to `reports/`, never committed.
-- v1/v2 are internal kit generations; released artifacts version from 1.0.
-- Kit CI gates beyond tests: `docs-consistency` (banned v1 vocabulary + doc
+- v1/v2 are internal generations; released artifacts version from 1.0.
+- Agent Base CI gates beyond tests: `docs-consistency` (banned v1 vocabulary + doc
   link resolution) and `rule-check-map` (spec-rule ⇄ audit-check coverage).
 
 ## Documentation
@@ -54,22 +55,22 @@ notes.
 ## Do Not
 
 - Do not add payload to `.claude/` unless it is also wanted while developing
-  the kit — everything there auto-loads here (v1's mistake; see dropped rules
-  in spec). The installer allowlist (`scripts/install-adoption.mjs`) decides
-  what ships to targets; `ai-kit-adopt` stays kit-only.
-- Do not move `.claude/skills/ai-kit-adopt/` or rename `scripts/`,
+  Agent Base — everything there auto-loads here (v1's mistake; see dropped rules
+  in spec). The installer allowlist (`scripts/install-setup.mjs`) decides
+  what ships to projects; `base-setup` stays Agent Base-side only.
+- Do not move `.claude/skills/base-setup/` or rename `scripts/`,
   `templates/` — paths are load-bearing (one-prompt flow in
-  `docs/how-to/adoption-guide.md`, `materialize.mjs`, `install-adoption.mjs`).
-  Within `templates/`: `instructions/` is resolved by target path during
-  slot assembly (`materialize.mjs`), and `gitignore` is dotless so it is
-  never live — neither here nor when copied into targets.
-- Do not edit installed-asset copies in a target repo by hand during adoption —
+  `docs/how-to/setup-guide.md`, `apply.mjs`, `install-setup.mjs`).
+  Within `templates/`: `instructions/` is resolved by project path during
+  slot assembly (`apply.mjs`), and `gitignore` is dotless so it is
+  never live — neither here nor when copied into projects.
+- Do not edit installed-asset copies in a project repo by hand during setup —
   manifest + literals only (reproducibility gate).
 - No secrets in code; no new dependencies without discussion.
 
 ## More Context
 
-For on-demand workflows see `.claude/skills/` (adoption pipeline + validation).
+For on-demand workflows see `.claude/skills/` (setup pipeline + validation).
 For specialized roles see `.claude/agents/`.
 
 > **Cross-tool note:** `AGENTS.md` is canonical; `CLAUDE.md` imports it

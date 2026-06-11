@@ -35,13 +35,13 @@ function singleGiantSection() {
 // ── fixture catalog ─────────────────────────────────────────────────────────
 
 export const fixtures = {
-  'greenfield-empty': {
+  'starter-empty': {
     files: { 'README.md': '# New Project\n\nNothing here yet.\n' },
     sentinels: [],
     expect: { surfaces: 0, candidates: 0 },
   },
 
-  'greenfield-code': {
+  'starter-with-code': {
     files: {
       'README.md': '# Service\n\nA REST API for orders.\n',
       'package.json': '{ "name": "svc", "version": "1.0.0" }\n',

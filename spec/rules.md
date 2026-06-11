@@ -1,4 +1,4 @@
-# ai-kit rule catalog
+# Agent Base rule catalog
 
 **This file is the single source of truth for the target state.** The audit enforces
 every `mechanical` rule; the verifier rubric applies every `judgment` rule; docs
@@ -17,8 +17,8 @@ retained; decisions D-1..D-5 resolved)
 - "first line" = first line of the file, byte-position 0, no preceding blank lines.
 - *(compat)* rules apply only when the repo uses the nested-AGENTS.md compat option
   (see R-53).
-- *(conditional: code-review)* rules branch on the adoption answer recorded in the
-  kit marker (`.claude/ai-kit.json`, field `githubCodeReview: true|false`).
+- *(conditional: code-review)* rules branch on the setup answer recorded in the
+  Agent Base marker (`.claude/agent-base.json`, field `githubCodeReview: true|false`).
 
 ---
 
@@ -69,7 +69,7 @@ Conventions entry like "write clean code" (inferable, content-free).
 *(conditional: code-review)*
 If `githubCodeReview: true`: `.github/copilot-instructions.md` exists, is ≤ 4,000
 characters, and contains a pointer to AGENTS.md as the canonical file.
-If `false`: the file does not exist (content folded into AGENTS.md during adoption).
+If `false`: the file does not exist (content folded into AGENTS.md during setup).
 Rationale: GitHub.com code review reads only this file (first 4,000 chars); the
 cloud coding agent reads AGENTS.md natively.
 
@@ -267,11 +267,12 @@ exactly one `README.md`; no per-asset READMEs.
 AI configuration lives under `.claude/`. Under `.github/`, only
 `copilot-instructions.md` + `instructions/` are valid, and only when
 `githubCodeReview: true` (R-09). `.github/{skills,agents,prompts,chatmodes}` are
-findings (migration sources in brownfield).
+findings (migration sources in existing project).
 
 **R-50 · Maintenance surface installed** · mechanical · audit, warning
-Adopted repos contain the `ai-kit-check` skill and the one-line kit marker
-(`.claude/ai-kit.json`: kit version/sha, adoptedAt, githubCodeReview).
+Set-up projects contain the `base-check` skill and the Agent Base marker
+(`.claude/agent-base.json`: `standard`, `toolRepo`, `pin`, `lastSyncedAt`,
+`setupAt`, `githubCodeReview`).
 
 **R-51 · Rule-ID indirection** · mechanical · kit CI
 Kit docs, templates, and check metadata reference rules by R-ID only — never by
@@ -285,13 +286,13 @@ in consumer repos.)
 Besides the vendored-UPSTREAM exemption above, the audit implementation carries
 two narrow exemptions the rules would otherwise flag:
 
-- **Adoption-window tooling.** `.claude/ai-kit-adoption/`,
-  `.claude/skills/adopt-{inventory,plan,materialize,verify}/`, and
-  `.claude/agents/adoption-verifier.md` are skipped by the skills/agents/
-  reference checks: they exist only between install and the adopt-verify
-  teardown, and transient references (e.g. `.adoption/report.md`) are legal
+- **Setup-window tooling.** `.claude/agent-base-setup/`,
+  `.claude/skills/base-{inventory,plan,apply,verify}/`, and
+  `.claude/agents/setup-verifier.md` are skipped by the skills/agents/
+  reference checks: they exist only between install and the base-verify
+  teardown, and transient references (e.g. `.setup/report.md`) are legal
   there.
-- **Payload skeletons.** Files containing `<!-- ai-kit:slot:` markers are
+- **Payload skeletons.** Files containing `<!-- agent-base:slot:` markers are
   template payload, not live configuration, and are excluded from live-config
   checks.
 
@@ -309,8 +310,8 @@ manifest-role exemptions, migrate-specific permission allow-list entries,
 hash-manifest update flow. (Two narrow exemptions DID survive into v2 — see
 "Audit exemptions (implementation)" above.)
 
-## Adoption-flow inputs (not rules, recorded in the kit marker)
+## Setup-flow inputs (not rules, recorded in the Agent Base marker)
 
-- `githubCodeReview: true|false` — asked during adoption (D-3); drives R-09/R-49.
+- `githubCodeReview: true|false` — asked during setup (D-3); drives R-09/R-49.
 - Path-scoping choice: rules (default) or nested-compat — drives R-52/R-53 vs
   R-13..R-16 and the R-45 nested key.

@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { execPath } from 'node:process';
 
 const KIT_ROOT = new URL('..', import.meta.url).pathname;
-const NUDGE = join(KIT_ROOT, '.claude/skills/ai-kit-check/scripts/audit-nudge.mjs');
+const NUDGE = join(KIT_ROOT, '.claude/skills/base-check/scripts/audit-nudge.mjs');
 
 // Run the hook in `cwd`, pointing it at the kit via AI_KIT_HOME unless told not to.
 function runNudge(cwd, { withKit = true } = {}) {
@@ -16,7 +16,7 @@ function runNudge(cwd, { withKit = true } = {}) {
   if (withKit) env.AI_KIT_HOME = KIT_ROOT;
   else {
     delete env.AI_KIT_HOME;
-    // audit-nudge also probes ~/tools/ai-kit (a documented install location);
+    // audit-nudge also probes ~/tools/agent-base (a documented install location);
     // point HOME (and USERPROFILE, for Windows) at an empty temp dir so the
     // "no kit reachable" premise holds on machines with a real checkout there.
     fakeHome = mkdtempSync(join(tmpdir(), 'nudge-home-'));
@@ -35,12 +35,12 @@ test('always exits 0 and nudges when the repo has audit findings', () => {
     writeFileSync(join(root, 'placeholder.txt'), 'x');
     const res = runNudge(root);
     assert.equal(res.status, 0);
-    assert.match(res.stdout, /\[ai-kit\] AI-config audit found/);
-    assert.match(res.stdout, /ai-kit-check skill/);
+    assert.match(res.stdout, /\[agent-base\] AI-config audit found/);
+    assert.match(res.stdout, /base-check skill/);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
-test('silent on a clean adopted repo (use the kit-built starter)', () => {
+test('silent on a clean set-up project (use the kit-built starter)', () => {
   const starter = mkdtempSync(join(tmpdir(), 'nudge-clean-'));
   rmSync(starter, { recursive: true, force: true }); // build-starter needs an empty/new dir
   try {

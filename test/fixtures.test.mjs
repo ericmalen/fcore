@@ -13,12 +13,12 @@ import { runInventory } from '../scripts/inventory-extract.mjs';
 
 function runOn(name) {
   const repo = buildFixture(name);
-  const inv = runInventory({ root: repo, outDir: '.adoption', allowDirty: false });
+  const inv = runInventory({ root: repo, outDir: '.setup', allowDirty: false });
   return { repo, inv };
 }
 
 function nodeText(repo, id) {
-  return readFileSync(join(repo, '.adoption', 'nodes', id), 'utf8');
+  return readFileSync(join(repo, '.setup', 'nodes', id), 'utf8');
 }
 
 function allNodeText(repo, inv) {
@@ -57,8 +57,8 @@ for (const name of Object.keys(fixtures)) {
   });
 }
 
-test('greenfield fixtures produce empty inventories', () => {
-  for (const name of ['greenfield-empty', 'greenfield-code']) {
+test('starter fixtures produce empty inventories', () => {
+  for (const name of ['starter-empty', 'starter-with-code']) {
     const { repo, inv } = runOn(name);
     try {
       assert.equal(inv.files.length, 0, `${name}: expected no AI surfaces`);

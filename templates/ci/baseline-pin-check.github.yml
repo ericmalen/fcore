@@ -1,0 +1,35 @@
+# baseline-pin-check — warn/fail when the project's baseline pin is behind the
+# latest compatible Agent Base release. Optional companion to audit-strict.
+# Installed by setup for repos with GitHub CI when teams want Renovate-style nudges.
+#
+# Clone URL and pin come from .claude/agent-base.json (toolRepo, pin).
+# Shallow-clones at pin for sync-baseline; uses the kit's sync-baseline.mjs.
+name: baseline-pin-check
+on:
+  pull_request:
+    branches: ['**']
+  schedule:
+    - cron: '0 9 * * 1' # weekly Monday 09:00 UTC — optional nudge
+permissions:
+  contents: read
+jobs:
+  baseline-pin-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Check baseline pin (--check)
+        run: |
+          set -euo pipefail
+          MARKER=.claude/agent-base.json
+          test -f "$MARKER"
+          KIT_URL="$(node -e "process.stdout.write(require('./$MARKER').toolRepo)")"
+          PIN="$(node -e "process.stdout.write(require('./$MARKER').pin || ('v'+require('./$MARKER').standard))")"
+          git clone --depth 1 --branch "$PIN" "$KIT_URL" "${RUNNER_TEMP}/agent-base" || \
+            git clone --depth 1 "$KIT_URL" "${RUNNER_TEMP}/agent-base"
+          node "${RUNNER_TEMP}/agent-base/scripts/sync-baseline.mjs" --check --json || {
+            echo "::warning title=Agent Base baseline behind::Run sync-baseline --report locally or open a bot PR."
+            exit 1
+          }

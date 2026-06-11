@@ -1,6 +1,6 @@
 ---
 name: agent-instantiator
-description: Orchestration generation step — instantiates ONE agent definition (specialist or orchestrator) from its agent template via pure slot substitution from a validated blueprint entry, writing the result into the target repo's .claude/agents/. Zero authoring; the same blueprint always yields byte-identical output. Use when an orchestration blueprint.json has passed the handoff gate and its agents must be materialized into a target repo. Not for creating or designing new agents (use agent-creator), not for instantiating paired skills (use skill-instantiator), not for ai-kit adoption materialization, and not for any agent work outside orchestration generation.
+description: Orchestration generation step — instantiates ONE agent definition (specialist or orchestrator) from its agent template via pure slot substitution from a validated blueprint entry, writing the result into the project's .claude/agents/. Zero authoring; the same blueprint always yields byte-identical output. Use when an orchestration blueprint.json has passed the handoff gate and its agents must be materialized into a project. Not for creating or designing new agents (use agent-creator), not for instantiating paired skills (use skill-instantiator), not for agent-base setup materialization, and not for any agent work outside orchestration generation.
 ---
 
 # agent-instantiator
@@ -18,9 +18,9 @@ from its pin would produce a file no manifest version describes (C5).
 
 - A blueprint entry: one of `specialists[]` or the `orchestrator` from a
   validated `docs/orchestration/blueprint.json` in the target.
-- The target repo path.
+- The project path.
 - The entry's template: `templates/orchestration/agents/<templateId>.template.md`
-  in the kit clone.
+  in the Agent Base clone.
 
 ## Procedure
 
@@ -38,7 +38,7 @@ from its pin would produce a file no manifest version describes (C5).
    [dispatch-order.mjs](../../../scripts/lib/orchestration/dispatch-order.mjs).
    Specialists never get it (an unused slot is an error).
 
-2. Instantiate the template strictly. From the kit clone root:
+2. Instantiate the template strictly. From the Agent Base clone root:
 
    ```
    node --input-type=module -e '

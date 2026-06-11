@@ -3,7 +3,7 @@
 //
 // Ships with the `docs` skill so the restructure procedure has a concrete
 // link check in any adopted repo (the kit's own docs-consistency tool stays
-// kit-side; the adoption audit only covers AI-config surfaces, not docs/).
+// kit-side; the setup audit only covers AI-config surfaces, not docs/).
 //
 // Walks *.md under the repo (skipping junk dirs), resolves each relative link
 // target against the filesystem, and reports the ones that don't exist.
@@ -18,7 +18,7 @@ import { join, dirname, resolve, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const SKIP_DIRS = new Set([
-  '.git', 'node_modules', '.adoption', 'dist', 'build', 'coverage',
+  '.git', 'node_modules', '.setup', 'dist', 'build', 'coverage',
   '.next', '.venv', 'target', 'out', '.turbo', '.cache',
 ]);
 

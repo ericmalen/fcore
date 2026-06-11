@@ -19,7 +19,7 @@ test("gate catches a seeded banned term and a seeded broken link", () => {
     mkdirSync(join(root, "docs"), { recursive: true });
     writeFileSync(
       join(root, "docs", "guide.md"),
-      "Run `ai-kit init` to start.\n\nSee [the plan](./missing.md).\n"
+      "Run `agent-base init` to start.\n\nSee [the plan](./missing.md).\n"
     );
     const findings = run(root);
     const checks = findings.map((f) => f.check).sort();
@@ -45,11 +45,11 @@ test("consumer-shipped templates beyond md/json are scanned (ci yml + gitignore)
   const root = mkdtempSync(join(tmpdir(), "dc-tpl-"));
   try {
     mkdirSync(join(root, "templates", "ci"), { recursive: true });
-    writeFileSync(join(root, "templates", "ci", "gate.yml"), "# wire up bin/ai-kit.mjs here\n");
-    writeFileSync(join(root, "templates", "gitignore"), ".ai-kit-migration-routing\n");
+    writeFileSync(join(root, "templates", "ci", "gate.yml"), "# wire up bin/agent-base.mjs here\n");
+    writeFileSync(join(root, "templates", "gitignore"), ".agent-base-migration-routing\n");
     const findings = run(root);
     const terms = findings.map((f) => f.term).sort();
-    assert.deepEqual(terms, [".ai-kit-migration-routing", "bin/ai-kit.mjs"]);
+    assert.deepEqual(terms, [".agent-base-migration-routing", "bin/agent-base.mjs"]);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

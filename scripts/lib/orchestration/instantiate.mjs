@@ -1,25 +1,25 @@
 // instantiate.mjs — strict inline slot substitution for orchestration
 // templates (DD-5, C3).
 //
-// Same marker vocabulary as adoption (<!-- ai-kit:slot:name -->, kebab-case)
+// Same marker vocabulary as setup (<!-- agent-base:slot:name -->, kebab-case)
 // but a different operation: scripts/lib/template.mjs does line-anchored
 // block ROUTING with lenient empty-string fill and stays untouched; this
 // module does inline scalar SUBSTITUTION — markers may sit mid-line, inside
 // sentences, table cells, or frontmatter values — with STRICT fill:
 //   - every marker in the template must have a slot value (unfilled → error)
 //   - every slot value must match a marker (unused → error)
-//   - any ai-kit:slot comment that is not a well-formed kebab-case marker
+//   - any agent-base:slot comment that is not a well-formed kebab-case marker
 //     is a template defect (malformed → error)
 // Error-string-array reporting per scripts/lib/manifest.mjs validateShape;
 // content is null whenever errors are non-empty — never a partial fill.
 
-export const INLINE_SLOT_RE = /<!--\s*ai-kit:slot:([a-z0-9-]+)\s*-->/g;
+export const INLINE_SLOT_RE = /<!--\s*agent-base:slot:([a-z0-9-]+)\s*-->/g;
 
-// Any HTML comment mentioning ai-kit:slot — superset of INLINE_SLOT_RE used
+// Any HTML comment mentioning agent-base:slot — superset of INLINE_SLOT_RE used
 // to catch malformed markers (bad casing, stray characters) that strict
 // matching would silently leave in the output.
-const ANY_SLOT_COMMENT_RE = /<!--[^>]*ai-kit:slot[^>]*-->/g;
-const WELL_FORMED_RE = /^<!--\s*ai-kit:slot:[a-z0-9-]+\s*-->$/;
+const ANY_SLOT_COMMENT_RE = /<!--[^>]*agent-base:slot[^>]*-->/g;
+const WELL_FORMED_RE = /^<!--\s*agent-base:slot:[a-z0-9-]+\s*-->$/;
 
 const isNonEmptyString = (v) => typeof v === 'string' && v.trim() !== '';
 const isPlainObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);

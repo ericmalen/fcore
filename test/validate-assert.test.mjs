@@ -1,5 +1,5 @@
-// F-2 regression: validate-assert reads the adoption report from git history
-// when adopt-verify has removed .adoption/ before merge. The original F-2 fix
+// F-2 regression: validate-assert reads the setup report from git history
+// when base-verify has removed .setup/ before merge. The original F-2 fix
 // used `git log -1 -- <path>`, which returns the DELETION commit; the follow-up
 // `git show <deletion>:<path>` then fails, leaving the report empty so every
 // dropped-but-documented sentinel reads as SILENT-LOSS. The guard is
@@ -24,8 +24,8 @@ function git(dir, ...args) {
   return (r.stdout ?? '').trim();
 }
 
-// Build a repo in the state adopt-verify leaves behind: the report was
-// generated and committed, then .adoption/ was git-rm'd in a later commit.
+// Build a repo in the state base-verify leaves behind: the report was
+// generated and committed, then .setup/ was git-rm'd in a later commit.
 // Sentinels live ONLY in the report's drop section — never in the working
 // tree — so the report read is the only thing standing between "accounted"
 // and a false SILENT-LOSS.
@@ -38,19 +38,19 @@ function repoAfterMergePrep() {
   // Working tree: AI surfaces with NO sentinels in them.
   writeFileSync(join(dir, 'AGENTS.md'), '# Project\n\nGeneric assembled content.\n');
 
-  // Adoption report documenting every sentinel as a reviewed drop.
-  mkdirSync(join(dir, '.adoption'), { recursive: true });
+  // Setup report documenting every sentinel as a reviewed drop.
+  mkdirSync(join(dir, '.setup'), { recursive: true });
   const dropBlock = fixtures[FIXTURE].sentinels
     .map((s) => `### node \`${s}\`\n**Reason:** documented drop\n\n\`\`\`\n${s} — dropped with review\n\`\`\`\n`)
     .join('\n');
-  writeFileSync(join(dir, '.adoption', 'report.md'),
-    `# Adoption review report\n\n## 1. Dropped content\n\n${dropBlock}\n`);
+  writeFileSync(join(dir, '.setup', 'report.md'),
+    `# Setup review report\n\n## 1. Dropped content\n\n${dropBlock}\n`);
   git(dir, 'add', '-A');
-  git(dir, 'commit', '-qm', 'chore(adoption): report + converged gates');
+  git(dir, 'commit', '-qm', 'chore(setup): report + converged gates');
 
-  // adopt-verify merge prep: remove the adoption tooling in its own commit.
-  git(dir, 'rm', '-q', '-r', '.adoption');
-  git(dir, 'commit', '-qm', 'chore(adoption): remove adoption-time tooling');
+  // base-verify merge prep: remove the setup tooling in its own commit.
+  git(dir, 'rm', '-q', '-r', '.setup');
+  git(dir, 'commit', '-qm', 'chore(setup): remove setup-time tooling');
   return dir;
 }
 
@@ -61,7 +61,7 @@ function runAssert(dir) {
   return JSON.parse(r.stdout);
 }
 
-test('F-2: report read survives the .adoption deletion commit (no false SILENT-LOSS)', () => {
+test('F-2: report read survives the .setup deletion commit (no false SILENT-LOSS)', () => {
   const dir = repoAfterMergePrep();
   try {
     const res = runAssert(dir);
@@ -79,7 +79,7 @@ test('F-2: report read survives the .adoption deletion commit (no false SILENT-L
 });
 
 test('F-2: genuinely missing report is flagged inconclusive, not reported as silent loss', () => {
-  // No .adoption/ ever committed → the fallback finds no Add/Modify commit.
+  // No .setup/ ever committed → the fallback finds no Add/Modify commit.
   const dir = mkdtempSync(join(tmpdir(), 'aikit-f2-noreport-'));
   git(dir, 'init', '-q', '-b', 'main');
   git(dir, 'config', 'user.email', 't@t');

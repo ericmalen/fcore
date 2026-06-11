@@ -1,15 +1,14 @@
 ---
 name: skill-instantiator
-description: Orchestration generation step — for one blueprint specialist, looks up its paired skill templates in the kit's template registry (skills whose pairsWith matches the specialist's templateId) and instantiates each via pure slot substitution, writing SKILL.md files into the target repo's .claude/skills/. Zero authoring; the same blueprint always yields byte-identical output. Use when an orchestration blueprint.json has passed the handoff gate and a specialist's paired skills must be materialized into a target repo. Not for creating or designing new skills (use skill-creator), not for instantiating agents (use agent-instantiator), not for ai-kit adoption materialization, and not for any skill work outside orchestration generation.
+description: Orchestration generation step — for one blueprint specialist, instantiates each skill listed in entry.pairedSkills via pure slot substitution from the kit template registry, writing SKILL.md files into the project's .claude/skills/. Zero authoring; the same blueprint always yields byte-identical output. Use when an orchestration blueprint.json has passed the handoff gate and a specialist's paired skills must be materialized into a project. Not for creating or designing new skills (use skill-creator), not for instantiating agents (use agent-instantiator), not for agent-base setup materialization, and not for any skill work outside orchestration generation.
 ---
 
 # skill-instantiator
 
 Pure substitution, zero authoring: a blueprint specialist entry plus a target
 path in, that specialist's paired skill files out. Pairing comes from
-[template-registry.json](../../../templates/orchestration/template-registry.json)
-— skills whose `pairsWith` equals `entry.templateId`. Zero pairs is normal:
-report "none" and stop. The engine is
+`entry.pairedSkills` on the blueprint specialist — an explicit list of skill
+ids from synthesis. Zero pairs is normal: report "none" and stop. The engine is
 [instantiate.mjs](../../../scripts/lib/orchestration/instantiate.mjs) (strict
 inline slot substitution). Each template's sha256 pin in the registry is
 verified before substituting — generating from a template that drifted from
@@ -18,9 +17,9 @@ its pin would produce a file no manifest version describes (C5).
 ## Inputs
 
 - A specialist entry from a validated `docs/orchestration/blueprint.json`.
-- The target repo path.
+- The project path.
 - Each paired skill's template:
-  `templates/orchestration/skills/<skillId>.template.md` in the kit clone.
+  `templates/orchestration/skills/<skillId>.template.md` in the Agent Base clone.
 
 ## Procedure
 
@@ -28,7 +27,7 @@ its pin would produce a file no manifest version describes (C5).
    exactly the `layer-path`, `stack`, `test-cmd`, and `conventions` slots;
    strict substitution rejects anything missing or extra.
 2. Instantiate every paired skill; validate all before writing any. From the
-   kit clone root:
+   Agent Base clone root:
 
    ```
    node --input-type=module -e '
@@ -42,10 +41,11 @@ its pin would produce a file no manifest version describes (C5).
    const regPath = "templates/orchestration/template-registry.json";
    if (!existsSync(regPath)) { console.error(`missing ${regPath}`); process.exit(1); }
    const reg = JSON.parse(readFileSync(regPath, "utf8"));
-   const paired = Object.keys(reg.skills ?? {}).filter((id) => reg.skills[id].pairsWith === entry.templateId);
-   if (!paired.length) { console.log(`no skills pair with ${entry.templateId} — nothing to write`); process.exit(0); }
+   const paired = entry.pairedSkills ?? [];
+   if (!paired.length) { console.log(`no pairedSkills for ${agentName} — nothing to write`); process.exit(0); }
    const outputs = []; const fails = [];
    for (const skillId of paired) {
+     if (!reg.skills?.[skillId]) { fails.push(`skill ${skillId}: not in registry`); continue; }
      const tplPath = `templates/orchestration/skills/${skillId}.template.md`;
      if (!existsSync(tplPath)) { fails.push(`missing template ${tplPath}`); continue; }
      const source = readFileSync(tplPath, "utf8");

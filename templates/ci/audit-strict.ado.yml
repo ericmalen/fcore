@@ -1,13 +1,8 @@
-# audit-strict — adopted repos must stay conformant to the ai-kit target state.
-# Installed by adoption for repos with Azure DevOps CI (alongside docs-impact).
-# Place under `.azuredevops/`. Add as a PR build validation policy on the
-# target branch.
-#
-# The audit engine is NOT vendored into adopted repos (adopt-verify removes the
-# adoption tooling before merge), so CI shallow-clones the kit. The clone URL is
-# read from .claude/ai-kit.json (field "kitRepo"). For a PRIVATE kit repo, grant
-# the build service read access to it, or inject a PAT into the clone URL.
-trigger: none
+# audit-strict — set-up projects must stay conformant to the Agent Base standard layout.
+# Azure DevOps variant. Clones toolRepo at marker.pin before running audit --strict.
+trigger:
+  branches:
+    include: ['*']
 pr:
   branches:
     include: ['*']
@@ -15,13 +10,15 @@ pool:
   vmImage: ubuntu-latest
 steps:
   - checkout: self
-    fetchDepth: 1
   - task: NodeTool@0
     inputs:
       versionSpec: '20.x'
   - bash: |
       set -euo pipefail
-      KIT_URL="$(node -e "process.stdout.write(require('./.claude/ai-kit.json').kitRepo)")"
-      git clone --depth 1 "$KIT_URL" "$(Agent.TempDirectory)/ai-kit"
-      node "$(Agent.TempDirectory)/ai-kit/scripts/audit.mjs" --root . --strict
-    displayName: audit --strict (clone kit from marker)
+      MARKER=.claude/agent-base.json
+      KIT_URL="$(node -e "process.stdout.write(require('./$MARKER').toolRepo)")"
+      PIN="$(node -e "const m=require('./$MARKER'); process.stdout.write(m.pin||('v'+m.standard))")"
+      git clone --depth 1 --branch "$PIN" "$KIT_URL" "$(Agent.TempDirectory)/agent-base" || \
+        git clone --depth 1 "$KIT_URL" "$(Agent.TempDirectory)/agent-base"
+      node "$(Agent.TempDirectory)/agent-base/scripts/audit.mjs" --root . --strict
+    displayName: Clone Agent Base at pin and audit (--strict)

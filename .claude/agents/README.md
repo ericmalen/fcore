@@ -16,13 +16,29 @@ in Claude Code it is always invoked as a subagent.
 ## What lives in this folder
 
 - [`docs-auditor.md`](./docs-auditor.md) — heavy documentation audit/migration
-  planner. Permanent baseline: installed into every adopted repo.
-- [`adoption-verifier.md`](./adoption-verifier.md) — fresh-context verifier for
-  adoption phase 4. Adoption-time only: installed for the adoption window,
+  planner. Permanent baseline: installed into every set-up project.
+- [`setup-verifier.md`](./setup-verifier.md) — fresh-context verifier for
+  setup phase 4. Adoption-time only: installed for the setup window,
   removed again before merge.
 - [`example-reviewer.md`](./example-reviewer.md) — annotated example of a
   read-only reviewer. Kit-side reference to copy from; NOT installed into
   targets.
+
+**Orchestration meta-agents** — discovery, generation, and kit health. Kit-side
+only (never installed into targets). Entry point: `/base-orchestrate` in an
+open Agent Base clone. How-to:
+[`docs/how-to/orchestration-guide.md`](../../docs/how-to/orchestration-guide.md).
+
+- [`repo-analyst.md`](./repo-analyst.md) — profiles a project into
+  `docs/orchestration/repo-profile.json`.
+- [`requirements-interviewer.md`](./requirements-interviewer.md) — gap-driven
+  policy Q&A → `decisions.json` (+ rendered `decisions.md`).
+- [`plan-synthesizer.md`](./plan-synthesizer.md) — profile + decisions →
+  `blueprint.json`, gated by `handoff-validator`.
+- [`scaffolder.md`](./scaffolder.md) — blueprint → generated agents, skills,
+  and docs in the target.
+- [`evaluator.md`](./evaluator.md) — pre-distribution gate and periodic
+  review (evals, drift, handoff analytics).
 
 ## When to create an agent
 
@@ -66,7 +82,7 @@ Markdown links for progressive disclosure).
 
 ## Flat orchestration (preferred default)
 
-ai-kit prefers flat orchestration: orchestrators call every specialist
+agent-base prefers flat orchestration: orchestrators call every specialist
 directly. Nesting (a subagent invoking subagents) is possible in both tools
 but compounds token cost and is harder to debug — reach for it only when a
 specialist genuinely needs its own helpers. See
@@ -86,12 +102,12 @@ New agents live in this same folder. The steps mirror the skills workflow:
    the role statement, procedures, tool list, and lazy-load `## Documents`
    section.
 
-2. **Check** — run the `ai-kit-check` skill; agent conventions are enforced
+2. **Check** — run the `base-check` skill; agent conventions are enforced
    by rule ID (R-27..R-37).
 
-In the kit repo itself, `adoption-verifier` and `docs-auditor` are dual-role:
+In the kit repo itself, `setup-verifier` and `docs-auditor` are dual-role:
 loaded while developing the kit AND installed path-for-path into adopted
-repos by `scripts/install-adoption.mjs` (the installer allowlist decides what
+repos by `scripts/install-setup.mjs` (the installer allowlist decides what
 ships; `example-reviewer` stays kit-side).
 
 ## Filename convention

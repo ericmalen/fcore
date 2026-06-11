@@ -277,6 +277,16 @@ test('B8 golden: mini synthesized blueprint validates and selects the generic te
   assert.ok(generic.length >= 1, 'mini blueprint must select generic-specialist at least once');
 });
 
+test('validateBlueprint: duplicate pairedSkills across specialists rejected', () => {
+  const bp = loadFixture('maxi-repo.synthesized.blueprint.json');
+  const clone = JSON.parse(JSON.stringify(bp.specialists.find((s) => s.name === 'api-engineer')));
+  clone.name = 'api2-engineer';
+  bp.specialists.push(clone);
+  assert.deepEqual(validateBlueprint(bp), [
+    'pairedSkills: duplicate skill "api-testing" across specialists — assign each skill at most once',
+  ]);
+});
+
 // ── validateHandoffLog (A5) ─────────────────────────────────────────────────
 
 test('validateHandoffLog: success fixture with optional capture fields validates clean', () => {

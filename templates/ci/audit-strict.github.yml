@@ -1,11 +1,9 @@
-# audit-strict — adopted repos must stay conformant to the ai-kit target state.
-# Installed by adoption for repos with GitHub CI (alongside docs-impact).
-# Runs the kit's audit against this repo with --strict (every finding fails).
+# audit-strict — set-up projects must stay conformant to the Agent Base standard layout.
+# Installed by setup for repos with GitHub CI (alongside docs-impact).
+# Runs the kit audit at the pinned release (--strict).
 #
-# The audit engine is NOT vendored into adopted repos (adopt-verify removes the
-# adoption tooling before merge), so CI shallow-clones the kit. The clone URL is
-# read from .claude/ai-kit.json (field "kitRepo"). For a PRIVATE kit repo, give
-# the job read access (e.g. a PAT in secrets.KIT_TOKEN; see the commented line).
+# Shallow-clones toolRepo at marker.pin (fallback: v{standard}). Private kit?
+# Use secrets.KIT_TOKEN — see commented line below.
 name: audit-strict
 on:
   pull_request:
@@ -22,11 +20,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Clone ai-kit and audit (--strict)
+      - name: Clone Agent Base at pin and audit (--strict)
         run: |
           set -euo pipefail
-          KIT_URL="$(node -e "process.stdout.write(require('./.claude/ai-kit.json').kitRepo)")"
+          MARKER=.claude/agent-base.json
+          KIT_URL="$(node -e "process.stdout.write(require('./$MARKER').toolRepo)")"
+          PIN="$(node -e "const m=require('./$MARKER'); process.stdout.write(m.pin||('v'+m.standard))")"
           # Private kit? prepend credentials, e.g.:
           # KIT_URL="$(echo "$KIT_URL" | sed "s#https://#https://x-token:${{ secrets.KIT_TOKEN }}@#")"
-          git clone --depth 1 "$KIT_URL" "${RUNNER_TEMP}/ai-kit"
-          node "${RUNNER_TEMP}/ai-kit/scripts/audit.mjs" --root . --strict
+          git clone --depth 1 --branch "$PIN" "$KIT_URL" "${RUNNER_TEMP}/agent-base" || \
+            git clone --depth 1 "$KIT_URL" "${RUNNER_TEMP}/agent-base"
+          node "${RUNNER_TEMP}/agent-base/scripts/audit.mjs" --root . --strict
