@@ -405,20 +405,30 @@ const VSCODE_REQUIRED = {
   'explorer.fileNesting.enabled': true,
 };
 
-// Negation-aware: is .vscode/settings.json effectively gitignored? A later
-// "!.vscode/settings.json" un-ignores it, so order matters (last match wins).
+// Is .vscode/settings.json effectively gitignored? Models git's rule that a
+// file CANNOT be re-included if a parent directory is excluded — so a bare
+// ".vscode/" (directory exclusion) ignores the file even with a later
+// "!.vscode/settings.json". Only a contents glob (".vscode/*") leaves the dir
+// itself un-excluded so a file negation can take effect.
 function vscodeSettingsIgnored(gi) {
   const target = '.vscode/settings.json';
+  const lines = gi.split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
+  const parse = (l) => {
+    const neg = l.startsWith('!');
+    return { neg, pat: (neg ? l.slice(1) : l).replace(/^\//, '').replace(/\/$/, '') };
+  };
+  // Step 1: parent-directory exclusion is sticky — a file negation can't undo it.
+  let dirExcluded = false;
+  for (const l of lines) {
+    const { neg, pat } = parse(l);
+    if (pat === '.vscode' || pat === '**/.vscode') dirExcluded = !neg;
+  }
+  if (dirExcluded) return true;
+  // Step 2: file-level patterns, last match wins (negations effective here).
   let ignored = false;
-  for (const raw of gi.split('\n')) {
-    let l = raw.trim();
-    if (!l || l.startsWith('#')) continue;
-    let neg = false;
-    if (l.startsWith('!')) { neg = true; l = l.slice(1); }
-    const pat = l.replace(/^\//, '').replace(/\/$/, '');
-    const matches = pat === target || pat === '.vscode' || pat === '**/.vscode'
-      || pat === '**/settings.json' || target.startsWith(pat + '/');
-    if (matches) ignored = !neg;
+  for (const l of lines) {
+    const { neg, pat } = parse(l);
+    if (pat === target || pat === '.vscode/*' || pat === '**/settings.json') ignored = !neg;
   }
   return ignored;
 }
@@ -467,7 +477,7 @@ export function checkVscodeSettings(ctx) {
     const gi = readSafe(join(root, '.gitignore'));
     if (gi != null && vscodeSettingsIgnored(gi)) {
       out.push(F('R-45', 'warning', rel,
-        '.vscode/settings.json is gitignored — it passes on disk but will not be committed; add "!.vscode/settings.json" or stop ignoring .vscode/.'));
+        '.vscode/settings.json is gitignored — it passes on disk but will not be committed; un-ignore it with ".vscode/*" + "!.vscode/settings.json" (a file negation under a bare ".vscode/" does NOT work), or stop ignoring .vscode/.'));
     }
   }
   return out;

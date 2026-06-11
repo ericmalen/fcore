@@ -453,14 +453,14 @@ test('R-23: a path-shaped link LABEL is not flagged as a bare sibling path', () 
 
 // ── R-45 (A4): a gitignored .vscode/settings.json passes on disk but won't ship ─
 
-test('R-45: gitignored .vscode/settings.json fires; an un-ignore negation clears it', () => {
-  const ignored = makeRepo({ ...CONFORMANT, '.gitignore': '.claude/settings.local.json\n.vscode/\n' });
-  const negated = makeRepo({ ...CONFORMANT, '.gitignore': '.claude/settings.local.json\n.vscode/\n!.vscode/settings.json\n' });
-  try {
-    assert.equal(of(audit({ root: ignored }), 'R-45').filter((f) => /gitignored/.test(f.message)).length, 1);
-    assert.equal(of(audit({ root: negated }), 'R-45').filter((f) => /gitignored/.test(f.message)).length, 0);
-  } finally {
-    rmSync(ignored, { recursive: true, force: true });
-    rmSync(negated, { recursive: true, force: true });
-  }
+test('R-45: gitignored .vscode/settings.json fires; only a ".vscode/*"+negation clears it', () => {
+  const hit = (gi) => of(audit({ root: makeRepo({ ...CONFORMANT, '.gitignore': gi }) }), 'R-45')
+    .filter((f) => /gitignored/.test(f.message)).length;
+  const base = '.claude/settings.local.json\n';
+  // bare ".vscode/" excludes the directory — git can't re-include the file, so
+  // a "!.vscode/settings.json" negation does NOT clear it (still fires).
+  assert.equal(hit(base + '.vscode/\n'), 1, 'bare .vscode/ → fires');
+  assert.equal(hit(base + '.vscode/\n!.vscode/settings.json\n'), 1, 'dir exclusion + file negation still ignored by git → fires');
+  // contents glob leaves the dir itself un-excluded, so the negation works.
+  assert.equal(hit(base + '.vscode/*\n!.vscode/settings.json\n'), 0, '.vscode/* + negation → committable → clean');
 });
