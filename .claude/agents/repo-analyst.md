@@ -15,19 +15,15 @@ never decisions or blueprints.
 2. Read the profile shape from `scripts/lib/orchestration/schemas.mjs`
    (`validateRepoProfile`, A1) and the two golden fixtures in
    `test/fixtures/orchestration/*.profile.json` as worked examples.
-3. Inspect the target (evidence only, no guessing):
-   - `name`, `type`, `packageManager`: root manifest, workspace config,
-     lockfiles. `monorepo` iff multiple packages/workspaces, else
-     `single-package`.
-   - `layers[]`: one entry per package/workspace (single entry, `path: "."`,
-     for single-package). `stack` from actual dependencies; `testCmd`/`buildCmd`
-     from declared scripts — a command you cannot find is `null`, plus a
-     `gaps[]` entry.
-   - `ci`: CI config files (e.g. `.github/workflows/`, `azure-pipelines.yml`);
-     `null` if none, plus a `gaps[]` entry.
-   - `conventions`: naming from observed file names; branching and commitStyle
-     from `git branch -a` / `git log` samples and contributor docs; any field
-     without evidence is `null`, plus a `gaps[]` entry.
+3. Inspect the target by running the three discovery skills in order, each
+   against the target path (evidence only, no guessing — every undetected
+   value is `null` where the schema allows, plus a `gaps[]` entry):
+   - `structure-detector` (B1): `name`, `type`, `packageManager`, `layers[]`
+     with stacks and test/build commands.
+   - `dependency-mapper` (B2): internal edges and key external deps; refines
+     layer `stack` strings. "No internal dependencies" is a normal result.
+   - `convention-detector` (B3): `conventions.*` and `ci`, each with one
+     line of evidence.
 4. Assemble the profile (`schemaVersion: 1`) and validate it BEFORE writing,
    from the kit clone:
 
@@ -59,6 +55,9 @@ never decisions or blueprints.
 
 ## Documents
 
+.claude/skills/structure-detector/SKILL.md
+.claude/skills/dependency-mapper/SKILL.md
+.claude/skills/convention-detector/SKILL.md
 scripts/lib/orchestration/schemas.mjs
 test/fixtures/orchestration/maxi-repo.profile.json
 test/fixtures/orchestration/mini-repo.profile.json
