@@ -36,8 +36,16 @@ for schema and worked examples before authoring.
      AGENTS.md size cap). Few, small, justified — every merged byte is
      judgment-checked, not construction-guaranteed.
    - `drop` needs a true, specific reason; the human reads the full text.
+   - **Contradictions are NOT grounds for a drop.** When two sources give
+     conflicting rules (e.g. AGENTS.md "tabs" vs CLAUDE.md "spaces"), route
+     BOTH verbatim and name the conflict in the USER GATE 1 prose for the owner
+     to reconcile. Never let the tool pick a winner — "superseded by the
+     canonical/newer file" is the tool adjudicating content it cannot judge
+     (you cannot know which side is stale). Reconciling contradictions is the
+     owner's call, not a routing decision.
    - Duplicates: route ONE instance; `drop` the rest as "duplicate of <node>"
-     only after verifying byte-identity.
+     only after verifying byte-identity. (A duplicate is byte-identical; a
+     contradiction is two DIFFERENT rules — never treat one as the other.)
    - Settings files: `jsonMerges` — never hand-merge JSON.
    - Wiring (shim, .gitignore, marker, READMEs): `installs`. (ai-kit-check
      is a permanent baseline skill installed by install-adoption, not the manifest.)

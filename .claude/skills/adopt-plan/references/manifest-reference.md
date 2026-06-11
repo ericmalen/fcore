@@ -9,7 +9,7 @@ Schema v1. Top level: `{ schemaVersion: 1, entries: [], jsonMerges: [], installs
 | move | `{ node, op:"move", target, slot? }` | verbatim relocation (DEFAULT) |
 | split | `{ node, op:"split", ranges:[{lines:[s,e], target, slot?} \| {lines:[s,e], op:"drop", reason}] }` | one node → several targets; ranges are 1-based over the NODE's lines and must tile it exactly |
 | keep-file | `{ file, op:"keep-file" }` | file already correct; covers all its nodes |
-| drop | `{ node, op:"drop", reason }` | content that should not survive; human reads full text |
+| drop | `{ node, op:"drop", reason }` | content that should not survive; human reads full text. NOT for contradictions — conflicting rules from two sources are both routed and flagged at USER GATE 1, never resolved by dropping a side |
 | merge | `{ node, op:"merge", literal, target, slot?, note? }` | rewrite — node replaced by `.adoption/literals/<literal>`; several nodes may share one literal (emitted once); verifier judges side-by-side |
 | supersede | `{ node, op:"supersede", catalogSkill, note? }` | bespoke content replaced by a catalog skill |
 | out-of-scope | `{ file, op:"out-of-scope", reason }` | sweep candidate that is NOT AI instructions |
