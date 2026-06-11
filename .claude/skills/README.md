@@ -38,13 +38,16 @@ Two groups, both loaded here because both are wanted while developing the kit:
 
 **Agent Base tooling** — the setup engine and self-checks. The four `base-*`
 setup phase skills and `base-check` are installed into every project by
-`scripts/install-setup.mjs`; TWO skills are deliberately kit-side only and
-never installed (installer allowlist): `base-setup`, `base-orchestrate`,
-and `validate-setup`.
+`scripts/install-setup.mjs`; FOUR skills are deliberately kit-side only and
+never installed (installer allowlist): `base-setup`, `base-refresh`,
+`base-orchestrate`, and `validate-setup`.
 
 - [`base-setup`](./base-setup/SKILL.md) — the setup entry point and
   orchestrator. Run from this Agent Base clone against a project path. Kit-side
   only.
+- [`base-refresh`](./base-refresh/SKILL.md) — baseline upgrade loop for
+  set-up projects (sync-baseline report → upgrade → audit). Run from this
+  Agent Base clone against a project path. Kit-side only.
 - [`base-orchestrate`](./base-orchestrate/SKILL.md) — orchestration entry
   point (discovery → generation). Run from this Agent Base clone against a set-up
   project path. Kit-side only.

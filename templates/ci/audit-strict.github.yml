@@ -28,6 +28,8 @@ jobs:
           PIN="$(node -e "const m=require('./$MARKER'); process.stdout.write(m.pin||('v'+m.standard))")"
           # Private kit? prepend credentials, e.g.:
           # KIT_URL="$(echo "$KIT_URL" | sed "s#https://#https://x-token:${{ secrets.KIT_TOKEN }}@#")"
-          git clone --depth 1 --branch "$PIN" "$KIT_URL" "${RUNNER_TEMP}/agent-base" || \
-            git clone --depth 1 "$KIT_URL" "${RUNNER_TEMP}/agent-base"
+          git clone --depth 1 --branch "$PIN" "$KIT_URL" "${RUNNER_TEMP}/agent-base" || {
+            echo "::error title=Agent Base pin clone failed::Could not clone $KIT_URL at tag $PIN. Check the tag exists and the runner can reach the repo."
+            exit 1
+          }
           node "${RUNNER_TEMP}/agent-base/scripts/audit.mjs" --root . --strict

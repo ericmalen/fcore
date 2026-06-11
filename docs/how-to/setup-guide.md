@@ -82,7 +82,12 @@ your repo is untouched until YOU merge.
   `docs`, `git-conventions`, `skill-creator`, and `agent-creator` skills;
   the orchestration lifecycle skills `retro`, `log-report`, and `eval-runner`;
   and the `docs-auditor` agent.
-- Updating to a newer kit: re-run the setup flow; your current state is
-  just new existing project input, protected by the same machinery.
+- Updating to a newer Agent Base release: use baseline sync, not a re-setup.
+  `sync-baseline --check` flags a stale pin; `--report` shows the plan;
+  `--upgrade` applies it — see [baseline-sync](./baseline-sync.md). The
+  `base-refresh` skill (run from an Agent Base clone, like `base-setup`)
+  walks the full loop for you. Re-run the full setup flow only for
+  major/breaking changes to routing or layout; your current state is just
+  new existing-project input, protected by the same machinery.
 - Review the diff with move-detection on:
   `git diff main...agent-base-setup --color-moved=zebra --find-copies-harder`

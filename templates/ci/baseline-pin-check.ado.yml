@@ -1,0 +1,48 @@
+# baseline-pin-check — warn/fail when the project's baseline pin is behind the
+# latest compatible Agent Base release. Azure DevOps variant of
+# baseline-pin-check.github.yml. Optional companion to audit-strict.
+#
+# Clone URL and pin come from .claude/agent-base.json (toolRepo, pin).
+# Shallow-clones at pin for sync-baseline; a failed pin clone fails the build
+# (never falls back to an unpinned clone).
+# Private Agent Base repo? Inject credentials via a secret pipeline variable —
+# see the commented line below.
+# Default is fail-when-behind; for a warn-only nudge, drop the final `exit 1`.
+trigger:
+  branches:
+    include: ['*']
+# NOTE: Azure Repos Git ignores YAML `pr:` triggers — PR validation requires a
+# branch build-validation policy pointing at this pipeline.
+pr:
+  branches:
+    include: ['*']
+schedules:
+  - cron: '0 9 * * 1' # weekly Monday 09:00 UTC — optional nudge
+    displayName: weekly baseline pin check
+    branches:
+      include: [main]
+    always: true
+pool:
+  vmImage: ubuntu-latest
+steps:
+  - checkout: self
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '20.x'
+  - bash: |
+      set -euo pipefail
+      MARKER=.claude/agent-base.json
+      test -f "$MARKER"
+      KIT_URL="$(node -e "process.stdout.write(require('./$MARKER').toolRepo)")"
+      PIN="$(node -e "const m=require('./$MARKER'); process.stdout.write(m.pin||('v'+m.standard))")"
+      # Private Agent Base repo? prepend credentials from a secret variable, e.g.:
+      # KIT_URL="$(echo "$KIT_URL" | sed "s#https://#https://x-token:${AGENT_BASE_TOKEN}@#")"
+      git clone --depth 1 --branch "$PIN" "$KIT_URL" "$(Agent.TempDirectory)/agent-base" || {
+        echo "##vso[task.logissue type=error]Could not clone $KIT_URL at tag $PIN — check the tag exists and the agent can reach the repo."
+        exit 1
+      }
+      node "$(Agent.TempDirectory)/agent-base/scripts/sync-baseline.mjs" --check --json || {
+        echo "##vso[task.logissue type=warning]Agent Base baseline behind — run sync-baseline --report locally or use base-refresh."
+        exit 1
+      }
+    displayName: Check baseline pin (--check)

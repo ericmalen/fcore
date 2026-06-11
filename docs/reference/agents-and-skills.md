@@ -30,6 +30,7 @@ Run from an open Agent Base clone. Entry skill: `base-orchestrate`.
 | Skill | Role |
 | --- | --- |
 | `base-setup` | Setup pipeline entry |
+| `base-refresh` | Baseline upgrade loop (sync-baseline → audit) |
 | `base-orchestrate` | Orchestration discovery + generation entry |
 | `validate-setup` | End-to-end setup qualification |
 

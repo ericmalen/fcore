@@ -83,11 +83,13 @@ Copy from the Agent Base clone when the project has CI:
 
 | Template | Purpose |
 | --- | --- |
-| `templates/ci/audit-strict.github.yml` | Audit at **pinned** release (`--strict`) |
-| `templates/ci/baseline-pin-check.github.yml` | Fail/warn when `pin` is behind |
+| `templates/ci/audit-strict.github.yml` / `.ado.yml` | Audit at **pinned** release (`--strict`) |
+| `templates/ci/baseline-pin-check.github.yml` / `.ado.yml` | Fail/warn when `pin` is behind |
 
-Both read `toolRepo` and `pin` from the marker. For private kits, inject
-`secrets.KIT_TOKEN` (see comments in the workflow).
+All read `toolRepo` and `pin` from the marker, and fail hard when the clone
+at `pin` fails — a bad pin never silently falls back to an unpinned clone.
+For private repos, inject credentials (`secrets.KIT_TOKEN` on GitHub, a
+secret pipeline variable on ADO — see comments in each template).
 
 ## Optional Renovate / bot PR
 
@@ -99,6 +101,18 @@ A bot can run on schedule:
 
 Example GitHub Actions schedule: see `baseline-pin-check.github.yml` (weekly
 cron stub included).
+
+## Legacy markers (set up before the first tag)
+
+Projects set up before `v1.0.0` may have a marker without `pin`:
+
+- `standard` is semver, `pin` missing → nothing to do; sync derives the pin
+  as `v<standard>`, and the first `--upgrade` writes the full marker shape
+  (`pin`, `lastSyncedAt`).
+- `standard` is not semver (e.g. a sha) → the marker fails validation.
+  Edit `.claude/agent-base.json` once by hand: set `standard` to the release
+  you are effectively on (e.g. `1.0.0`) and add `"pin": "v1.0.0"`, then run
+  `--upgrade` normally.
 
 ## Related
 

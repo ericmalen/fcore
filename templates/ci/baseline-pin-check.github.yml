@@ -3,7 +3,10 @@
 # Installed by setup for repos with GitHub CI when teams want Renovate-style nudges.
 #
 # Clone URL and pin come from .claude/agent-base.json (toolRepo, pin).
-# Shallow-clones at pin for sync-baseline; uses the kit's sync-baseline.mjs.
+# Shallow-clones at pin for sync-baseline; a failed pin clone fails the build
+# (never falls back to an unpinned clone).
+# Private Agent Base repo? Use secrets.KIT_TOKEN — see commented line below.
+# Default is fail-when-behind; for a warn-only nudge, drop the final `exit 1`.
 name: baseline-pin-check
 on:
   pull_request:
@@ -27,6 +30,8 @@ jobs:
           test -f "$MARKER"
           KIT_URL="$(node -e "process.stdout.write(require('./$MARKER').toolRepo)")"
           PIN="$(node -e "process.stdout.write(require('./$MARKER').pin || ('v'+require('./$MARKER').standard))")"
+          # Private Agent Base repo? prepend credentials, e.g.:
+          # KIT_URL="$(echo "$KIT_URL" | sed "s#https://#https://x-token:${{ secrets.KIT_TOKEN }}@#")"
           git clone --depth 1 --branch "$PIN" "$KIT_URL" "${RUNNER_TEMP}/agent-base" || {
             echo "::error title=Agent Base pin clone failed::Could not clone $KIT_URL at tag $PIN. Check the tag exists and the runner can reach the repo; do not fall back to an unpinned clone."
             exit 1

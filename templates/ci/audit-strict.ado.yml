@@ -18,7 +18,9 @@ steps:
       MARKER=.claude/agent-base.json
       KIT_URL="$(node -e "process.stdout.write(require('./$MARKER').toolRepo)")"
       PIN="$(node -e "const m=require('./$MARKER'); process.stdout.write(m.pin||('v'+m.standard))")"
-      git clone --depth 1 --branch "$PIN" "$KIT_URL" "$(Agent.TempDirectory)/agent-base" || \
-        git clone --depth 1 "$KIT_URL" "$(Agent.TempDirectory)/agent-base"
+      git clone --depth 1 --branch "$PIN" "$KIT_URL" "$(Agent.TempDirectory)/agent-base" || {
+        echo "##vso[task.logissue type=error]Could not clone $KIT_URL at tag $PIN — check the tag exists and the agent can reach the repo."
+        exit 1
+      }
       node "$(Agent.TempDirectory)/agent-base/scripts/audit.mjs" --root . --strict
     displayName: Clone Agent Base at pin and audit (--strict)
