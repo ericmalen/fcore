@@ -2,3 +2,6 @@
 
 # generated outputs
 reports/
+
+# python bytecode (skill-creator scripts)
+__pycache__/
