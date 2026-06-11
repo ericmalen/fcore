@@ -27,8 +27,10 @@ jobs:
           test -f "$MARKER"
           KIT_URL="$(node -e "process.stdout.write(require('./$MARKER').toolRepo)")"
           PIN="$(node -e "process.stdout.write(require('./$MARKER').pin || ('v'+require('./$MARKER').standard))")"
-          git clone --depth 1 --branch "$PIN" "$KIT_URL" "${RUNNER_TEMP}/agent-base" || \
-            git clone --depth 1 "$KIT_URL" "${RUNNER_TEMP}/agent-base"
+          git clone --depth 1 --branch "$PIN" "$KIT_URL" "${RUNNER_TEMP}/agent-base" || {
+            echo "::error title=Agent Base pin clone failed::Could not clone $KIT_URL at tag $PIN. Check the tag exists and the runner can reach the repo; do not fall back to an unpinned clone."
+            exit 1
+          }
           node "${RUNNER_TEMP}/agent-base/scripts/sync-baseline.mjs" --check --json || {
             echo "::warning title=Agent Base baseline behind::Run sync-baseline --report locally or open a bot PR."
             exit 1
