@@ -77,7 +77,7 @@ export function generateReport({ root }) {
   L.push(`| **merged/superseded (REWRITTEN text — REVIEW)** | ${groups.merge.length + groups.supersede.length} (${pct(mergedBytes)}% of source bytes rewritten) |`);
   L.push(`| verbatim-via-literal (cosmetic routing, byte-equivalent) | ${pct(verbatimLitBytes)}% of source bytes |`);
   L.push(`| out-of-scope rulings | ${groups.oos.length} |`);
-  L.push(`| installed (kit templates/literals) | ${(manifest.installs ?? []).length} |`);
+  L.push(`| installed (Agent Base templates/literals) | ${(manifest.installs ?? []).length} |`);
   L.push('');
   L.push(`> Merged-bytes fraction is the creeping-merge tripwire. Extraction-first`);
   L.push(`> policy: this number should be small; every point of it is judgment-`);

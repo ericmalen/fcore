@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // apply — deterministically assemble the project tree from
-// nodes + manifest + kit templates + literals.
+// nodes + manifest + Agent Base templates + literals.
 //
 // Conservation by construction: node bytes are copied verbatim from
 // .setup/nodes/, never re-typed. The only non-node bytes in generated
@@ -8,7 +8,7 @@
 // (inserted only when a chunk does not end with a newline).
 //
 // Assembly semantics (owner decision):
-// - Structured targets = targets with a kit template containing
+// - Structured targets = targets with an Agent Base template containing
 //   `<!-- agent-base:slot:NAME -->` markers. Entries attach content to a slot;
 //   slot content is concatenated in MANIFEST ORDER and replaces the marker.
 //   Unused markers are removed (the template's surrounding text stays).
@@ -189,7 +189,7 @@ export function apply({ root, templatesDir, outRoot = null }) {
     const srcObj = existsSync(srcPath)
       ? (JSON.parse(stripJsonComments(readFileSync(srcPath, 'utf8'))) ?? {})
       : {};
-    // source keys preserved; kit template wins on its own keys
+    // source keys preserved; Agent Base template wins on its own keys
     const merged = deepMerge(srcObj, baseObj);
     const output = JSON.stringify(merged, null, 2) + '\n';
     const abs = join(writeRoot, jm.file);
@@ -199,7 +199,7 @@ export function apply({ root, templatesDir, outRoot = null }) {
   }
 
   // ── 3b. Guarantee R-47: .gitignore excludes personal settings ─────────────
-  // Idempotent, and deliberately NOT recorded in `generated`: the kit owns only
+  // Idempotent, and deliberately NOT recorded in `generated`: Agent Base owns only
   // this one line, not the whole file, so the reproducibility gate must never
   // sha-compare a existing project .gitignore it does not fully own. Coverage test
   // mirrors the R-47 audit check so apply and audit agree exactly.

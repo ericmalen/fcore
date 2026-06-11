@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // build-starter — emit a clean starter repo (the target state,
-// nothing else). Used by kit CI to publish the "clone and go" starter, and
+// nothing else). Used by Agent Base CI to publish the "clone and go" starter, and
 // runnable directly. Usage: node scripts/build-starter.mjs <dir> [--git]
 
 import { resolve, dirname, join } from 'node:path';
@@ -10,8 +10,8 @@ import { spawnSync } from 'node:child_process';
 import { instantiate as instantiateTemplate } from './lib/template.mjs';
 import { buildMarker } from './lib/marker.mjs';
 
-const kitRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const kitVersion = JSON.parse(readFileSync(join(kitRoot, 'package.json'), 'utf8')).version ?? '1.0.0';
+const baseRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const baseVersion = JSON.parse(readFileSync(join(baseRoot, 'package.json'), 'utf8')).version ?? '1.0.0';
 
 const [dir, ...flags] = process.argv.slice(2);
 if (!dir) {
@@ -24,13 +24,13 @@ if (existsSync(target) && readdirSync(target).length > 0) {
   process.exit(1);
 }
 
-const tpl = (rel) => readFileSync(join(kitRoot, 'templates', rel), 'utf8');
+const tpl = (rel) => readFileSync(join(baseRoot, 'templates', rel), 'utf8');
 // starter: no slot is filled → optional sections drop out, mandatory slots
 // instantiate empty (shared with apply so the two stay byte-identical).
 const instantiate = (rel) => instantiateTemplate(tpl(rel));
 // base-check is a permanent baseline skill — its source of truth is .claude/skills/,
 // not templates/ (it ships verbatim, like docs/git-conventions).
-const skill = (rel) => readFileSync(join(kitRoot, '.claude/skills', rel), 'utf8');
+const skill = (rel) => readFileSync(join(baseRoot, '.claude/skills', rel), 'utf8');
 
 const files = {
   'AGENTS.md': instantiate('instructions/AGENTS.md'),
@@ -44,7 +44,7 @@ const files = {
   '.claude/skills/base-check/references/audit-hook.md': skill('base-check/references/audit-hook.md'),
   '.claude/skills/base-check/scripts/audit-nudge.mjs': skill('base-check/scripts/audit-nudge.mjs'),
   '.claude/agent-base.json': `${JSON.stringify(buildMarker({
-    standard: kitVersion,
+    standard: baseVersion,
     setupAt: new Date().toISOString().slice(0, 10),
     githubCodeReview: false,
   }), null, 2)}\n`,
@@ -71,6 +71,6 @@ if (flags.includes('--git')) {
   const g = (args) => spawnSync('git', args, { cwd: target, encoding: 'utf8' });
   g(['init', '-q', '-b', 'main']);
   g(['add', '-A']);
-  g(['-c', 'user.email=starter@agent-base', '-c', 'user.name=agent-base', 'commit', '-qm', `chore: agent-base starter (v${kitVersion})`]);
+  g(['-c', 'user.email=starter@agent-base', '-c', 'user.name=agent-base', 'commit', '-qm', `chore: agent-base starter (v${baseVersion})`]);
 }
-console.log(`starter → ${target} (v${kitVersion})`);
+console.log(`starter → ${target} (v${baseVersion})`);

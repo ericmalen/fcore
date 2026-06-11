@@ -28,7 +28,7 @@ scope gate.
 ## jsonMerges
 
 `{ file: ".vscode/settings.json", base: "settings/vscode/settings.json" }` — key-level
-merge: source-only keys preserved, kit template keys win. Bases live in
+merge: source-only keys preserved, Agent Base template keys win. Bases live in
 `.claude/agent-base-setup/templates/`.
 
 ## installs (static wiring)
@@ -55,7 +55,7 @@ NOT manifest installs — they are permanent baseline assets copied verbatim by
 ## CI gate templates (optional file copies, not manifest installs)
 
 When the project has CI, offer the drift gate alongside the docs-impact
-gate — copy the matching kit template, do not route it through the manifest:
+gate — copy the matching Agent Base template, do not route it through the manifest:
 
 - `templates/ci/audit-strict.github.yml` → `.github/workflows/` (or
   `audit-strict.ado.yml` → `.azuredevops/` for Azure DevOps) — runs

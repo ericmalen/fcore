@@ -58,20 +58,20 @@
       "sha256": "437cfbd7def2662765c08ffde92ec38b5b0282416aa5ade01bb81491620fc25d"
     },
     "tasks-format": {
-      "version": "1.2.0",
-      "sha256": "b92cffa8792ffc6dfd8806098ee4e0e783400ad75c28244349bce87a3fc6a0f1"
+      "version": "1.2.1",
+      "sha256": "6c4b847f4e6ff0a3486a78c45f002f818ce98cb334c97f5520ee46d5f1be3bc8"
     },
     "handoff-logging": {
       "version": "1.1.0",
       "sha256": "75ea1ad7db5d9fe801e9bc315f640f6eb32ebe872ce14181011e891cae1974fa"
     },
     "README": {
-      "version": "1.1.1",
-      "sha256": "7f25cb442c771b683260411834535012bda0fc80949096e0447a9a785bcbe258"
+      "version": "1.1.2",
+      "sha256": "fc15967072e6fa10021119d4522a9b8b46dad0e6d3d04d45133d617c8269f773"
     },
     "triage-rules": {
-      "version": "1.0.0",
-      "sha256": "93597737de504dc7b8ee9c6be4c4a29564dd91cb565ec0dce39f54e4d614bf32"
+      "version": "1.0.1",
+      "sha256": "e9520b4725d65c8ae71fa2e9b6c3007e2c5ef88eb28c6adf4cbddc44bec4aa70"
     },
     "agent-teams": {
       "version": "1.1.0",

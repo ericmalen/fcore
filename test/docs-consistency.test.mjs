@@ -6,10 +6,10 @@ import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { run } from "../scripts/docs-consistency.mjs";
 
-const KIT_ROOT = fileURLToPath(new URL("..", import.meta.url));
+const BASE_ROOT = fileURLToPath(new URL("..", import.meta.url));
 
-test("kit docs are consistent (no banned terms, no broken links)", () => {
-  const findings = run(KIT_ROOT);
+test("Agent Base docs are consistent (no banned terms, no broken links)", () => {
+  const findings = run(BASE_ROOT);
   assert.deepEqual(findings, []);
 });
 

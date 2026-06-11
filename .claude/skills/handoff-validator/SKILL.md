@@ -25,7 +25,7 @@ run from the Agent Base clone.
 
 2. **Generation dry-run** — run the real generation planner
    (`planGeneration`, the same code the scaffolder executes) against the
-   kit's registry and templates, discarding the planned files:
+   Agent Base's registry and templates, discarding the planned files:
 
    ```
    node --input-type=module -e '
@@ -69,8 +69,8 @@ error class:
 - slot errors, `not in registry`, duplicate generated path — blueprint
   defects: the caller fixes the blueprint (or the upstream
   profile/decisions) and re-runs.
-- `missing from kit`, `drifted from registry pin` — kit defects: author the
-  missing template or bump the version and re-pin in the kit; the blueprint
+- `missing from Agent Base`, `drifted from registry pin` — Agent Base defects: author the
+  missing template or bump the version and re-pin in Agent Base; the blueprint
   is innocent.
 
 Never hand-edit generated downstream files to compensate.

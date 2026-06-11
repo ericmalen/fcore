@@ -56,7 +56,7 @@ the Markdown companion is rendered, never written by hand.
 - Never write a `decisions.json` that fails `validateDecisionsDoc`.
 - Never proceed to blueprint synthesis or generation — that is the
   plan-synthesizer's job (B8).
-- Never modify the profile, the target's source, or the kit.
+- Never modify the profile, the target's source, or Agent Base.
 
 ## Documents
 

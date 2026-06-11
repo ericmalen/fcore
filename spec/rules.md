@@ -277,9 +277,9 @@ release-pin fields (info when missing): `pin`, `lastSyncedAt` — used by
 baseline sync and the pinned-clone CI templates. Candidate for promotion to
 warning once tagged pins are the norm across set-up projects.
 
-**R-51 · Rule-ID indirection** · mechanical · kit CI
-Kit docs, templates, and check metadata reference rules by R-ID only — never by
-file line numbers, never restating thresholds. (Enforced in the kit repo's CI, not
+**R-51 · Rule-ID indirection** · mechanical · Agent Base CI
+Agent Base docs, templates, and check metadata reference rules by R-ID only — never by
+file line numbers, never restating thresholds. (Enforced in the Agent Base repo's CI, not
 in consumer repos.)
 
 ---

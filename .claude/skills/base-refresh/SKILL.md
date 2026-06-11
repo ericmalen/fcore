@@ -6,7 +6,7 @@ argument-hint: "[/path/to/project]"
 
 # base-refresh (baseline upgrade loop)
 
-Run from this Agent Base clone against a set-up project. Kit-side only: the
+Run from this Agent Base clone against a set-up project. Agent Base-side only: the
 installer never ships it into targets (like `base-setup`). All file changes
 go through [`sync-baseline`](../../../scripts/sync-baseline.mjs) — never copy
 baseline files by hand.

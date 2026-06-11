@@ -1,5 +1,5 @@
 # docs-impact — code changes must update docs or declare why not (visibly).
-# The kit's own live copy (self-installed; source template: templates/ci/docs-impact.ado.yml).
+# Agent Base's own live copy (self-installed; source template: templates/ci/docs-impact.ado.yml).
 # Declaration surface on ADO: a commit message line in the PR:
 #   Docs: not-needed — <reason>
 # Add as a PR build validation policy on the target branch.

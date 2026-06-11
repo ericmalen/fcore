@@ -11,7 +11,7 @@ audit, then fixes findings by rule ID.
 ## Run the audit
 
 The audit script ships with the agent-base repo (single source of truth — this
-skill stays thin so checks never drift from the kit):
+skill stays thin so checks never drift from Agent Base):
 
 1. Locate Agent Base: use `.claude/agent-base-setup/scripts/audit.mjs` if the
    setup tooling is still present; otherwise shallow-clone at `pin` from
@@ -26,7 +26,7 @@ skill stays thin so checks never drift from the kit):
 
 ## Fix findings
 
-- Each finding carries a rule ID (R-…). Look the rule up in the kit's
+- Each finding carries a rule ID (R-…). Look the rule up in Agent Base's
   `spec/rules.md` for the exact statement before editing.
 - Apply minimal edits that satisfy the rule. Never weaken or delete user
   content to silence a finding — if a rule and real content conflict, surface

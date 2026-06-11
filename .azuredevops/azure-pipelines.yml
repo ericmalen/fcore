@@ -1,11 +1,11 @@
-# Kit-repo CI (ADO primary) — integrity + regression gate for agent-base itself.
+# Agent Base repo CI (ADO primary) — integrity + regression gate for agent-base itself.
 # Mirrored by .github/workflows/ci.yml. Keep the two in lockstep.
 #
 # Gates:
 #   1. npm test            — unit suite (audit, materialize, extract, gates).
 #   2. rule-check-map      — every mechanical rule maps to a check (R-51).
 #   3. docs-consistency    — no v1 vocabulary drift, no broken doc links.
-#   4. audit --root . --strict — the kit repo itself stays audit-clean.
+#   4. audit --root . --strict — the Agent Base repo itself stays audit-clean.
 #   5. build-starter + audit --strict — the published starter stays audit-clean.
 # The starter is published as a pipeline artifact ("starter").
 trigger:
@@ -47,7 +47,7 @@ steps:
   - bash: node scripts/docs-consistency.mjs
     displayName: docs consistency
   - bash: node scripts/audit.mjs --root . --strict
-    displayName: kit self-audit --strict
+    displayName: Agent Base self-audit --strict
   - bash: |
       set -euo pipefail
       OUT="$(Agent.TempDirectory)/starter"

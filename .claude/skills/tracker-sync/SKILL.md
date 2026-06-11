@@ -30,20 +30,20 @@ Non-Basic ADO process template? Set `ado.stateMap` (`basic` | `agile`) in
 
 ## Run
 
-Locate a kit root first (same resolution as base-check): an Agent Base clone
+Locate an Agent Base root first (same resolution as base-check): an Agent Base clone
 if you are in one; else the target's `.claude/agent-base-setup/` while setup
-tooling is present; else shallow-clone the kit repo (URL in
+tooling is present; else shallow-clone the Agent Base repo (URL in
 `.claude/agent-base.json` → `toolRepo`). Then **always dry-run first**:
 
 ```
-node <kit>/scripts/tracker-sync.mjs --target /path/to/project
+node <agent-base>/scripts/tracker-sync.mjs --target /path/to/project
 ```
 
 Present the plan (imports / status updates / conflicts) to the user. Only
 after they confirm:
 
 ```
-node <kit>/scripts/tracker-sync.mjs --target /path/to/project --apply
+node <agent-base>/scripts/tracker-sync.mjs --target /path/to/project --apply
 ```
 
 Then commit the `tasks.md` change in the target with a conventional message

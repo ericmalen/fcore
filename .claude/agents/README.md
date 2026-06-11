@@ -21,10 +21,10 @@ in Claude Code it is always invoked as a subagent.
   setup phase 4. Adoption-time only: installed for the setup window,
   removed again before merge.
 - [`example-reviewer.md`](./example-reviewer.md) — annotated example of a
-  read-only reviewer. Kit-side reference to copy from; NOT installed into
+  read-only reviewer. Agent Base-side reference to copy from; NOT installed into
   targets.
 
-**Orchestration meta-agents** — discovery, generation, and kit health. Kit-side
+**Orchestration meta-agents** — discovery, generation, and orchestration health. Agent Base-side
 only (never installed into targets). Entry point: `/base-orchestrate` in an
 open Agent Base clone. How-to:
 [`docs/how-to/orchestration-guide.md`](../../docs/how-to/orchestration-guide.md).
@@ -105,10 +105,10 @@ New agents live in this same folder. The steps mirror the skills workflow:
 2. **Check** — run the `base-check` skill; agent conventions are enforced
    by rule ID (R-27..R-37).
 
-In the kit repo itself, `setup-verifier` and `docs-auditor` are dual-role:
-loaded while developing the kit AND installed path-for-path into adopted
+In the Agent Base repo itself, `setup-verifier` and `docs-auditor` are dual-role:
+loaded while developing Agent Base AND installed path-for-path into adopted
 repos by `scripts/install-setup.mjs` (the installer allowlist decides what
-ships; `example-reviewer` stays kit-side).
+ships; `example-reviewer` stays Agent Base-side).
 
 ## Filename convention
 

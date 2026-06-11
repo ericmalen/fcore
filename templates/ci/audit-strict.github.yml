@@ -1,8 +1,8 @@
 # audit-strict — set-up projects must stay conformant to the Agent Base standard layout.
 # Installed by setup for repos with GitHub CI (alongside docs-impact).
-# Runs the kit audit at the pinned release (--strict).
+# Runs the Agent Base audit at the pinned release (--strict).
 #
-# Shallow-clones toolRepo at marker.pin (fallback: v{standard}). Private kit?
+# Shallow-clones toolRepo at marker.pin (fallback: v{standard}). Private Agent Base repo?
 # Use secrets.KIT_TOKEN — see commented line below.
 name: audit-strict
 on:
@@ -26,7 +26,7 @@ jobs:
           MARKER=.claude/agent-base.json
           KIT_URL="$(node -e "process.stdout.write(require('./$MARKER').toolRepo)")"
           PIN="$(node -e "const m=require('./$MARKER'); process.stdout.write(m.pin||('v'+m.standard))")"
-          # Private kit? prepend credentials, e.g.:
+          # Private Agent Base repo? prepend credentials, e.g.:
           # KIT_URL="$(echo "$KIT_URL" | sed "s#https://#https://x-token:${{ secrets.KIT_TOKEN }}@#")"
           git clone --depth 1 --branch "$PIN" "$KIT_URL" "${RUNNER_TEMP}/agent-base" || {
             echo "::error title=Agent Base pin clone failed::Could not clone $KIT_URL at tag $PIN. Check the tag exists and the runner can reach the repo."

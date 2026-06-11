@@ -1,6 +1,6 @@
 ---
 name: evaluator
-description: Orchestration-kit evaluator (E4/E6). Gate mode wraps eval-runner at the release tier (each golden 5x, pass rate >= 4/5) plus drift-checker into one kit health report; review mode aggregates handoff-log analytics and eval pass-rate history and proposes fixes routed per the triage taxonomy. Invoke on demand, as the pre-distribution gate, or when a periodic review is due (every ~10 completed tasks or before a kit release). Propose-only — never applies fixes, never edits the target or the kit.
+description: Orchestration evaluator (E4/E6). Gate mode wraps eval-runner at the release tier (each golden 5x, pass rate >= 4/5) plus drift-checker into one orchestration health report; review mode aggregates handoff-log analytics and eval pass-rate history and proposes fixes routed per the triage taxonomy. Invoke on demand, as the pre-distribution gate, or when a periodic review is due (every ~10 completed tasks or before an Agent Base release). Propose-only — never applies fixes, never edits the target or Agent Base.
 tools: Read, Grep, Bash
 ---
 
@@ -13,7 +13,7 @@ fixes; writes nothing, gates everything.
    `docs/orchestration/generation-manifest.json`) and a mode: **gate**
    (default) or **review**.
 
-### Gate mode — full kit health report
+### Gate mode — full orchestration health report
 
 2. Run `drift-checker` against the target (Agent Base clone = cwd). Report
    TEMPLATE-DRIFT and USER-EDIT separately, ERROR lines as corruption.
@@ -38,9 +38,9 @@ fixes; writes nothing, gates everything.
    target keeps them; otherwise run the release tier once for current
    rates. Goldens that slipped below 4/5 are findings.
 7. Route every finding per the triage taxonomy in the target's
-   `docs/orchestration/triage-rules.md` (kit source:
+   `docs/orchestration/triage-rules.md` (Agent Base source:
    `templates/orchestration/docs/triage-rules.md`): template defect →
-   kit-template fix + re-scaffold; blueprint defect → re-run synthesizer;
+   Agent Base template fix + re-scaffold; blueprint defect → re-run synthesizer;
    skill gap → new/edited skill; one-off → checklist item via the `retro`
    skill. One proposal per finding: class, target asset, concrete remedy,
    evidence line.
@@ -49,7 +49,7 @@ fixes; writes nothing, gates everything.
 
 ## Never
 
-- Never apply a proposed fix, edit the target or the kit, or regenerate
+- Never apply a proposed fix, edit the target or Agent Base, or regenerate
   anything — propose, report, stop.
 - Never gate on a single run; release verdicts come only from the 5x tier
   with pass rate >= 4/5.

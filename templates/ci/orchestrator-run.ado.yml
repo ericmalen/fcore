@@ -67,11 +67,11 @@ steps:
             require("fs").writeFileSync(process.env.AGENT_TEMPDIRECTORY + "/open-branches.json", JSON.stringify(branches));
           });
         '
-      KIT="$(Agent.TempDirectory)/agent-base" node --input-type=module -e '
+      AGENT_BASE="$(Agent.TempDirectory)/agent-base" node --input-type=module -e '
         import { readFileSync, appendFileSync } from "node:fs";
-        const kit = process.env.KIT;
-        const { parseTasksMd } = await import(`${kit}/scripts/lib/orchestration/parse-tasks.mjs`);
-        const { decideHeadlessRun } = await import(`${kit}/scripts/lib/orchestration/headless-guard.mjs`);
+        const base = process.env.AGENT_BASE;
+        const { parseTasksMd } = await import(`${base}/scripts/lib/orchestration/parse-tasks.mjs`);
+        const { decideHeadlessRun } = await import(`${base}/scripts/lib/orchestration/headless-guard.mjs`);
         const { doc, errors } = parseTasksMd(readFileSync("tasks.md", "utf8"));
         if (errors.length) { console.error(errors.join("\n")); process.exit(1); }
         const openBranches = JSON.parse(readFileSync(process.env.AGENT_TEMPDIRECTORY + "/open-branches.json", "utf8"));

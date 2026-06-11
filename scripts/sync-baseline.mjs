@@ -9,7 +9,7 @@
 //
 // Options:
 //   --root <dir>       project root (default cwd)
-//   --kit-root <dir>   use local Agent Base clone (skip network; for dev/tests)
+//   --base-root <dir>   use local Agent Base clone (skip network; for dev/tests)
 //   --allow-major      consider latest tag across major versions
 //   --json             machine-readable stdout
 //
@@ -26,9 +26,9 @@ import {
 } from './lib/release.mjs';
 import { planBaselineSync } from './lib/sync-plan.mjs';
 
-function readKitVersion(kitRoot) {
+function readBaseVersion(baseRoot) {
   try {
-    const pkg = JSON.parse(readFileSync(join(kitRoot, 'package.json'), 'utf8'));
+    const pkg = JSON.parse(readFileSync(join(baseRoot, 'package.json'), 'utf8'));
     return pkg.version ?? '0.0.0';
   } catch {
     return '0.0.0';
@@ -38,8 +38,8 @@ function readKitVersion(kitRoot) {
 function parseArgs(argv) {
   const opt = {
     root: process.cwd(),
-    kitRoot: null,
-    oldKitRoot: null,
+    baseRoot: null,
+    oldBaseRoot: null,
     check: false,
     report: false,
     upgrade: false,
@@ -50,8 +50,8 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--root') opt.root = resolve(argv[++i]);
-    else if (a === '--kit-root') opt.kitRoot = resolve(argv[++i]);
-    else if (a === '--old-kit-root') opt.oldKitRoot = resolve(argv[++i]);
+    else if (a === '--base-root' || a === '--kit-root') opt.baseRoot = resolve(argv[++i]); // --kit-root: legacy alias
+    else if (a === '--old-base-root' || a === '--old-kit-root') opt.oldBaseRoot = resolve(argv[++i]);
     else if (a === '--check') opt.check = true;
     else if (a === '--report') opt.report = true;
     else if (a === '--upgrade') opt.upgrade = true;
@@ -66,18 +66,18 @@ function parseArgs(argv) {
   return opt;
 }
 
-function checkoutKit(toolRepo, pin, kitRootOverride) {
-  if (kitRootOverride) return { path: kitRootOverride, cleanup: null };
+function checkoutBase(toolRepo, pin, baseRootOverride) {
+  if (baseRootOverride) return { path: baseRootOverride, cleanup: null };
   const tmp = mkdtempSync(join(tmpdir(), 'agent-base-sync-'));
   shallowCloneAt(toolRepo, pin, tmp);
   return { path: tmp, cleanup: () => rmSync(tmp, { recursive: true, force: true }) };
 }
 
-function applyFileUpdates(projectRoot, kitRoot, relPaths) {
+function applyFileUpdates(projectRoot, baseRoot, relPaths) {
   for (const rel of relPaths) {
-    const from = join(kitRoot, rel);
+    const from = join(baseRoot, rel);
     const to = join(projectRoot, rel);
-    if (!existsSync(from)) throw new Error(`missing in kit: ${rel}`);
+    if (!existsSync(from)) throw new Error(`missing in Agent Base: ${rel}`);
     mkdirSync(dirname(to), { recursive: true });
     cpSync(from, to);
   }
@@ -95,8 +95,8 @@ export function runSyncBaseline(opt) {
   const pinSem = tagToSemver(pin);
 
   let latest;
-  if (opt.kitRoot) {
-    latest = `v${readKitVersion(opt.kitRoot)}`;
+  if (opt.baseRoot) {
+    latest = `v${readBaseVersion(opt.baseRoot)}`;
   } else {
     try {
       const tags = listRemoteTags(marker.toolRepo);
@@ -134,12 +134,12 @@ export function runSyncBaseline(opt) {
   let oldCo = null;
   let newCo = null;
   try {
-    if (opt.oldKitRoot && opt.kitRoot) {
-      oldCo = { path: opt.oldKitRoot, cleanup: null };
-      newCo = { path: opt.kitRoot, cleanup: null };
+    if (opt.oldBaseRoot && opt.baseRoot) {
+      oldCo = { path: opt.oldBaseRoot, cleanup: null };
+      newCo = { path: opt.baseRoot, cleanup: null };
     } else {
-      oldCo = checkoutKit(marker.toolRepo, pin, null);
-      newCo = checkoutKit(marker.toolRepo, targetPin, opt.kitRoot);
+      oldCo = checkoutBase(marker.toolRepo, pin, null);
+      newCo = checkoutBase(marker.toolRepo, targetPin, opt.baseRoot);
     }
 
     const plan = planBaselineSync(root, oldCo.path, newCo.path);

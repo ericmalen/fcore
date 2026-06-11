@@ -6,10 +6,10 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { run, parseRules, parseEmitted } from '../scripts/rule-check-map.mjs';
 
-const KIT_ROOT = fileURLToPath(new URL('..', import.meta.url));
+const BASE_ROOT = fileURLToPath(new URL('..', import.meta.url));
 
-test('kit rule↔check map is intact (no orphan rules, no stale emissions)', () => {
-  assert.deepEqual(run(KIT_ROOT), []);
+test('Agent Base rule↔check map is intact (no orphan rules, no stale emissions)', () => {
+  assert.deepEqual(run(BASE_ROOT), []);
 });
 
 // Hardening: RULE_DEF_RE only matches single-line definitions. A reflowed
@@ -18,19 +18,19 @@ test('kit rule↔check map is intact (no orphan rules, no stale emissions)', () 
 // surfaces here and the numbers get updated consciously.
 test('live rule/emission totals match the spec (parse-regression tripwire)', () => {
   const { defined, mechanicalAudit } = parseRules(
-    readFileSync(join(KIT_ROOT, 'spec', 'rules.md'), 'utf8'));
+    readFileSync(join(BASE_ROOT, 'spec', 'rules.md'), 'utf8'));
   const emitted = parseEmitted(
-    readFileSync(join(KIT_ROOT, 'scripts', 'lib', 'audit', 'checks.mjs'), 'utf8'));
+    readFileSync(join(BASE_ROOT, 'scripts', 'lib', 'audit', 'checks.mjs'), 'utf8'));
   assert.equal(defined.size, 50);
   assert.equal(mechanicalAudit.size, 39);
   assert.equal(emitted.size, 40);
 });
 
-test('parser ignores judgment-only rules and kit-CI rules for the audit requirement', () => {
+test('parser ignores judgment-only rules and Agent Base-CI rules for the audit requirement', () => {
   const rules = parseRules([
     '**R-90 · A mechanical audit rule** · mechanical · audit, warning',
     '**R-91 · A judgment rule** · judgment · rubric',
-    '**R-92 · A kit-CI rule** · mechanical · kit CI',
+    '**R-92 · An Agent Base-CI rule** · mechanical · Agent Base CI',
     '**R-93 · A *(compat)* rule** · mechanical · audit, warning',
   ].join('\n'));
   assert.deepEqual([...rules.mechanicalAudit].sort(), ['R-90', 'R-93']);
@@ -42,7 +42,7 @@ test('parseEmitted finds F() rule emissions in either quote style', () => {
   assert.deepEqual([...emitted].sort(), ['R-01', 'R-44']);
 });
 
-// Build a minimal kit-shaped tree so run() can read both files.
+// Build a minimal Agent Base-shaped tree so run() can read both files.
 function seedKit(rules, checks) {
   const root = mkdtempSync(join(tmpdir(), 'rcm-'));
   mkdirSync(join(root, 'spec'), { recursive: true });

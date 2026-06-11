@@ -1,9 +1,9 @@
 # Agents and skills — orchestration inventory
 
-What exists in the kit repo, what setup installs into every target, and
+What exists in the Agent Base repo, what setup installs into every target, and
 what orchestration generation materializes per repo.
 
-## Kit-side only (never installed)
+## Agent Base-side only (never installed)
 
 Run from an open Agent Base clone. Entry skill: `base-orchestrate`.
 
@@ -25,7 +25,7 @@ Run from an open Agent Base clone. Entry skill: `base-orchestrate`.
 | Generation | `agent-instantiator`, `skill-instantiator` |
 | Quality | `eval-runner`, `drift-checker` |
 
-### Entry skills (kit-only)
+### Entry skills (Agent Base-only)
 
 | Skill | Role |
 | --- | --- |
@@ -58,7 +58,7 @@ Shipped by `scripts/install-setup.mjs` allowlist.
 
 Present after `scaffolder` runs against an approved blueprint. Recorded in
 `docs/orchestration/generation-manifest.json`. Never hand-edit — fix the
-blueprint or kit template and re-scaffold.
+blueprint or Agent Base template and re-scaffold.
 
 ### Agent templates
 
@@ -90,6 +90,6 @@ blueprint.
 ## Authoring new agents and skills
 
 Use `agent-creator` and `skill-creator` for **hand-authored** additions in any
-repo. Orchestration **generated** agents follow a separate path: edit kit
+repo. Orchestration **generated** agents follow a separate path: edit Agent Base
 templates under `templates/orchestration/` or adjust the blueprint, then
 re-run `scaffolder`.

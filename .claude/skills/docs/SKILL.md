@@ -94,7 +94,7 @@ Infer the proportionality tier, then CONFIRM with the human:
      SessionStart → `node .claude/skills/docs/scripts/docs-nudge.mjs session-start`
      Stop → `node .claude/skills/docs/scripts/docs-nudge.mjs stop`
    - If the repo has CI, offer the docs-impact gate: copy the matching
-     template (kit `templates/ci/docs-impact.github.yml` →
+     template (Agent Base `templates/ci/docs-impact.github.yml` →
      `.github/workflows/`, or `docs-impact.ado.yml` → `.azuredevops/` for
      Azure DevOps).
 5. Surveying an unfamiliar or large doc corpus — classifying what exists,

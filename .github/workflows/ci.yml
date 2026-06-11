@@ -1,7 +1,7 @@
-# Kit-repo CI (GitHub Actions mirror of azure-pipelines.yml).
+# Agent Base repo CI (GitHub Actions mirror of azure-pipelines.yml).
 # ADO is the primary pipeline; this mirror keeps GitHub clones honest.
 # Gates: unit tests, rule↔check integrity (R-51), docs consistency,
-# kit self-audit --strict, and build-starter → audit --strict (starter must stay clean).
+# Agent Base self-audit --strict, and build-starter → audit --strict (starter must stay clean).
 name: ci
 on:
   push:
@@ -44,7 +44,7 @@ jobs:
         run: node scripts/rule-check-map.mjs
       - name: docs consistency
         run: node scripts/docs-consistency.mjs
-      - name: kit self-audit --strict
+      - name: Agent Base self-audit --strict
         run: node scripts/audit.mjs --root . --strict
       - name: build starter + audit --strict
         run: |

@@ -27,5 +27,8 @@ consistently; do not rotate synonyms.
 
 ## Retired terms (do not use)
 
-`ai-kit`, greenfield, brownfield, adopt/adoption (as pipeline nouns), target repo,
-kit clone (without “Agent Base”), factory/house metaphor.
+`ai-kit`, kit (any bare use: “the kit”, kit clone, kit-side, kit template,
+orchestration kit — say “Agent Base …”), greenfield, brownfield, adopt/adoption
+(as pipeline nouns), target repo, factory/house metaphor. The only surviving
+`kit` spellings are legacy compatibility surfaces: the `$AI_KIT_HOME` env var
+and the `--kit-root`/`--old-kit-root` flag aliases of `sync-baseline.mjs`.

@@ -12,7 +12,7 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { fixtures } from '../test/fixtures/defs.mjs';
 
-const kitRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const baseRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 const args = process.argv.slice(2);
 const opt = { fixture: null, dir: null, json: false };
@@ -46,7 +46,7 @@ if (hasSetup) {
   if (audit.status !== 0) failures.push(`audit.mjs exit ${audit.status}: ${audit.stdout.trim().slice(0, 400)}`);
 } else {
   results.note = 'no .setup dir (starter path or already merged)';
-  const audit = run(process.execPath, [join(kitRoot, 'scripts/audit.mjs'), '--root', dir]);
+  const audit = run(process.execPath, [join(baseRoot, 'scripts/audit.mjs'), '--root', dir]);
   results.auditExit = audit.status;
   if (audit.status !== 0) failures.push(`audit.mjs exit ${audit.status}`);
 }

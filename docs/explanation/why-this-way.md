@@ -72,7 +72,7 @@ duplicates the same framing 15 times — and drifts when conventions change.
 
 One README per asset-type folder covers the same ground with less maintenance.
 The READMEs explain the pattern. The annotated example assets (like
-`example-reviewer`, kept kit-side) show what good looks like. Individual
+`example-reviewer`, kept Agent Base-side) show what good looks like. Individual
 assets stay lean.
 
 ## Why annotated examples instead of blank templates
@@ -82,7 +82,7 @@ you what to type and why it belongs there.
 
 The meta-skills provide the templates (paste-ready, stub content). The
 example assets (like `example-reviewer.md`) provide the annotated versions with
-inline comments explaining the non-obvious choices — they are kit-side examples
+inline comments explaining the non-obvious choices — they are Agent Base-side examples
 to copy from, not assets installed into set-up projects. Together they cover both
 modes — "I just need a starting point" and "I want to see a real one."
 

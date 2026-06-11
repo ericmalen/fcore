@@ -78,7 +78,7 @@ On ANY error (missing entry, missing template, drifted sha256 pin,
 unfilled/unused/malformed slot): stop and report the error-string array
 verbatim. Never write partial output; never hand-patch the template, the
 slots, or the generated file. Fixes belong upstream in the blueprint
-(re-gate it with handoff-validator) or in the kit template.
+(re-gate it with handoff-validator) or in the Agent Base template.
 
 ## Contract
 

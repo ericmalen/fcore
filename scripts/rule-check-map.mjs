@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// rule-check-map — R-51 integrity gate for the kit repo's own CI.
+// rule-check-map — R-51 integrity gate for the Agent Base repo's own CI.
 //
 // spec/rules.md is the single source of truth. Every MECHANICAL rule whose
 // enforcement column names `audit` must have a matching check that emits its
@@ -7,7 +7,7 @@
 // catalog does not define. This catches a rule going orphaned (added to the
 // spec, never wired) or a check drifting onto a stale/retired ID.
 //
-// Rules enforced elsewhere (enforcement column = "kit CI", e.g. R-51 itself)
+// Rules enforced elsewhere (enforcement column = "Agent Base CI", e.g. R-51 itself)
 // are exempt from the "must have an audit check" requirement.
 //
 // Usage: node scripts/rule-check-map.mjs [--root <dir>] [--json]
@@ -17,7 +17,7 @@ import { readFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const kitRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const baseRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 // Bold rule definition: **R-NN · title** · <type> · <enforcement+severity>
 // Title may itself contain emphasis (e.g. *(compat)*), so match lazily to the
@@ -49,7 +49,7 @@ export function parseEmitted(checksText) {
   return emitted;
 }
 
-export function run(root = kitRoot) {
+export function run(root = baseRoot) {
   const rulesText = readFileSync(join(root, 'spec', 'rules.md'), 'utf8');
   const checksText = readFileSync(join(root, 'scripts', 'lib', 'audit', 'checks.mjs'), 'utf8');
   const { defined, mechanicalAudit } = parseRules(rulesText);
@@ -79,7 +79,7 @@ const isMain = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(imp
 
 if (isMain) {
   const args = process.argv.slice(2);
-  let root = kitRoot;
+  let root = baseRoot;
   let json = false;
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--root') root = resolve(args[++i]);

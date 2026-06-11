@@ -1,7 +1,7 @@
 // baseline.mjs — paths copied into every set-up project (shared by install-setup
 // and sync-baseline). Setup-window tooling is install-only, never synced.
 
-/** @type {[srcRel, dstRel][]} kit-root-relative → project-relative */
+/** @type {[srcRel, dstRel][]} Agent Base-root-relative → project-relative */
 export const SETUP_WINDOW_COPIES = [
   ['scripts/inventory-extract.mjs', '.claude/agent-base-setup/scripts/inventory-extract.mjs'],
   ['scripts/apply.mjs', '.claude/agent-base-setup/scripts/apply.mjs'],

@@ -36,7 +36,7 @@ function hashTree(root, rel) {
   return out;
 }
 
-/** Expand baseline copy pairs into per-file hashes for a kit/project root. */
+/** Expand baseline copy pairs into per-file hashes for an Agent Base/project root. */
 export function baselineFileHashes(root) {
   const out = new Map();
   for (const [, dst] of BASELINE_COPIES) {
@@ -47,25 +47,25 @@ export function baselineFileHashes(root) {
 
 /**
  * Plan a baseline sync. Returns { updates, conflicts, unchanged, summary }.
- * - updates: files that match oldKit (or missing) and differ on newKit
- * - conflicts: files that differ from both oldKit and newKit (local edits)
- * - unchanged: already match newKit
+ * - updates: files that match oldBase (or missing) and differ on newBase
+ * - conflicts: files that differ from both oldBase and newBase (local edits)
+ * - unchanged: already match newBase
  */
-export function planBaselineSync(projectRoot, oldKitRoot, newKitRoot) {
+export function planBaselineSync(projectRoot, oldBaseRoot, newBaseRoot) {
   const project = baselineFileHashes(projectRoot);
-  const oldKit = baselineFileHashes(oldKitRoot);
-  const newKit = baselineFileHashes(newKitRoot);
+  const oldBase = baselineFileHashes(oldBaseRoot);
+  const newBase = baselineFileHashes(newBaseRoot);
 
-  const allPaths = new Set([...project.keys(), ...oldKit.keys(), ...newKit.keys()]);
+  const allPaths = new Set([...project.keys(), ...oldBase.keys(), ...newBase.keys()]);
   const updates = [];
   const conflicts = [];
   const unchanged = [];
 
   for (const path of [...allPaths].sort()) {
     const p = project.get(path) ?? null;
-    const o = oldKit.get(path) ?? null;
-    const n = newKit.get(path) ?? null;
-    if (n == null) continue; // removed from kit — out of scope for auto-sync
+    const o = oldBase.get(path) ?? null;
+    const n = newBase.get(path) ?? null;
+    if (n == null) continue; // removed from Agent Base — out of scope for auto-sync
 
     if (p === n) {
       unchanged.push(path);
@@ -75,7 +75,7 @@ export function planBaselineSync(projectRoot, oldKitRoot, newKitRoot) {
       updates.push(path);
       continue;
     }
-    conflicts.push({ path, reason: 'local edit differs from kit baseline' });
+    conflicts.push({ path, reason: 'local edit differs from Agent Base baseline' });
   }
 
   return {

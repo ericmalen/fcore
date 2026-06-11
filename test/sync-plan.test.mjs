@@ -12,24 +12,24 @@ function write(root, rel, text) {
   writeFileSync(abs, text);
 }
 
-test('planBaselineSync: unchanged kit match, safe update, local conflict', () => {
+test('planBaselineSync: unchanged Agent Base match, safe update, local conflict', () => {
   const project = mkdtempSync(join(tmpdir(), 'sync-proj-'));
-  const oldKit = mkdtempSync(join(tmpdir(), 'sync-old-'));
-  const newKit = mkdtempSync(join(tmpdir(), 'sync-new-'));
+  const oldBase = mkdtempSync(join(tmpdir(), 'sync-old-'));
+  const newBase = mkdtempSync(join(tmpdir(), 'sync-new-'));
   try {
-    write(oldKit, '.claude/skills/base-check/SKILL.md', 'v1\n');
-    write(newKit, '.claude/skills/base-check/SKILL.md', 'v2\n');
+    write(oldBase, '.claude/skills/base-check/SKILL.md', 'v1\n');
+    write(newBase, '.claude/skills/base-check/SKILL.md', 'v2\n');
     write(project, '.claude/skills/base-check/SKILL.md', 'v1\n');
 
-    const safe = planBaselineSync(project, oldKit, newKit);
+    const safe = planBaselineSync(project, oldBase, newBase);
     assert.deepEqual(safe.conflicts, []);
     assert.ok(safe.updates.includes('.claude/skills/base-check/SKILL.md'));
 
     write(project, '.claude/skills/base-check/SKILL.md', 'local-edit\n');
-    const conflict = planBaselineSync(project, oldKit, newKit);
+    const conflict = planBaselineSync(project, oldBase, newBase);
     assert.equal(conflict.conflicts.length, 1);
     assert.equal(conflict.updates.length, 0);
   } finally {
-    for (const d of [project, oldKit, newKit]) rmSync(d, { recursive: true, force: true });
+    for (const d of [project, oldBase, newBase]) rmSync(d, { recursive: true, force: true });
   }
 });

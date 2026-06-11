@@ -34,34 +34,34 @@ If your `SKILL.md` body runs past ~200 lines, it probably needs decomposition.
 
 ## What lives in this folder
 
-Two groups, both loaded here because both are wanted while developing the kit:
+Two groups, both loaded here because both are wanted while developing Agent Base:
 
 **Agent Base tooling** — the setup engine and self-checks. The four `base-*`
 setup phase skills and `base-check` are installed into every project by
-`scripts/install-setup.mjs`; FOUR skills are deliberately kit-side only and
+`scripts/install-setup.mjs`; FOUR skills are deliberately Agent Base-side only and
 never installed (installer allowlist): `base-setup`, `base-refresh`,
 `base-orchestrate`, and `validate-setup`.
 
 - [`base-setup`](./base-setup/SKILL.md) — the setup entry point and
-  orchestrator. Run from this Agent Base clone against a project path. Kit-side
+  orchestrator. Run from this Agent Base clone against a project path. Agent Base-side
   only.
 - [`base-refresh`](./base-refresh/SKILL.md) — baseline upgrade loop for
   set-up projects (sync-baseline report → upgrade → audit). Run from this
-  Agent Base clone against a project path. Kit-side only.
+  Agent Base clone against a project path. Agent Base-side only.
 - [`base-orchestrate`](./base-orchestrate/SKILL.md) — orchestration entry
   point (discovery → generation). Run from this Agent Base clone against a set-up
-  project path. Kit-side only.
+  project path. Agent Base-side only.
 - `base-inventory`, `base-plan`, `base-apply`, `base-verify` — the
   four-phase setup pipeline. Installed for the setup window; removed
   again before merge.
-- `validate-setup` — runs the full setup validation end-to-end. Kit-side
+- `validate-setup` — runs the full setup validation end-to-end. Agent Base-side
   only.
 - `base-check` — audits a repo's AI configuration against agent-base conventions
   (the mandatory check; source of truth is this folder — shipped verbatim by
   install-setup).
 
 **Baseline assets** — shipped path-for-path into every target alongside the
-tooling, and held to the kit's own conventions because they load here too:
+tooling, and held to Agent Base's own conventions because they load here too:
 
 - [`docs`](./docs/SKILL.md) — the documentation standard (Diátaxis content
   model, decision-record + changelog workflows, proportional setup). Pairs with the
@@ -69,16 +69,16 @@ tooling, and held to the kit's own conventions because they load here too:
 - [`git-conventions`](./git-conventions/SKILL.md) — Conventional Commits plus
   team-derived PR and branch conventions.
 - [`agent-creator`](./agent-creator/SKILL.md) — meta-skill: scaffold a new
-  custom agent to kit conventions.
+  custom agent to Agent Base conventions.
 - [`skill-creator`](./skill-creator/SKILL.md) — Anthropic's official
   skill-authoring meta-skill, vendored **verbatim** from
   [anthropics/skills](https://github.com/anthropics/skills) (Apache 2.0; pinned
   commit in [`UPSTREAM`](./skill-creator/UPSTREAM)). Shipped so Copilot users
   and consumers without a user-level copy get it; delete freely if you already
   have it. Do not edit — re-sync from upstream instead. Exempt from house-style
-  audit rules: it follows upstream's conventions, not the kit's.
+  audit rules: it follows upstream's conventions, not Agent Base's.
 
-**Orchestration meta-skills** — discovery, generation, and quality. Kit-side
+**Orchestration meta-skills** — discovery, generation, and quality. Agent Base-side
 only except the lifecycle skills (`retro`, `log-report`, `eval-runner`,
 `tracker-sync`), which install into every adopted repo. Entry point:
 [`base-orchestrate`](./base-orchestrate/SKILL.md). How-to:

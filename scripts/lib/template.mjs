@@ -14,7 +14,7 @@ const SLOT_NAME_RE = /<!--\s*agent-base:slot:([a-z0-9-]+)\s*-->/;
 const OPTIONAL_LINE_RE = /<!--\s*agent-base:optional\s*-->/;
 
 // Remove every optional ## section whose slots are all absent from filledSlots.
-// Operates on template bytes only (kit-owned), before slot replacement. Splits
+// Operates on template bytes only (Agent Base-owned), before slot replacement. Splits
 // on "\n" and rejoins on "\n" — line endings are preserved exactly.
 export function stripEmptyOptionalSections(text, filledSlots) {
   const lines = text.split('\n');

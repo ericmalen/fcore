@@ -6,8 +6,8 @@ import { tmpdir, devNull } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { execPath } from 'node:process';
 
-const KIT_ROOT = new URL('..', import.meta.url).pathname;
-const IMPACT = join(KIT_ROOT, '.claude/skills/docs/scripts/docs-impact.mjs');
+const BASE_ROOT = new URL('..', import.meta.url).pathname;
+const IMPACT = join(BASE_ROOT, '.claude/skills/docs/scripts/docs-impact.mjs');
 const CEILING = realpathSync(tmpdir());
 
 const CFG = { tier: 'T3', codePaths: ['src/'], docsPaths: ['docs/', 'README.md'] };

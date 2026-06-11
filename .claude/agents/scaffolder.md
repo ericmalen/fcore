@@ -57,7 +57,7 @@ manifest is the only state it owns.
    report the same file count with zero conflicts; then confirm each
    manifest entry's `sha256` matches the on-disk file. Any mismatch is a
    defect to report, never to patch by hand.
-5. Run the kit audit against the target (`node scripts/audit.mjs --root
+5. Run the Agent Base audit against the target (`node scripts/audit.mjs --root
    <target>`) and report: file list with SHAs, stubs created, audit
    findings, validator outputs. Then stop.
 
@@ -69,7 +69,7 @@ manifest is the only state it owns.
 - Never modify `blueprint.json` or any discovery output — one writer per
   artifact: the scaffolder owns only the manifest (and the generated files
   it records).
-- Never bump or invent template versions — pins come from the kit's
+- Never bump or invent template versions — pins come from Agent Base's
   template registry verbatim.
 - Never track living state (tasks.md, handoff log, checklists) in the
   manifest.

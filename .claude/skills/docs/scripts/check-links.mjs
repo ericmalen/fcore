@@ -2,8 +2,8 @@
 // check-links.mjs — resolve every relative Markdown link in a repo's docs.
 //
 // Ships with the `docs` skill so the restructure procedure has a concrete
-// link check in any adopted repo (the kit's own docs-consistency tool stays
-// kit-side; the setup audit only covers AI-config surfaces, not docs/).
+// link check in any adopted repo (Agent Base's own docs-consistency tool stays
+// Agent Base-side; the setup audit only covers AI-config surfaces, not docs/).
 //
 // Walks *.md under the repo (skipping junk dirs), resolves each relative link
 // target against the filesystem, and reports the ones that don't exist.

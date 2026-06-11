@@ -12,7 +12,7 @@
 //   { node, op: "supersede", catalogSkill, note? }
 //   { file, op: "out-of-scope", reason }            — sweep candidate ruled non-instructional
 // Plus:
-//   jsonMerges: [ { file, base } ]                  — key-level merge against kit template
+//   jsonMerges: [ { file, base } ]                  — key-level merge against Agent Base template
 //   installs:   [ { file, template } | { file, literal } ]
 //     — static file instantiation (starter template install: shim, settings, marker,
 //       READMEs). Template slot markers are stripped. Output-side only.
@@ -39,7 +39,7 @@ const ALLOWED_TARGET_PATTERNS = [
 ];
 
 export function isAllowedTarget(path, inventoriedPaths = null) {
-  // Any kit-canonical target location, or any recognized AI-config surface
+  // Any Agent Base-canonical target location, or any recognized AI-config surface
   // (the scope invariant is "no writes outside AI-config surfaces" — whether a
   // given surface SHOULD exist after setup is the audit's layer, not check's).
   // Inventoried source files are also valid targets: forced-include MIXED files
@@ -119,7 +119,7 @@ export function validateShape(manifest) {
 
   for (const [i, jm] of (manifest.jsonMerges ?? []).entries()) {
     if (!jm.file) errors.push(`jsonMerges[${i}]: requires "file"`);
-    if (!jm.base) errors.push(`jsonMerges[${i}]: requires "base" (kit template path)`);
+    if (!jm.base) errors.push(`jsonMerges[${i}]: requires "base" (Agent Base template path)`);
   }
 
   for (const [i, ins] of (manifest.installs ?? []).entries()) {

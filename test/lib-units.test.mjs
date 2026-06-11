@@ -127,15 +127,15 @@ test('validateShape: jsonMerges and installs shapes', () => {
   };
   assert.deepEqual(validateShape(manifest), [
     'jsonMerges[0]: requires "file"',
-    'jsonMerges[0]: requires "base" (kit template path)',
+    'jsonMerges[0]: requires "base" (Agent Base template path)',
     'installs[0]: requires "file"',
     'installs[0]: requires "template" or "literal"',
     'installs[1]: "template" and "literal" are mutually exclusive',
   ]);
 });
 
-test('isAllowedTarget: kit-canonical and AI-surface targets pass, code paths do not', () => {
-  // kit-canonical target patterns
+test('isAllowedTarget: Agent Base-canonical and AI-surface targets pass, code paths do not', () => {
+  // Agent Base-canonical target patterns
   assert.equal(isAllowedTarget('AGENTS.md'), true);
   assert.equal(isAllowedTarget('packages/api/AGENTS.md'), true); // nested compat
   assert.equal(isAllowedTarget('.claude/skills/docs/SKILL.md'), true);

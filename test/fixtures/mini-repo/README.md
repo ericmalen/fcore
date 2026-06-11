@@ -1,7 +1,7 @@
 # mini-repo (test fixture)
 
 Tiny zero-dependency word-count CLI; single package, no workspaces. Fixture
-for orchestration-kit repo-agnosticism checks (deliberately different
+for orchestration repo-agnosticism checks (deliberately different
 conventions from maxi-repo).
 
 Usage: `node src/cli_main.mjs --top 5 notes.txt`

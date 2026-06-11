@@ -5,8 +5,8 @@ description: Runs the full agent-base setup validation end-to-end — builds fix
 
 # validate-setup
 
-One command, zero choreography. Run FROM the agent-base repo (this clone is the
-kit). The user only reads the final report.
+One command, zero choreography. Run FROM the agent-base repo (this clone is
+Agent Base). The user only reads the final report.
 
 Arguments (parse from the user's message): fixture names, `all` (default:
 `mixed-messy`), `--sabotage` (default ON for mixed-messy), `--keep` (retain
@@ -20,10 +20,10 @@ when no recognizable fixture/flag is present.
 
 ## Procedure
 
-1. Workspace: `WORK=~/aikit-validation/<YYYYMMDD-HHMM>`; record kit SHA.
+1. Workspace: `WORK=~/agent-base-validation/<YYYYMMDD-HHMM>`; record Agent Base SHA.
 2. For EACH fixture, sequentially:
-   a. `node <kit>/scripts/build-fixture.mjs <name> $WORK/fx-<name>`
-   b. `node <kit>/scripts/install-setup.mjs $WORK/fx-<name>`, then commit
+   a. `node <agent-base>/scripts/build-fixture.mjs <name> $WORK/fx-<name>`
+   b. `node <agent-base>/scripts/install-setup.mjs $WORK/fx-<name>`, then commit
       ("chore: agent-base setup tooling") in the fixture.
    c. Run the four phases, EACH as a fresh-context subagent whose prompt is:
       "Read <fixtureDir>/.claude/skills/base-<phase>/SKILL.md and execute its
@@ -34,7 +34,7 @@ when no recognizable fixture/flag is present.
       You (orchestrator) record each subagent's summary, gate contents, any
       escalations, and the iteration counts it reports.
    d. Mechanical verdict:
-      `node <kit>/scripts/validate-assert.mjs --fixture <name> --dir $WORK/fx-<name> --json`
+      `node <agent-base>/scripts/validate-assert.mjs --fixture <name> --dir $WORK/fx-<name> --json`
    e. On assertion failure: capture details, continue with remaining fixtures
       (never abort the matrix for one failure).
 
@@ -48,14 +48,14 @@ when no recognizable fixture/flag is present.
 3. Sabotage (mixed-messy only, after its clean run): follow
    [sabotage procedure](references/sabotage.md) — 3 seeded defects, fresh
    verifier subagent per defect, record caught/missed. Catch-rate = n/3.
-4. Report → `<kit>/reports/validation-report-<date>.md` (create `reports/`
+4. Report → `<agent-base>/reports/validation-report-<date>.md` (create `reports/`
    if missing; it is gitignored — reports are working outputs, never committed):
    per-fixture table (phases completed, gate loops, assert verdict, sentinel
    accounting, merged-bytes %), sabotage catch-rate, ALL escalations gathered
-   for the human, environment (tool, model, kit SHA), and a plain-language
+   for the human, environment (tool, model, Agent Base SHA), and a plain-language
    verdict against the pivot triggers. Honest caveat in the
    header: this validates the Claude Code column; Copilot runs are manual.
-5. TEARDOWN: after the report is written to the kit's reports/ —
+5. TEARDOWN: after the report is written to Agent Base's reports/ —
    - PASSING fixture dirs: `rm -rf` them.
    - FAILING fixture dirs: keep automatically for forensics; list their paths
      in the report so the user can inspect, then delete when done.

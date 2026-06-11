@@ -1,6 +1,6 @@
 # Orchestration first run
 
-A guided walkthrough using the kit's **fixture repos** — not a production
+A guided walkthrough using Agent Base's **fixture repos** — not a production
 project. You learn the five-session flow without touching a real codebase.
 
 ## What you need
@@ -41,7 +41,7 @@ Check `specialists[]` (one engineer per layer + reviewers), `dispatch_rules`
 
 ### 4. Dry-run generation
 
-From the kit root:
+From the Agent Base root:
 
 ```sh
 node -e "

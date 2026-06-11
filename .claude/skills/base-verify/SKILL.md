@@ -34,7 +34,7 @@ Preconditions: `check.mjs` and `audit.mjs` both exit 0 (re-run to confirm);
    KEEP the permanent baseline — the `base-check`, `docs`,
    `git-conventions`, `skill-creator`, and `agent-creator` skills; the
    orchestration lifecycle skills `retro`, `log-report`, and `eval-runner`;
-   the `docs-auditor` agent; and the kit marker.
+   the `docs-auditor` agent; and the Agent Base marker.
 6. **USER GATE 2:** present `.setup/report.md` content (from the last
    pre-removal commit), the verifier matrices, and review instructions:
    `git diff main...agent-base-setup --color-moved=zebra --find-copies-harder`

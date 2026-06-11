@@ -2,13 +2,13 @@
 
 How to run the teammate pilot that gates Phase F: one colleague takes a
 **real** repo through Discovery → Generation using **only the docs**, while
-the kit author observes and counts interventions. Pass bar: **≤ 2
+Agent Base author observes and counts interventions. Pass bar: **≤ 2
 interventions**.
 
 ## Roles and inputs
 
-- **Pilot:** a colleague with no prior exposure to the orchestration kit.
-- **Observer:** the kit author. Silent by default; answers questions only by
+- **Pilot:** a colleague with no prior exposure to Agent Base orchestration.
+- **Observer:** the Agent Base author. Silent by default; answers questions only by
   pointing at an existing doc section.
 - **Inputs the pilot gets, and nothing else:** an Agent Base clone at a tagged
   release, a real repo of their choice (already through `/base-setup`), and
@@ -42,13 +42,13 @@ gaps, not to pass.
 ## After the run
 
 File the completed report as `reports/orchestration-pilot-<repo>-<date>.md`
-(`reports/` is gitignored kit output). Then route **every** friction row per
+(`reports/` is gitignored Agent Base output). Then route **every** friction row per
 [`triage-rules`](../../templates/orchestration/docs/triage-rules.md):
 
 | Friction kind | Route |
 |---|---|
 | Doc gap / unclear passage | Patch the guide or [troubleshooting doc](./orchestration-troubleshooting.md) before the next pilot |
-| Template defect | Fix kit template, re-scaffold affected targets |
+| Template defect | Fix Agent Base template, re-scaffold affected targets |
 | Skill gap | Edit the meta-skill |
 | One-off in the generated repo | `retro` checklist item in that repo |
 
@@ -61,7 +61,7 @@ Phase F exits when **two** pilots have passed and one scheduled
 # Orchestration pilot — <repo> — <date>
 
 - Pilot: <name>  ·  Observer: <name>
-- Kit release: <tag>  ·  Repo shape: <layers/packages summary>
+- Agent Base release: <tag>  ·  Repo shape: <layers/packages summary>
 - Scope run: Sessions 1–4 [+ Session 5: yes/no]
 
 ## Result

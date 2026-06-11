@@ -12,7 +12,7 @@ import { readFileSync } from 'node:fs';
 import { ALL_INSTALL_COPIES } from './lib/baseline.mjs';
 import { buildMarker, writeMarker } from './lib/marker.mjs';
 
-const kitRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const baseRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const target = process.argv[2] ? resolve(process.argv[2]) : null;
 
 if (!target) {
@@ -34,13 +34,13 @@ if (major < 20) {
   process.exit(1);
 }
 
-const kitVersion = JSON.parse(readFileSync(join(kitRoot, 'package.json'), 'utf8')).version ?? '1.0.0';
+const baseVersion = JSON.parse(readFileSync(join(baseRoot, 'package.json'), 'utf8')).version ?? '1.0.0';
 
 for (const [src, dst] of ALL_INSTALL_COPIES) {
-  const from = join(kitRoot, src);
+  const from = join(baseRoot, src);
   const to = join(target, dst);
   if (!existsSync(from)) {
-    console.error(`install-setup: missing in kit: ${src} (incomplete clone?)`);
+    console.error(`install-setup: missing in Agent Base: ${src} (incomplete clone?)`);
     process.exit(1);
   }
   mkdirSync(dirname(to), { recursive: true });
@@ -52,7 +52,7 @@ for (const [src, dst] of ALL_INSTALL_COPIES) {
 const markerPath = join(target, '.claude/agent-base.json');
 if (!existsSync(markerPath)) {
   writeMarker(target, buildMarker({
-    standard: kitVersion,
+    standard: baseVersion,
     setupAt: new Date().toISOString().slice(0, 10),
     githubCodeReview: false,
   }));

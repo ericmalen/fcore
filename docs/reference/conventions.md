@@ -56,7 +56,7 @@ names (Copilot maps them):
 
 The copy shipped into targets lives in
 [`agent-creator/references/tool-tiers.md`](../../.claude/skills/agent-creator/references/tool-tiers.md)
-(kit docs are not installed); the two tables are kept in sync.
+(Agent Base docs are not installed); the two tables are kept in sync.
 
 ## File-naming conventions
 
@@ -76,7 +76,7 @@ Every setup installs the baseline skills (`base-check`, `docs`,
 lifecycle skills (`retro`, `log-report`, `eval-runner`) and the `docs-auditor`
 agent. The lifecycle skills are dormant until orchestration generation creates
 their surfaces (`docs/orchestration/`, generated agents). Orchestration
-discovery/generation meta-assets stay kit-side and run from a Agent Base clone against
+discovery/generation meta-assets stay Agent Base-side and run from an Agent Base clone against
 a target path — see [`spec/target-layout.md`](../../spec/target-layout.md).
 
 Directory- or layer-scoped conventions go in a path-scoped rules file at
@@ -95,7 +95,7 @@ files stay lean.
 ## Conformance tooling (and a name disambiguation)
 
 Conformance to these conventions is audited by the `base-check` skill: it
-runs `node <kit>/scripts/audit.mjs --root .` and fixes findings by rule ID
+runs `node <agent-base>/scripts/audit.mjs --root .` and fixes findings by rule ID
 (usage tips: [`workflow-tips.md`](../how-to/workflow-tips.md#keeping-the-config-conformant)).
 Despite the similar names, `scripts/check.mjs` is unrelated — it enforces the
 manifest gates during setup phase 3, while the `base-check` skill is the

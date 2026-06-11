@@ -59,7 +59,7 @@ export function checkRootInstructions(ctx) {
     }
   } else if (ciText != null) {
     out.push(F('R-09', 'info', '.github/copilot-instructions.md',
-      'Present, but no recorded code-review stance in the kit marker — record githubCodeReview true/false.'));
+      'Present, but no recorded code-review stance in the Agent Base marker — record githubCodeReview true/false.'));
   }
 
   return out;

@@ -42,14 +42,14 @@ export function isSetupTooling(rel) {
 }
 
 // Vendored third-party assets — an UPSTREAM provenance marker beside SKILL.md
-// means the skill is held to upstream's conventions, not the kit's. The audit
+// means the skill is held to upstream's conventions, not Agent Base's. The audit
 // skips style rules (R-20..R-25) for these; load-critical rules still apply.
 export function isVendored(root, rel) {
   return existsSync(join(root, dirname(rel), 'UPSTREAM'));
 }
 
 // Template payload skeletons — files carrying agent-base slot/optional markers are
-// kit payload, not live configuration; live-config checks skip them
+// Agent Base payload, not live configuration; live-config checks skip them
 // (spec/rules.md: Audit exemptions).
 export function isPayloadSkeleton(text) {
   return /<!--\s*agent-base:(slot|optional)/.test(text ?? '');
@@ -129,7 +129,7 @@ export function finding(rule, severity, file, message, extra = {}) {
   return { rule, severity, file, message, ...extra };
 }
 
-// Read the kit marker (.claude/agent-base.json). Returns {} when absent/unparseable.
+// Read the Agent Base marker (.claude/agent-base.json). Returns {} when absent/unparseable.
 export function readMarker(root) {
   const text = readSafe(join(root, '.claude', 'agent-base.json'));
   if (!text) return { present: false };

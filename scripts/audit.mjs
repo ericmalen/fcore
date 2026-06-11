@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // audit — target-state conformance, findings keyed by rule ID (spec/rules.md).
-// Closed world only: checks the kit-defined target state, never classifies inputs.
+// Closed world only: checks Agent Base-defined target state, never classifies inputs.
 //
 // Usage: node scripts/audit.mjs [--root <dir>] [--json] [--strict]
 // Exit:  0 = pass · 1 = findings above threshold (errors; with --strict, any)

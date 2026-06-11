@@ -120,7 +120,7 @@ Index READMEs for the live `.claude/` config:
 - [`.claude/skills/README.md`](./.claude/skills/README.md) — setup, baseline, and orchestration meta-skills.
 
 Orchestration assets: `templates/orchestration/` (agent/skill/doc templates),
-`scripts/lib/orchestration/` (validators and scaffold), kit-side entry skill
+`scripts/lib/orchestration/` (validators and scaffold), Agent Base-side entry skill
 [`base-orchestrate`](./.claude/skills/base-orchestrate/SKILL.md). Build-plan
 history: [`notes/agent-orchestration-plan.md`](./notes/agent-orchestration-plan.md).
 

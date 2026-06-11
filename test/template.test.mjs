@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { stripEmptyOptionalSections, instantiate } from '../scripts/lib/template.mjs';
 
-const KIT_ROOT = new URL('..', import.meta.url).pathname;
+const BASE_ROOT = new URL('..', import.meta.url).pathname;
 
 const TPL = [
   '# Title',
@@ -52,7 +52,7 @@ test('no optional markers → text is returned unchanged', () => {
 });
 
 test('starter AGENTS template drops Overview/Architecture, keeps Do Not + More Context footer', () => {
-  const tpl = readFileSync(join(KIT_ROOT, 'templates', 'instructions', 'AGENTS.md'), 'utf8');
+  const tpl = readFileSync(join(BASE_ROOT, 'templates', 'instructions', 'AGENTS.md'), 'utf8');
   const out = instantiate(tpl); // starter: nothing filled
   for (const gone of ['## Overview', '## Architecture']) {
     assert.ok(!out.includes(gone), `${gone} should be removed in starter`);

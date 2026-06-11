@@ -11,7 +11,7 @@ and where it does not. No silent divergence — gaps are explicit.
 | Orchestration state | `docs/orchestration/*`, `tasks.md` |
 | Subagent dispatch | Orchestrator delegates specialists in-session |
 | Lifecycle skills | `retro`, `log-report`, `eval-runner` |
-| Kit scripts | Node validators and scaffold (allowlist when prompted) |
+| Agent Base scripts | Node validators and scaffold (allowlist when prompted) |
 
 Discovery and generation (`/base-orchestrate`) should **attempt** subagent
 dispatch in Copilot the same as Claude Code. If subagent dispatch fails, run
@@ -57,7 +57,7 @@ approval behavior use VS Code settings. Setup wires the shared subset; see
 ## Practical guidance for Copilot users
 
 1. Adopt the project first (`/base-setup`).
-2. Run `/base-orchestrate` from the Agent Base clone; allowlist `node` on kit
+2. Run `/base-orchestrate` from the Agent Base clone; allowlist `node` on Agent Base
    scripts when prompted.
 3. After generation, open the **target** and invoke `feature-orchestrator` on
    `tasks.md` items — expect in-session dispatch even for wide scopes.

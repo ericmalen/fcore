@@ -18,11 +18,11 @@ with shared dispatch rules and a handoff log.
 
 | Layer | Where it runs | Semantic? | Output |
 | --- | --- | --- | --- |
-| Discovery | Kit clone → target `docs/orchestration/` | Yes — profiling, interview, synthesis | `repo-profile.json`, `decisions.json`, `blueprint.json` |
-| Generation | Kit clone → target `.claude/` + docs | No — pure template slot fill | Generated agents, paired skills, payload docs, `generation-manifest.json` |
+| Discovery | Agent Base clone → target `docs/orchestration/` | Yes — profiling, interview, synthesis | `repo-profile.json`, `decisions.json`, `blueprint.json` |
+| Generation | Agent Base clone → target `.claude/` + docs | No — pure template slot fill | Generated agents, paired skills, payload docs, `generation-manifest.json` |
 | Execution | Project | Yes — orchestrator dispatches specialists | Commits, handoff log entries, PR at human gate |
 
-Discovery and generation meta-assets stay **kit-side** (same pattern as
+Discovery and generation meta-assets stay **Agent Base-side** (same pattern as
 `base-setup`). Only the generated agents and orchestration docs land in the
 target. See [`target-layout.md`](../../spec/target-layout.md#orchestration-layer-conditional).
 
@@ -64,7 +64,7 @@ evals gate template changes.
 
 - [Orchestration how-to](../how-to/orchestration-guide.md) — five-session flow
   and gates.
-- [Agents and skills reference](../reference/agents-and-skills.md) — kit-side
+- [Agents and skills reference](../reference/agents-and-skills.md) — Agent Base-side
   vs shipped vs generated inventory.
 - [First-run tutorial](../tutorials/orchestration-first-run.md) — walkthrough
-  on kit fixtures.
+  on Agent Base fixtures.

@@ -1,6 +1,6 @@
 ---
 name: retro
-description: Orchestration quality-flywheel intake — turns one shipped bug report or substantive review finding from an orchestration-generated repo into exactly one new item in that repo's docs/orchestration/checklists/review-checklist.md, which the generated code-reviewer applies on every review. Use when a bug or review finding from orchestration-generated work needs to feed the review checklist. Not for general retrospectives, kit-development bugs, or findings outside orchestration-generated repos; not for editing or reorganizing existing checklist items.
+description: Orchestration quality-flywheel intake — turns one shipped bug report or substantive review finding from an orchestration-generated repo into exactly one new item in that repo's docs/orchestration/checklists/review-checklist.md, which the generated code-reviewer applies on every review. Use when a bug or review finding from orchestration-generated work needs to feed the review checklist. Not for general retrospectives, Agent Base-development bugs, or findings outside orchestration-generated repos; not for editing or reorganizing existing checklist items.
 ---
 
 # retro
@@ -17,7 +17,7 @@ orchestration-generated repo, with enough detail to know what went wrong.
 
 ## Procedure
 
-1. **Triage first.** If the root cause is a defect in a kit template,
+1. **Triage first.** If the root cause is a defect in an Agent Base template,
    blueprint, or skill (the same flaw would be regenerated), say so and route
    the fix there — do NOT add a checklist item. The checklist is for review
    judgment, not for papering over generation defects.

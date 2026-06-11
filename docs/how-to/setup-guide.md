@@ -15,18 +15,18 @@ zero-dependency Node invoked as `node <script>.mjs` (shell-agnostic, no
 bash required); the only external command it spawns is `git`. The CI
 templates run on hosted Ubuntu runners, not your machine.
 
-You never type a terminal command. The AI clones the kit, installs the
+You never type a terminal command. The AI clones Agent Base, installs the
 tooling, and runs every script itself.
 
 ## Starting a NEW project (starter)
 
-Emit the clean target state directly from a Agent Base clone:
+Emit the clean target state directly from an Agent Base clone:
 
 ```sh
 node ~/tools/agent-base/scripts/build-starter.mjs /path/to/new-repo --git
 ```
 
-Fill in AGENTS.md and you're done. No AI session required. (The kit's CI
+Fill in AGENTS.md and you're done. No AI session required. (Agent Base's CI
 publishes the same output as a build artifact named `starter`, if you'd
 rather download than run the script.)
 
@@ -45,7 +45,7 @@ orchestration lifecycle skills `retro`, `log-report`, and `eval-runner`
 (dormant until orchestration generation creates their surfaces); and the
 `docs-auditor` agent.
 
-**Repeat users:** keep a Agent Base clone (`git clone <url> ~/tools/agent-base`), open
+**Repeat users:** keep an Agent Base clone (`git clone <url> ~/tools/agent-base`), open
 it in your tool, and say `/base-setup /path/to/repo`. The skill freshens
 the clone, installs the tooling into the target, and orchestrates all four
 phases from there.

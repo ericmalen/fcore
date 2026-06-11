@@ -163,7 +163,7 @@ test('C5: template improvement → version bump → regenerated file, no conflic
   const v1Manifest = manifestFor(v1.files);
   const disk = new Map(v1.files.map((f) => [f.path, f.content]));
 
-  // kit-side template improvement, registry updated in the same change
+  // Agent Base-side template improvement, registry updated in the same change
   const improved = readTemplate('agent', 'generic-specialist') + '\n<!-- improved guidance -->\n';
   const sha = (t) => createHash('sha256').update(t, 'utf8').digest('hex');
   const bumpedRegistry = JSON.parse(JSON.stringify(registry));

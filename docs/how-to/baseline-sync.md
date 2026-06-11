@@ -42,7 +42,7 @@ node /path/to/agent-base/scripts/sync-baseline.mjs --check
 # Bot-friendly JSON plan (files to update, conflicts)
 node /path/to/agent-base/scripts/sync-baseline.mjs --report --json
 
-# Apply safe updates (skips files with local edits vs old kit)
+# Apply safe updates (skips files with local edits vs the old release)
 node /path/to/agent-base/scripts/sync-baseline.mjs --upgrade
 
 # Preview only
@@ -54,7 +54,7 @@ Use `--allow-major` to consider the latest tag across major versions.
 During development, point at a local clone:
 
 ```sh
-node ~/tools/agent-base/scripts/sync-baseline.mjs --check --kit-root ~/tools/agent-base
+node ~/tools/agent-base/scripts/sync-baseline.mjs --check --base-root ~/tools/agent-base
 ```
 
 ## What gets synced
@@ -71,9 +71,9 @@ never touched.
 
 For each baseline file:
 
-- Matches old kit, differs on new kit → **auto-update**
-- Matches new kit already → **unchanged**
-- Differs from both old and new kit → **conflict** (human resolves, then re-run)
+- Matches the old release, differs on the new release → **auto-update**
+- Matches the new release already → **unchanged**
+- Differs from both old and new release → **conflict** (human resolves, then re-run)
 
 This is the polished version of “pull from source” — not silent auto-sync.
 

@@ -1,17 +1,17 @@
 ---
 name: drift-checker
-description: Detects drift in an orchestration-generated project by re-instantiating every generation-manifest entry from the CURRENT kit templates plus the stored blueprint and comparing sha256 digests, and by re-rendering decisions.md — separating TEMPLATE-DRIFT (kit template moved on; remedy is re-scaffold) from USER-EDIT (generated file or rendered companion touched on disk; remedy is human conflict resolution). Use when checking whether a target's generated agents, skills, docs, or decisions.md still match what generation would produce today. Not git diff, not the agent-base setup reproducibility audit, and not for repos without docs/orchestration/generation-manifest.json.
+description: Detects drift in an orchestration-generated project by re-instantiating every generation-manifest entry from the CURRENT Agent Base templates plus the stored blueprint and comparing sha256 digests, and by re-rendering decisions.md — separating TEMPLATE-DRIFT (Agent Base template moved on; remedy is re-scaffold) from USER-EDIT (generated file or rendered companion touched on disk; remedy is human conflict resolution). Use when checking whether a target's generated agents, skills, docs, or decisions.md still match what generation would produce today. Not git diff, not the agent-base setup reproducibility audit, and not for repos without docs/orchestration/generation-manifest.json.
 ---
 
 # drift-checker
 
-Compares a generated target against what the CURRENT kit templates plus the
+Compares a generated target against what the CURRENT Agent Base templates plus the
 target's stored `docs/orchestration/blueprint.json` would produce, using the
 SHA-256 record in `docs/orchestration/generation-manifest.json`. Two drift
 kinds, ALWAYS reported separately — they have different remedies:
 
 - **TEMPLATE-DRIFT** — re-instantiated content differs from the manifest
-  SHA, but the file on disk still equals it: the kit template moved on.
+  SHA, but the file on disk still equals it: the Agent Base template moved on.
   Remedy: re-scaffold (re-run the instantiators, refresh the manifest).
 - **USER-EDIT** — the file on disk differs from the manifest SHA (or is
   missing): someone touched a generated file. Remedy: human conflict
@@ -34,7 +34,7 @@ Slot maps for re-instantiation, paired via
 - **skills** (`.claude/skills/<id>/SKILL.md`) — the OWNING specialist's
   `slots` only, no quartet; the owner is the specialist whose `pairedSkills`
   lists that skill id in the blueprint.
-- **docs** — verbatim copies; hash the kit doc file directly.
+- **docs** — verbatim copies; hash the Agent Base doc file directly.
 
 From the Agent Base clone root, target path as the argument:
 

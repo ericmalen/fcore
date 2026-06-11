@@ -1,6 +1,6 @@
 ---
 name: skill-instantiator
-description: Orchestration generation step — for one blueprint specialist, instantiates each skill listed in entry.pairedSkills via pure slot substitution from the kit template registry, writing SKILL.md files into the project's .claude/skills/. Zero authoring; the same blueprint always yields byte-identical output. Use when an orchestration blueprint.json has passed the handoff gate and a specialist's paired skills must be materialized into a project. Not for creating or designing new skills (use skill-creator), not for instantiating agents (use agent-instantiator), not for agent-base setup materialization, and not for any skill work outside orchestration generation.
+description: Orchestration generation step — for one blueprint specialist, instantiates each skill listed in entry.pairedSkills via pure slot substitution from the Agent Base template registry, writing SKILL.md files into the project's .claude/skills/. Zero authoring; the same blueprint always yields byte-identical output. Use when an orchestration blueprint.json has passed the handoff gate and a specialist's paired skills must be materialized into a project. Not for creating or designing new skills (use skill-creator), not for instantiating agents (use agent-instantiator), not for agent-base setup materialization, and not for any skill work outside orchestration generation.
 ---
 
 # skill-instantiator
@@ -76,7 +76,7 @@ On ANY error (missing specialist, missing registry, missing template, drifted
 sha256 pin, unfilled/unused/malformed slot): stop and report the error-string
 array verbatim. Never write partial output — all paired skills validate
 before any file is written; never hand-patch templates, slots, or generated
-files. Fixes belong upstream in the blueprint or the kit template.
+files. Fixes belong upstream in the blueprint or the Agent Base template.
 
 ## Contract
 

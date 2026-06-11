@@ -27,7 +27,7 @@ function setup(fixture) {
 
 function writeManifest(repo, manifest) {
   writeFileSync(join(repo, '.setup', 'manifest.json'),
-    JSON.stringify({ schemaVersion: 1, kitVersion: '1.0.0', jsonMerges: [], ...manifest }, null, 2));
+    JSON.stringify({ schemaVersion: 1, baseVersion: '1.0.0', jsonMerges: [], ...manifest }, null, 2));
 }
 
 // Identity manifest: every node moves back to its own source file, in order;
@@ -149,7 +149,7 @@ test('slot assembly: nodes land under template headings, markers vanish, source 
     assert.ok(agents.includes('SENTINEL-001-amber-falcon'), 'h1 section moved to intro slot');
     // source CLAUDE.md deleted (fully dispositioned, not a target)
     assert.ok(!existsSync(join(repo, 'CLAUDE.md')));
-    // json key-merge: kit keys won, no comments, valid JSON
+    // json key-merge: template keys won, no comments, valid JSON
     const vs = JSON.parse(readFileSync(join(repo, '.vscode/settings.json'), 'utf8'));
     assert.equal(vs['chat.useAgentsMdFile'], true);
     assert.equal(vs['explorer.fileNesting.patterns']['AGENTS.md'], 'CLAUDE.md');
@@ -161,7 +161,7 @@ test('slot assembly: nodes land under template headings, markers vanish, source 
   }
 });
 
-test('json key-merge preserves source-only keys, kit keys win', () => {
+test('json key-merge preserves source-only keys, template keys win', () => {
   const { repo, inv } = setup('adversarial'); // has mixed AI/non-AI vscode settings
   try {
     const entries = inv.files.map((f) => ({ file: f.path, op: 'keep-file' }))
@@ -177,7 +177,7 @@ test('json key-merge preserves source-only keys, kit keys win', () => {
     const vs = JSON.parse(readFileSync(join(repo, '.vscode/settings.json'), 'utf8'));
     assert.equal(vs['editor.fontSize'], 13, 'source-only key preserved');
     assert.equal(vs['workbench.colorTheme'], 'Default Dark');
-    assert.equal(vs['chat.useClaudeMdFile'], false, 'kit key enforced');
+    assert.equal(vs['chat.useClaudeMdFile'], false, 'template key enforced');
   } finally {
     rmSync(repo, { recursive: true, force: true });
   }

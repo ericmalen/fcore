@@ -10,7 +10,7 @@ You orchestrate discovery and generation from an open **Agent Base clone** again
 a **set-up project** path. The user interacts only at policy gates and final
 merge review. Phases run in FRESH contexts.
 
-Kit-side only — `install-setup.mjs` never ships this skill.
+Agent Base-side only — `install-setup.mjs` never ships this skill.
 
 ## Preconditions (hard — stop with plain language if unmet)
 
@@ -20,14 +20,14 @@ Kit-side only — `install-setup.mjs` never ships this skill.
    `base-check` skill). If missing, tell the user to run `/base-setup`
    first.
 4. `node --version` >= 20.
-5. Kit clone freshened: `git pull --ff-only` (warn and continue on failure).
+5. Agent Base clone freshened: `git pull --ff-only` (warn and continue on failure).
 
 ## Procedure
 
 1. Obtain target path from the argument or ask.
 2. **Claude Code:** dispatch each phase below as a subagent with a fresh
    context. Prompt template: "You are `<agent-name>`. Read
-   `<kit>/.claude/agents/<agent-name>.md` and execute its procedures for
+   `<agent-base>/.claude/agents/<agent-name>.md` and execute its procedures for
    target `<path>`." Relay summaries to the user.
    **Copilot:** attempt the same; if subagent dispatch fails, hand the user
    the session table from `docs/how-to/orchestration-guide.md` and execute
@@ -60,7 +60,7 @@ conventional message (e.g. `chore(orchestration): add repo profile`). Use
 
 - Never run discovery/generation with the Agent Base clone as the target.
 - Never skip Gate 1 or Gate 2.
-- Never hand-edit generated agents in the target — fix the blueprint or kit
+- Never hand-edit generated agents in the target — fix the blueprint or Agent Base
   template and re-run `scaffolder`.
 - Never instantiate templates yourself when `scaffolder` is the assigned phase
   — delegate to that agent's procedure.

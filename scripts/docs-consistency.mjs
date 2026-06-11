@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-// docs-consistency.mjs — guards kit docs against vocabulary drift.
+// docs-consistency.mjs — guards Agent Base docs against vocabulary drift.
 //
 // Two checks, zero dependencies:
 //   1. Banned terms: v1 CLI / dropped-surface vocabulary must not reappear in
 //      consumer-facing prose (spec/ is exempt — it DEFINES the dropped
 //      surfaces).
-//   2. Relative Markdown links resolve to existing files (the kit's own docs
+//   2. Relative Markdown links resolve to existing files (Agent Base's own docs
 //      are not covered by the R-07 audit, which checks adopted-repo surfaces).
 //
 // Usage: node scripts/docs-consistency.mjs [--root <dir>] [--json]
@@ -32,7 +32,6 @@ export const BANNED_TERMS = [
   "ai-kit-adopt",
   "ai-kit-check",
   "ai-kit-orchestrate",
-  "kit clone",
   "factory, not the house",
   "/optimize",
   "/migrate",
@@ -46,6 +45,15 @@ export const BANNED_TERMS = [
   "catalog/", // retired v1 zone (assets live under .claude/ now)
 ];
 
+// Regex-banned vocabulary: bare "kit"/"kits" as a word — retired with the
+// Agent Base rename ("kit clone", "kit-side", "orchestration kit", …).
+// Underscores are word chars, so the legacy $AI_KIT_HOME env var never matches;
+// the legacy `--kit-root` flag alias DOES match and needs an ALLOW entry where
+// documented.
+export const BANNED_PATTERNS = [
+  { re: /\bkits?\b/i, term: "kit (bare)" },
+];
+
 // (file, term) pairs that are deliberately allowed.
 export const ALLOW = new Set([
   // documents the VS Code BUILT-IN /create-prompt, annotated as out-of-surface (R-54)
@@ -54,7 +62,8 @@ export const ALLOW = new Set([
   "docs/reference/terminology.md ai-kit",
   "docs/reference/terminology.md greenfield",
   "docs/reference/terminology.md brownfield",
-  "docs/reference/terminology.md kit clone",
+  // retired-term glossary lists bare "kit" and the legacy flag aliases on purpose
+  "docs/reference/terminology.md kit (bare)",
 ]);
 
 const SCAN_DIRS = ["docs", "templates", ".claude"];
@@ -102,6 +111,11 @@ export function checkBannedTerms(root, files) {
     lines.forEach((line, i) => {
       for (const term of BANNED_TERMS) {
         if (line.includes(term) && !ALLOW.has(rel + " " + term)) {
+          findings.push({ check: "banned-term", file: rel, line: i + 1, term });
+        }
+      }
+      for (const { re, term } of BANNED_PATTERNS) {
+        if (re.test(line) && !ALLOW.has(rel + " " + term)) {
           findings.push({ check: "banned-term", file: rel, line: i + 1, term });
         }
       }
