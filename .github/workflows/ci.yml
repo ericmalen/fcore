@@ -6,11 +6,31 @@ name: ci
 on:
   push:
     branches: ['**']
+    tags: ['v*']
   pull_request:
     branches: ['**']
 permissions:
   contents: read
 jobs:
+  # Release tag gate — a vX.Y.Z tag must match package.json before consumers
+  # can pin it (see docs/how-to/release-baseline.md). The full ci job below
+  # also runs on the tag, so the released starter is audit-clean too.
+  tag-gate:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Tag matches package.json version
+        run: |
+          set -euo pipefail
+          VER="$(node -p "require('./package.json').version")"
+          if [ "${GITHUB_REF_NAME}" != "v${VER}" ]; then
+            echo "::error title=Release tag mismatch::tag ${GITHUB_REF_NAME} does not match package.json v${VER}"
+            exit 1
+          fi
   ci:
     runs-on: ubuntu-latest
     steps:

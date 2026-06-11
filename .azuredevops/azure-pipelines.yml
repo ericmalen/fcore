@@ -11,6 +11,8 @@
 trigger:
   branches:
     include: ['*']
+  tags:
+    include: ['v*']
 # NOTE: Azure Repos Git ignores YAML `pr:` triggers — PR validation requires a
 # branch build-validation policy pointing at this pipeline (the block below is
 # honored only when this YAML runs against a GitHub-hosted repo).
@@ -26,6 +28,18 @@ steps:
     inputs:
       versionSpec: '22.x'
     displayName: Use Node 22
+  # Release tag gate — a vX.Y.Z tag must match package.json before consumers
+  # can pin it (see docs/how-to/release-baseline.md).
+  - bash: |
+      set -euo pipefail
+      VER="$(node -p "require('./package.json').version")"
+      TAG="${BUILD_SOURCEBRANCH#refs/tags/}"
+      if [ "$TAG" != "v$VER" ]; then
+        echo "##vso[task.logissue type=error]release tag $TAG does not match package.json v$VER"
+        exit 1
+      fi
+    displayName: tag gate — tag matches package.json
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
   - bash: npm test
     displayName: Unit tests
   - bash: node scripts/rule-check-map.mjs

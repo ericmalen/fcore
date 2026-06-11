@@ -96,6 +96,7 @@ while working on Agent Base itself. Payload is cargo, not config. Rationale:
 
 - [`docs/how-to/setup-guide.md`](./docs/how-to/setup-guide.md) — setting up a project.
 - [`docs/how-to/baseline-sync.md`](./docs/how-to/baseline-sync.md) — release pins and baseline upgrades.
+- [`docs/how-to/release-baseline.md`](./docs/how-to/release-baseline.md) — cutting a tagged release (maintainers).
 - [`docs/how-to/orchestration-guide.md`](./docs/how-to/orchestration-guide.md) — optional multi-agent team generation.
 - [`docs/reference/terminology.md`](./docs/reference/terminology.md) — canonical vocabulary.
 - [`docs/how-to/cross-tool-setup.md`](./docs/how-to/cross-tool-setup.md) — how one set of
