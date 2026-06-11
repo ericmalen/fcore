@@ -11,7 +11,9 @@ path in, that specialist's paired skill files out. Pairing comes from
 — skills whose `pairsWith` equals `entry.templateId`. Zero pairs is normal:
 report "none" and stop. The engine is
 [instantiate.mjs](../../../scripts/lib/orchestration/instantiate.mjs) (strict
-inline slot substitution).
+inline slot substitution). Each template's sha256 pin in the registry is
+verified before substituting — generating from a template that drifted from
+its pin would produce a file no manifest version describes (C5).
 
 ## Inputs
 
@@ -31,6 +33,7 @@ inline slot substitution).
    ```
    node --input-type=module -e '
    import { readFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
+   import { createHash } from "node:crypto";
    import { instantiateTemplate } from "./scripts/lib/orchestration/instantiate.mjs";
    const [bpPath, agentName, target] = process.argv.slice(1);
    const bp = JSON.parse(readFileSync(bpPath, "utf8"));
@@ -45,7 +48,12 @@ inline slot substitution).
    for (const skillId of paired) {
      const tplPath = `templates/orchestration/skills/${skillId}.template.md`;
      if (!existsSync(tplPath)) { fails.push(`missing template ${tplPath}`); continue; }
-     const { content, errors } = instantiateTemplate(readFileSync(tplPath, "utf8"), entry.slots);
+     const source = readFileSync(tplPath, "utf8");
+     const pin = reg.skills[skillId].sha256;
+     if (pin && createHash("sha256").update(source, "utf8").digest("hex") !== pin) {
+       fails.push(`skill template ${skillId}: source drifted from registry pin — bump version and update sha256`); continue;
+     }
+     const { content, errors } = instantiateTemplate(source, entry.slots);
      if (errors.length) fails.push(`${skillId}:\n  ` + errors.join("\n  "));
      else outputs.push([skillId, content]);
    }
@@ -64,14 +72,24 @@ inline slot substitution).
 
 ## Error discipline
 
-On ANY error (missing specialist, missing registry, missing template,
-unfilled/unused/malformed slot): stop and report the error-string array
-verbatim. Never write partial output — all paired skills validate before any
-file is written; never hand-patch templates, slots, or generated files. Fixes
-belong upstream in the blueprint or the kit template.
+On ANY error (missing specialist, missing registry, missing template, drifted
+sha256 pin, unfilled/unused/malformed slot): stop and report the error-string
+array verbatim. Never write partial output — all paired skills validate
+before any file is written; never hand-patch templates, slots, or generated
+files. Fixes belong upstream in the blueprint or the kit template.
 
 ## Contract
 
 Deterministic: the same specialist entry against the same registry and
-template versions produces byte-identical output on every run. Repeat runs
-are safe overwrites, never merges.
+template versions produces byte-identical output on every run — so re-running
+against unchanged templates is a no-op overwrite, never a merge.
+
+This step does NOT update `generation-manifest.json` (scaffolder-owned) and
+does NOT check for user edits the way regeneration does. Two consequences:
+
+- If a target's generated skill file was hand-edited, re-instantiating
+  clobbers the edit silently — check `drift-checker` first when in doubt.
+- If a template's version was bumped since the last scaffold, the rewritten
+  file will no longer match its manifest sha256 and drift-checker will
+  misread it as USER-EDIT. After a template bump, re-scaffold (which refreshes
+  the manifest) instead of single-asset re-instantiation.

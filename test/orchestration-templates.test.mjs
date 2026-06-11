@@ -1,12 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { spawnSync } from 'node:child_process';
 
 import { instantiateTemplate } from '../scripts/lib/orchestration/instantiate.mjs';
 import { renderDispatchOrder } from '../scripts/lib/orchestration/dispatch-order.mjs';
 import { validateGenerationManifest, validateTaskBacklog } from '../scripts/lib/orchestration/schemas.mjs';
 import { parseTasksMd } from '../scripts/lib/orchestration/parse-tasks.mjs';
+import { planGeneration } from '../scripts/lib/orchestration/scaffold.mjs';
 
 const FIXTURES = join(import.meta.dirname, 'fixtures', 'orchestration');
 const TEMPLATES = join(import.meta.dirname, '..', 'templates', 'orchestration', 'agents');
@@ -99,6 +102,86 @@ test('C1 lint: every shipped template is referenced by at least one fixture blue
     .map((f) => f.replace('.template.md', ''));
   for (const id of shipped) {
     assert.ok(referenced.has(id), `template ${id} is orphaned — no fixture blueprint references it`);
+  }
+});
+
+// ── C3: instantiator skill parity ───────────────────────────────────────────
+// Each instantiator skill embeds its own node -e script (hand-duplicating
+// the scaffolder's slot derivation and pairing), so it can silently drift
+// from scaffold.mjs — e.g. a new injected slot added to agentSlotMap but not
+// to the skill. These run the embedded scripts verbatim and assert
+// byte-parity with planGeneration.
+
+const ROOT = join(import.meta.dirname, '..');
+
+const embeddedScript = (skillName) => {
+  const md = readFileSync(join(ROOT, '.claude', 'skills', skillName, 'SKILL.md'), 'utf8');
+  const m = md.match(/node --input-type=module -e '\n([\s\S]*?)\n\s*' <blueprint\.json>/);
+  assert.ok(m, `embedded script block not found in ${skillName}/SKILL.md`);
+  return m[1];
+};
+
+const planMaxi = () => {
+  const bp = loadFixture('maxi-repo.blueprint.json');
+  const readTemplate = (kind, id) => {
+    const dir = kind === 'agent' ? 'agents' : kind === 'skill' ? 'skills' : 'docs';
+    const file = kind === 'doc' ? `${id}.md` : `${id}.template.md`;
+    const p = join(ROOT, 'templates', 'orchestration', dir, file);
+    return existsSync(p) ? readFileSync(p, 'utf8') : null;
+  };
+  const { files, errors } = planGeneration(bp, registry, readTemplate);
+  assert.deepEqual(errors, []);
+  return { bp, files };
+};
+
+const runEmbedded = (script, agentName, target) => {
+  const res = spawnSync(
+    process.execPath,
+    ['--input-type=module', '-e', script, join(FIXTURES, 'maxi-repo.blueprint.json'), agentName, target],
+    { cwd: ROOT, encoding: 'utf8' },
+  );
+  assert.equal(res.status, 0, `script failed for ${agentName}: ${res.stderr}`);
+  return res;
+};
+
+test('C3: agent-instantiator SKILL.md embedded script matches planGeneration byte-for-byte', () => {
+  const script = embeddedScript('agent-instantiator');
+  const { bp, files } = planMaxi();
+  const target = mkdtempSync(join(tmpdir(), 'agent-instantiator-parity-'));
+  try {
+    for (const name of [bp.specialists[0].name, bp.orchestrator.name]) {
+      runEmbedded(script, name, target);
+      const written = readFileSync(join(target, '.claude', 'agents', `${name}.md`), 'utf8');
+      const planned = files.find((f) => f.path === `.claude/agents/${name}.md`);
+      assert.equal(written, planned.content, `${name}: skill script output diverges from planGeneration`);
+    }
+  } finally {
+    rmSync(target, { recursive: true, force: true });
+  }
+});
+
+test('C3: skill-instantiator SKILL.md embedded script matches planGeneration byte-for-byte', () => {
+  const script = embeddedScript('skill-instantiator');
+  const { bp, files } = planMaxi();
+  const target = mkdtempSync(join(tmpdir(), 'skill-instantiator-parity-'));
+  try {
+    for (const specialist of bp.specialists) {
+      const res = runEmbedded(script, specialist.name, target);
+      const paired = Object.entries(registry.skills)
+        .filter(([, meta]) => meta.pairsWith === specialist.templateId)
+        .map(([id]) => id);
+      if (paired.length === 0) {
+        assert.match(res.stdout, /nothing to write/, `${specialist.name}: zero-pairs path should report and exit 0`);
+        continue;
+      }
+      for (const skillId of paired) {
+        const written = readFileSync(join(target, '.claude', 'skills', skillId, 'SKILL.md'), 'utf8');
+        const planned = files.find((f) => f.path === `.claude/skills/${skillId}/SKILL.md`);
+        assert.equal(written, planned.content, `${skillId}: skill script output diverges from planGeneration`);
+      }
+    }
+  } finally {
+    rmSync(target, { recursive: true, force: true });
   }
 });
 

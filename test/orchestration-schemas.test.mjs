@@ -197,6 +197,14 @@ test('validateBlueprint: malformed fixture — version pin tripwire, bad dispatc
   ]);
 });
 
+test('validateBlueprint: orchestrator name colliding with a specialist is rejected', () => {
+  const bp = loadFixture('maxi-repo.blueprint.json');
+  bp.orchestrator.name = bp.specialists[0].name;
+  assert.deepEqual(validateBlueprint(bp), [
+    `orchestrator.name "${bp.specialists[0].name}" collides with a specialist name`,
+  ]);
+});
+
 test('validateBlueprint: dispatch_order required ([] = unconstrained) and item-checked', () => {
   const missing = loadFixture('maxi-repo.blueprint.json');
   delete missing.dispatch_rules.dispatch_order;

@@ -221,6 +221,15 @@ export function validateBlueprint(blueprint) {
 
   checkAgentConfig(blueprint.orchestrator, 'orchestrator', e);
 
+  // The instantiators tell the orchestrator apart from specialists by name,
+  // and every agent lands at .claude/agents/<name>.md — a specialist sharing
+  // the orchestrator's name would collide on both counts.
+  if (Array.isArray(blueprint.specialists) && isPlainObject(blueprint.orchestrator)
+      && isNonEmptyString(blueprint.orchestrator.name)
+      && blueprint.specialists.some((s) => isPlainObject(s) && s.name === blueprint.orchestrator.name)) {
+    e(`orchestrator.name "${blueprint.orchestrator.name}" collides with a specialist name`);
+  }
+
   // Key names verbatim from §9.3 — the one snake_case island in the kit.
   const dr = blueprint.dispatch_rules;
   if (!isPlainObject(dr)) {
