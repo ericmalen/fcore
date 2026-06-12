@@ -30,7 +30,11 @@ installer from their base checkout first.
    rewrite node bytes and break the byte-exact repro gate)
 4. Report to the user: universe size, surfaces extracted → node count, sweep
    candidates needing triage, anything in `skipped[]` (skips must be surfaced,
-   never glossed over).
+   never glossed over). Note: the extractor mechanically follows `@path`
+   imports in CLAUDE.md/AGENTS.md-family files — in-repo targets become
+   `imported` surfaces; unresolved or out-of-repo (`~/`, absolute) imports
+   land in `skipped[]`, as do gitignored local files (CLAUDE.local.md,
+   .claude/settings.local.json) found on disk.
 5. Hand off to the user. Each phase needs a clean context, so they don't run
    in one session. Tell the user, in this order:
    - **If your tool can dispatch subagents, enabling that setting lets all four

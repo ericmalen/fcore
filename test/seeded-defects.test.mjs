@@ -66,7 +66,7 @@ test('defect: dilution of the env-deny rule is caught (R-44)', () => {
 
 // ── check.mjs defects (Phase 1 gates — the gates must FAIL these) ───────────
 
-import { writeFileSync as wf, mkdtempSync as mkdtemp, readFileSync, existsSync, symlinkSync } from 'node:fs';
+import { writeFileSync as wf, mkdtempSync as mkdtemp, readFileSync, existsSync, symlinkSync, readdirSync } from 'node:fs';
 import { runInventory as runInv } from '../scripts/inventory-extract.mjs';
 import { apply } from '../scripts/apply.mjs';
 import { check } from '../scripts/check.mjs';
@@ -279,6 +279,67 @@ test('defect: symlink at a generated target path → apply throws, link target u
     assert.throws(() => apply({ root: repo, templatesDir: EMPTY_TPL }), /symlink/);
     assert.equal(readFileSync(join(repo, 'victim.txt'), 'utf8'), 'out-of-band bytes\n',
       'bytes behind the symlink must never be clobbered');
+  } finally { rmSync(repo, { recursive: true, force: true }); }
+});
+
+// Byte-level snapshot of every file under dir (skipping .git) — proves a
+// failed apply touched NOTHING: no writes, no deletes, no creations.
+function treeSnapshot(dir) {
+  const snap = new Map();
+  for (const d of readdirSync(dir, { recursive: true, withFileTypes: true })) {
+    if (!d.isFile()) continue;
+    const abs = join(d.parentPath, d.name);
+    const rel = abs.slice(dir.length + 1);
+    if (rel === '.git' || rel.startsWith('.git/')) continue;
+    snap.set(rel, readFileSync(abs));
+  }
+  return snap;
+}
+
+// Manifest that assembles a real target (CLAUDE.md nodes → docs/ai/claude.md)
+// so a later compute failure would, pre-fix, leave that target written and
+// CLAUDE.md queued for deletion.
+function assemblingEntries(inv) {
+  const entries = [];
+  const claude = inv.files.find((f) => f.path === 'CLAUDE.md');
+  for (const id of claude.nodes) entries.push({ node: id, op: 'move', target: 'docs/ai/claude.md' });
+  for (const f of inv.files) {
+    if (f.path !== 'CLAUDE.md') entries.push({ file: f.path, op: 'keep-file' });
+  }
+  for (const c of inv.sweepCandidates) entries.push({ file: c.file, op: 'out-of-scope', reason: 'test' });
+  return entries;
+}
+
+test('defect: invalid JSON in a jsonMerge source → apply throws path-qualified, tree untouched', () => {
+  const repo = buildFixture('claude-only');
+  try {
+    const inv = runInv({ root: repo, outDir: '.setup', allowDirty: false });
+    saveManifest(repo, assemblingEntries(inv), {
+      jsonMerges: [{ file: '.vscode/settings.json', base: 'settings/vscode/settings.json' }],
+    });
+    // hand-broken existing settings file (not inventoried, read live at merge time)
+    mkdirSync(join(repo, '.vscode'), { recursive: true });
+    wf(join(repo, '.vscode', 'settings.json'), '{ "editor.fontSize": 13, broken\n');
+    const before = treeSnapshot(repo);
+    assert.throws(() => apply({ root: repo, templatesDir: KIT_TPL }),
+      /existing \.vscode\/settings\.json is not valid JSON\(C\):.*fix the file or route it through the manifest/s,
+      'error must carry the offending path and a remediation hint');
+    assert.deepEqual(treeSnapshot(repo), before,
+      'failed apply must leave the working tree byte-identical (no writes, no deletes)');
+  } finally { rmSync(repo, { recursive: true, force: true }); }
+});
+
+test('defect: missing literal in a late install entry → apply throws, tree untouched', () => {
+  const repo = buildFixture('claude-only');
+  try {
+    const inv = runInv({ root: repo, outDir: '.setup', allowDirty: false });
+    saveManifest(repo, assemblingEntries(inv), {
+      installs: [{ file: '.claude/agent-base.json', literal: 'literals/ghost.json' }],
+    });
+    const before = treeSnapshot(repo);
+    assert.throws(() => apply({ root: repo, templatesDir: KIT_TPL }), /install literal missing: literals\/ghost\.json/);
+    assert.deepEqual(treeSnapshot(repo), before,
+      'compute-phase failure after targets were assembled must not write them');
   } finally { rmSync(repo, { recursive: true, force: true }); }
 });
 

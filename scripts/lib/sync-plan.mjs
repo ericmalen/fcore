@@ -8,11 +8,15 @@ import { BASELINE_COPIES } from './baseline.mjs';
 const sha = (buf) => createHash('sha256').update(buf).digest('hex');
 
 function* walkFiles(absDir, base = absDir) {
-  if (!existsSync(absDir)) return;
-  for (const name of readdirSync(absDir)) {
-    const p = join(absDir, name);
-    if (statSync(p).isDirectory()) yield* walkFiles(p, base);
-    else yield relative(base, p).split('\\').join('/');
+  let entries;
+  try { entries = readdirSync(absDir, { withFileTypes: true }); } catch { return; }
+  for (const e of entries) {
+    // Never follow symlinks (dir or file) — a link out of the baseline tree
+    // would get recursed and hashed (mirrors the audit walk in audit/util.mjs).
+    if (e.isSymbolicLink()) continue;
+    const p = join(absDir, e.name);
+    if (e.isDirectory()) yield* walkFiles(p, base);
+    else if (e.isFile()) yield relative(base, p).split('\\').join('/');
   }
 }
 

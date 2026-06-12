@@ -1,10 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync, rmSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import { planBaselineSync } from '../scripts/lib/sync-plan.mjs';
+import { planBaselineSync, baselineFileHashes } from '../scripts/lib/sync-plan.mjs';
 
 function write(root, rel, text) {
   const abs = join(root, rel);
@@ -31,5 +31,26 @@ test('planBaselineSync: unchanged Agent Base match, safe update, local conflict'
     assert.equal(conflict.updates.length, 0);
   } finally {
     for (const d of [project, oldBase, newBase]) rmSync(d, { recursive: true, force: true });
+  }
+});
+
+test('baselineFileHashes: symlinks under a baseline dir are skipped, never followed', () => {
+  const project = mkdtempSync(join(tmpdir(), 'sync-link-proj-'));
+  const outside = mkdtempSync(join(tmpdir(), 'sync-link-out-'));
+  try {
+    write(project, '.claude/skills/docs/SKILL.md', 'real file\n');
+    write(outside, 'secret/leak.md', 'out-of-tree content\n');
+    // Symlinked dir and symlinked file pointing out of the baseline tree.
+    symlinkSync(join(outside, 'secret'), join(project, '.claude/skills/docs/linked-dir'));
+    symlinkSync(join(outside, 'secret/leak.md'), join(project, '.claude/skills/docs/linked-file.md'));
+
+    const hashes = baselineFileHashes(project); // must not throw or hash through links
+    assert.ok(hashes.has('.claude/skills/docs/SKILL.md'), 'real file hashed');
+    for (const path of hashes.keys()) {
+      assert.ok(!path.includes('linked-dir') && !path.includes('linked-file'),
+        `symlink leaked into hashes: ${path}`);
+    }
+  } finally {
+    for (const d of [project, outside]) rmSync(d, { recursive: true, force: true });
   }
 });

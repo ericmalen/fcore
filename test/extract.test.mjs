@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import {
   splitLinesKeepEnds, detectLineEnding, hasFinalNewline, isBinary,
   parseMarkdownBlocks, stripJsonComments, topLevelJsonKeys,
-  classifySurface, sweepFile, extractFile,
+  classifySurface, sweepFile, extractFile, extractImports,
 } from '../scripts/lib/extract.mjs';
 import { runInventory } from '../scripts/inventory-extract.mjs';
 
@@ -180,6 +180,51 @@ test('sweep finds AI-instruction markers with line numbers', () => {
 test('sweep catches "you are a" prompt-style instructions', () => {
   const hit = sweepFile('docs/notes.md', 'You are a senior engineer reviewing PRs.\n');
   assert.ok(hit);
+});
+
+test('sweep catches mcpServers config and "mcp server" prose', () => {
+  const hit = sweepFile('config/servers.json', '{\n  "mcpServers": { "fetch": { "command": "uvx" } }\n}\n');
+  assert.ok(hit);
+  assert.equal(hit.hits[0].marker, 'mcpservers');
+  assert.ok(sweepFile('docs/infra.md', 'Run the MCP server locally first.\n'));
+});
+
+test('sweep flags truncation at the per-file hit cap', () => {
+  const over = 'claude line\n'.repeat(12);
+  const hit = sweepFile('x.md', over);
+  assert.equal(hit.hits.length, 10);
+  assert.equal(hit.truncated, true);
+  const exact = sweepFile('x.md', 'claude line\n'.repeat(10));
+  assert.equal(exact.hits.length, 10);
+  assert.equal(exact.truncated, undefined);
+});
+
+// ── @-imports ───────────────────────────────────────────────────────────────
+
+test('extractImports: recognized token forms', () => {
+  const doc = '@AGENTS.md\nsee @./local.md and @docs/style.md\n@~/private.md then @/abs/path.md\n@../up/one.md\n';
+  assert.deepEqual(extractImports(doc), [
+    'AGENTS.md', './local.md', 'docs/style.md', '~/private.md', '/abs/path.md', '../up/one.md',
+  ]);
+});
+
+test('extractImports: emails and npm scopes are not imports', () => {
+  const doc = 'Use @anthropic-ai/sdk for calls.\nContact dev@example.com or a@b.md please.\nPing @username about it.\n';
+  assert.deepEqual(extractImports(doc), []);
+});
+
+test('extractImports: tokens inside code fences are ignored', () => {
+  const doc = 'real: @docs/real.md\n```\n@docs/fenced.md\n```\nafter\n';
+  assert.deepEqual(extractImports(doc), ['docs/real.md']);
+});
+
+test('extractFile records imports only on instruction surfaces', () => {
+  const { fileMeta } = extractFile('CLAUDE.md', '@AGENTS.md\n');
+  assert.deepEqual(fileMeta.imports, ['AGENTS.md']);
+  const none = extractFile('CLAUDE.md', '# plain\nno imports\n');
+  assert.equal(none.fileMeta.imports, undefined);
+  const readme = extractFile('.github/prompts/x.prompt.md', '@docs/style.md\n');
+  assert.equal(readme.fileMeta.imports, undefined);
 });
 
 // ── integration: full run against a temp git repo ───────────────────────────
@@ -363,6 +408,84 @@ test('integration: .mcp.json and .vscode/mcp.json are surfaces with nodes', () =
       const bytes = readFileSync(join(repo, '.setup', 'nodes', f.nodes[0]), 'utf8');
       assert.equal(bytes, readFileSync(join(repo, f.path), 'utf8'));
     }
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test('integration: @-import target becomes an imported surface with nodes', () => {
+  const repo = makeRepo({
+    'CLAUDE.md': '# Project\nStyle rules: @docs/style.md\n',
+  });
+  try {
+    // untracked but not ignored → in the universe
+    mkdirSync(join(repo, 'docs'), { recursive: true });
+    writeFileSync(join(repo, 'docs', 'style.md'), '# Style\nUse tabs.\n');
+    const inv = runInventory({ root: repo, outDir: '.setup', allowDirty: true });
+
+    const claude = inv.files.find((f) => f.path === 'CLAUDE.md');
+    assert.deepEqual(claude.imports, ['docs/style.md']);
+    const imp = inv.files.find((f) => f.path === 'docs/style.md');
+    assert.ok(imp, JSON.stringify(inv.files.map((f) => f.path)));
+    assert.equal(imp.surface, 'imported');
+    assert.ok(imp.nodes.length >= 1);
+    const joined = imp.nodes.map((id) => readFileSync(join(repo, '.setup', 'nodes', id), 'utf8')).join('');
+    assert.equal(joined, '# Style\nUse tabs.\n');
+    // promoted, so not left in sweep triage
+    assert.equal(inv.sweepCandidates.find((c) => c.file === 'docs/style.md'), undefined);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test('integration: unresolved and out-of-repo imports land in skipped[]', () => {
+  const repo = makeRepo({
+    'CLAUDE.md': '# P\n@docs/missing.md\n@~/private.md\n',
+  });
+  try {
+    const inv = runInventory({ root: repo, outDir: '.setup', allowDirty: false });
+    const claude = inv.files.find((f) => f.path === 'CLAUDE.md');
+    assert.deepEqual(claude.imports, ['docs/missing.md', '~/private.md']);
+    const missing = inv.skipped.find((s) => s.file === 'docs/missing.md');
+    assert.ok(missing, JSON.stringify(inv.skipped));
+    assert.match(missing.reason, /unresolved import/);
+    const home = inv.skipped.find((s) => s.file === '~/private.md');
+    assert.ok(home, JSON.stringify(inv.skipped));
+    assert.match(home.reason, /out-of-repo import/);
+    assert.equal(inv.files.find((f) => f.path === 'docs/missing.md'), undefined);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test('integration: gitignored CLAUDE.local.md is surfaced in skipped[], not inventoried', () => {
+  const repo = makeRepo({
+    'AGENTS.md': '# X\nrules\n',
+    '.gitignore': 'CLAUDE.local.md\n',
+  });
+  try {
+    writeFileSync(join(repo, 'CLAUDE.local.md'), '# Local\nmy private rules\n');
+    const inv = runInventory({ root: repo, outDir: '.setup', allowDirty: false }); // ignored → tree still clean
+    const skip = inv.skipped.find((s) => s.file === 'CLAUDE.local.md');
+    assert.ok(skip, JSON.stringify(inv.skipped));
+    assert.match(skip.reason, /local per-developer file/);
+    assert.equal(inv.files.find((f) => f.path === 'CLAUDE.local.md'), undefined);
+    for (const id of Object.keys(inv.nodes)) assert.notEqual(inv.nodes[id].file, 'CLAUDE.local.md');
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test('integration: mcpServers in a non-surface json is a sweep candidate', () => {
+  const repo = makeRepo({
+    'AGENTS.md': '# X\nrules\n',
+    'config/servers.json': '{\n  "mcpServers": { "fetch": { "command": "uvx" } }\n}\n',
+  });
+  try {
+    const inv = runInventory({ root: repo, outDir: '.setup', allowDirty: false });
+    const cand = inv.sweepCandidates.find((c) => c.file === 'config/servers.json');
+    assert.ok(cand, JSON.stringify(inv.sweepCandidates));
+    assert.equal(cand.hits[0].marker, 'mcpservers');
   } finally {
     rmSync(repo, { recursive: true, force: true });
   }

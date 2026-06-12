@@ -19,7 +19,9 @@ Preconditions: `.setup/manifest.json` parses, and
    `node .claude/agent-base-setup/scripts/apply.mjs --root . --templates .claude/agent-base-setup/templates`
    First apply snapshots jsonMerge sources into `.setup/merge-sources.json` —
    commit it with the other `.setup/` artifacts (the repro gate merges from
-   the snapshot, never the live file).
+   the snapshot, never the live file). Apply is all-or-nothing on validation
+   errors: if it throws (e.g. an existing settings file is invalid JSON(C)),
+   nothing was written — fix the named file or route it through the manifest.
 2. Read the generated files end to end. Judge coherence: section order,
    seams between verbatim blocks, orphaned references. Fix by reordering
    manifest entries, adjusting slots, or (sparingly, justified) a merge

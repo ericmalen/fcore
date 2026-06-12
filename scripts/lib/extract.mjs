@@ -252,6 +252,47 @@ function fileKind(path) {
   return 'text';
 }
 
+// ── @-import extraction (CLAUDE.md-family) ──────────────────────────────────
+
+// Claude Code instruction files pull in other files with `@path` tokens
+// (`@AGENTS.md`, `@./docs/style.md`, `@~/private.md`, `@/abs/path.md`).
+// Heuristic (recall on real imports without emails/npm scopes):
+// - char before `@` must be start-of-line or whitespace (emails put the
+//   local part there: user@host never matches)
+// - token must end in `.md` OR start with `./`, `../`, `~/`, or `/`
+//   (npm scopes like `@anthropic-ai/sdk` contain `/` but satisfy neither)
+// Lines inside code fences are skipped (same fence rules as the block parser).
+export function extractImports(text) {
+  const out = [];
+  const seen = new Set();
+  let inFence = false;
+  let fenceMark = '';
+  let fenceLen = 0;
+  for (const raw of splitLinesKeepEnds(text)) {
+    const line = stripEnd(raw);
+    const fm = FENCE_RE.exec(line);
+    if (fm) {
+      if (!inFence) {
+        inFence = true;
+        fenceMark = fm[1][0];
+        fenceLen = fm[1].length;
+      } else if (fm[1][0] === fenceMark && fm[1].length >= fenceLen && /^[`~]+$/.test(line.trim())) {
+        inFence = false;
+      }
+      continue;
+    }
+    if (inFence) continue;
+    for (const m of line.matchAll(/(?:^|\s)@([\w.\/~-]+)/g)) {
+      const p = m[1].replace(/\.+$/, ''); // trailing sentence punctuation
+      const pathLike = p.endsWith('.md') || /^(\.{1,2}\/|~\/|\/)/.test(p);
+      if (!pathLike || seen.has(p)) continue;
+      seen.add(p);
+      out.push(p);
+    }
+  }
+  return out;
+}
+
 // ── Content sweep ───────────────────────────────────────────────────────────
 
 // Marker list (recall over precision — tune against fixtures).
@@ -269,6 +310,8 @@ const SWEEP_MARKERS = [
   /\byou are an?\b/i,
   /\bllm\b/i,
   /\binstructions for (the )?ai\b/i,
+  /\bmcpservers\b/i,
+  /\bmcp servers?\b/i,
 ];
 
 const SWEEP_MAX_BYTES = 1024 * 1024;
@@ -280,18 +323,22 @@ export function sweepFile(path, text) {
     return { file: path, skipped: 'too-large', hits: [] };
   }
   const hits = [];
+  let truncated = false;
   const lines = splitLinesKeepEnds(text);
-  for (let i = 0; i < lines.length && hits.length < SWEEP_MAX_HITS_PER_FILE; i++) {
+  for (let i = 0; i < lines.length && !truncated; i++) {
     const line = stripEnd(lines[i]);
     for (const re of SWEEP_MARKERS) {
       const m = re.exec(line);
       if (m) {
-        hits.push({ line: i + 1, marker: m[0].toLowerCase(), text: line.trim().slice(0, SWEEP_CONTEXT_CAP) });
+        // an 11th hit only sets the flag — the planner must know 10 means 10+
+        if (hits.length === SWEEP_MAX_HITS_PER_FILE) truncated = true;
+        else hits.push({ line: i + 1, marker: m[0].toLowerCase(), text: line.trim().slice(0, SWEEP_CONTEXT_CAP) });
         break; // one hit per line is enough
       }
     }
   }
-  return hits.length ? { file: path, hits } : null;
+  if (!hits.length) return null;
+  return truncated ? { file: path, hits, truncated: true } : { file: path, hits };
 }
 
 // ── Whole-file extraction → nodes ───────────────────────────────────────────
@@ -312,6 +359,10 @@ export function extractFile(path, text) {
 
   let blocks;
   if (kind === 'markdown') {
+    if (fileMeta.surface === 'instructions') {
+      const imports = extractImports(text);
+      if (imports.length) fileMeta.imports = imports;
+    }
     blocks = parseMarkdownBlocks(text);
   } else if (kind === 'json') {
     const { keys, parseError } = topLevelJsonKeys(text);

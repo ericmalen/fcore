@@ -3,8 +3,8 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync, readFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, existsSync } from 'node:fs';
+import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 
@@ -100,4 +100,49 @@ test('install-setup ships orchestration lifecycle skills, keeps discovery/genera
   } finally {
     rmSync(target, { recursive: true, force: true });
   }
+});
+
+test('install-setup warns on pre-existing baseline paths, then still copies', () => {
+  const target = makeGitRepo();
+  try {
+    mkdirSync(join(target, '.claude/skills/docs'), { recursive: true });
+    writeFileSync(join(target, '.claude/skills/docs/SKILL.md'), 'project-owned content\n');
+
+    const r = spawnSync(process.execPath,
+      [join(BASE, 'scripts/install-setup.mjs'), target], { encoding: 'utf8' });
+    assert.equal(r.status, 0, `install-setup failed: ${r.stderr}`);
+    assert.match(r.stderr, /overwriting existing \.claude\/skills\/docs/, 'warning names the colliding path');
+
+    // The copy still proceeds — baseline wins (setup is branch-reversible).
+    assert.equal(readFileSync(join(target, '.claude/skills/docs/SKILL.md'), 'utf8'),
+      readFileSync(join(BASE, '.claude/skills/docs/SKILL.md'), 'utf8'), 'SKILL.md matches Agent Base source');
+  } finally {
+    rmSync(target, { recursive: true, force: true });
+  }
+});
+
+test('install-setup refuses target == base checkout', () => {
+  const r = spawnSync(process.execPath,
+    [join(BASE, 'scripts/install-setup.mjs'), BASE], { encoding: 'utf8' });
+  assert.notEqual(r.status, 0, 'must exit non-zero');
+  assert.match(r.stderr, /overlaps the Agent Base checkout/);
+  assert.equal(r.stdout.indexOf('installed:'), -1, 'nothing copied');
+});
+
+test('install-setup refuses target nested inside the base checkout', () => {
+  const inside = join(BASE, 'scripts'); // exists, inside base — guard fires before any write
+  const r = spawnSync(process.execPath,
+    [join(BASE, 'scripts/install-setup.mjs'), inside], { encoding: 'utf8' });
+  assert.notEqual(r.status, 0, 'must exit non-zero');
+  assert.match(r.stderr, /overlaps the Agent Base checkout/);
+  assert.ok(!existsSync(join(inside, '.claude')), 'nothing written inside base');
+});
+
+test('install-setup refuses base checkout nested inside the target', () => {
+  const parent = dirname(BASE); // always contains the base checkout
+  const r = spawnSync(process.execPath,
+    [join(BASE, 'scripts/install-setup.mjs'), parent], { encoding: 'utf8' });
+  assert.notEqual(r.status, 0, 'must exit non-zero');
+  assert.match(r.stderr, /overlaps the Agent Base checkout/);
+  assert.equal(r.stdout.indexOf('installed:'), -1, 'nothing copied');
 });

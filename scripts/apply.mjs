@@ -90,6 +90,14 @@ export function apply({ root, templatesDir, outRoot = null }) {
     }
   }
 
+  // ── COMPUTE PHASE (steps 1–4) ──────────────────────────────────────────────
+  // No filesystem writes or deletes until every output is computed: all inputs
+  // (node bytes, templates, literals, jsonMerge sources) are read and validated
+  // here, and outputs accumulate in `outputs` (relPath → text). A failure
+  // anywhere in this phase leaves the target tree byte-identical — no partial
+  // convergence. A crash during the write phase below can still leave a
+  // partial tree; that residual window is accepted.
+
   // ── 1. Collect chunks per target, in manifest order ───────────────────────
   // chunk: { target, slot|null, text, provenance }
   const chunks = [];
@@ -138,7 +146,7 @@ export function apply({ root, templatesDir, outRoot = null }) {
     byTarget.get(c.target).push(c);
   }
 
-  const generated = {};
+  const outputs = new Map(); // relPath → final text, in compute order
   const append = (acc, text) => {
     if (acc && !acc.endsWith('\n')) acc += '\n'; // additive separator only
     return acc + text;
@@ -174,8 +182,7 @@ export function apply({ root, templatesDir, outRoot = null }) {
       output = '';
       for (const c of targetChunks) output = append(output, c.text);
     }
-    writeNoFollow(join(writeRoot, target), output);
-    generated[target] = sha(output);
+    outputs.set(target, output);
   }
 
   // ── 2b. Static installs (starter template install) ───────────────────────────────
@@ -193,11 +200,10 @@ export function apply({ root, templatesDir, outRoot = null }) {
       if (!existsSync(p)) throw new Error(`install literal missing: ${ins.literal}`);
       text = readFileSync(p, 'utf8');
     }
-    if (generated[ins.file] !== undefined) {
+    if (outputs.has(ins.file)) {
       throw new Error(`install target ${ins.file} already written by an earlier assembled target or install`);
     }
-    writeNoFollow(join(writeRoot, ins.file), text);
-    generated[ins.file] = sha(text);
+    outputs.set(ins.file, text);
   }
 
   // ── 3. JSON key-level merges ───────────────────────────────────────────────
@@ -207,6 +213,7 @@ export function apply({ root, templatesDir, outRoot = null }) {
   // "source" and silently pass the reproducibility gate. A snapshot always
   // wins; the live file is only a fallback for pre-snapshot setups. The
   // repro re-apply (outRoot set) reads snapshots but never writes them.
+  // Snapshot is READ here; its write happens in the write phase below.
   const snapPath = join(setupDir, 'merge-sources.json');
   const mergeSources = existsSync(snapPath)
     ? JSON.parse(readFileSync(snapPath, 'utf8'))
@@ -216,7 +223,7 @@ export function apply({ root, templatesDir, outRoot = null }) {
   for (const jm of manifest.jsonMerges ?? []) {
     if (mergedFiles.has(jm.file)) throw new Error(`duplicate jsonMerges entry for ${jm.file}`);
     mergedFiles.add(jm.file);
-    if (generated[jm.file] !== undefined) {
+    if (outputs.has(jm.file)) {
       throw new Error(`jsonMerges file ${jm.file} already written by an assembled target or install`);
     }
     const basePath = join(templatesDir, jm.base);
@@ -230,17 +237,17 @@ export function apply({ root, templatesDir, outRoot = null }) {
       srcText = existsSync(srcPath) ? readFileSync(srcPath, 'utf8') : null;
       if (outRoot == null) { mergeSources[jm.file] = srcText; mergeSourcesDirty = true; }
     }
-    const srcObj = srcText != null
-      ? (JSON.parse(stripJsonComments(srcText)) ?? {})
-      : {};
+    let srcObj = {};
+    if (srcText != null) {
+      try {
+        srcObj = JSON.parse(stripJsonComments(srcText)) ?? {};
+      } catch (e) {
+        throw new Error(`existing ${jm.file} is not valid JSON(C): ${e.message} — fix the file or route it through the manifest`);
+      }
+    }
     // source keys preserved; Agent Base template wins on its own keys
     const merged = deepMerge(srcObj, baseObj);
-    const output = JSON.stringify(merged, null, 2) + '\n';
-    writeNoFollow(join(writeRoot, jm.file), output);
-    generated[jm.file] = sha(output);
-  }
-  if (mergeSourcesDirty) {
-    writeNoFollow(snapPath, JSON.stringify(mergeSources, null, 2) + '\n');
+    outputs.set(jm.file, JSON.stringify(merged, null, 2) + '\n');
   }
 
   // ── 3b. Guarantee R-47: .gitignore excludes personal settings ─────────────
@@ -248,20 +255,23 @@ export function apply({ root, templatesDir, outRoot = null }) {
   // this one line, not the whole file, so the reproducibility gate must never
   // sha-compare a existing project .gitignore it does not fully own. Coverage test
   // mirrors the R-47 audit check so apply and audit agree exactly.
+  // Computed here against this run's pending output (or the on-disk file);
+  // the append itself happens in the write phase.
+  let gitignoreNext = null;
   {
     const LOCAL = '.claude/settings.local.json';
     const giOut = join(writeRoot, '.gitignore');
     const giSrc = join(root, '.gitignore');
-    const cur = existsSync(giOut) ? readFileSync(giOut, 'utf8')
+    const cur = outputs.has('.gitignore') ? outputs.get('.gitignore')
+      : existsSync(giOut) ? readFileSync(giOut, 'utf8')
       : existsSync(giSrc) ? readFileSync(giSrc, 'utf8') : null;
     const lines = (cur ?? '').split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
     const covered = lines.some((l) =>
       l === LOCAL || l === 'settings.local.json' || l === '**/settings.local.json'
       || (l.endsWith('/') && LOCAL.startsWith(l.replace(/^\//, ''))));
     if (!covered) {
-      const next = cur == null || cur === '' ? LOCAL + '\n'
+      gitignoreNext = cur == null || cur === '' ? LOCAL + '\n'
         : cur + (cur.endsWith('\n') ? '' : '\n') + LOCAL + '\n';
-      writeNoFollow(giOut, next);
     }
   }
 
@@ -275,10 +285,28 @@ export function apply({ root, templatesDir, outRoot = null }) {
   const deleted = [];
   for (const f of inventory.files) {
     if (keep.has(f.path)) continue;
-    if (generated[f.path]) continue;
+    if (outputs.has(f.path)) continue;
     deleted.push(f.path);
-    const abs = join(writeRoot, f.path);
-    if (outRoot == null) {
+  }
+
+  // ── WRITE PHASE ────────────────────────────────────────────────────────────
+  // Every output is computed and every input validated; from here on, only
+  // mechanical writes/deletes. writeNoFollow keeps its symlink guard at write
+  // time (the destination is re-lstat'ed immediately before each write).
+  const generated = {};
+  for (const [relPath, text] of outputs) {
+    writeNoFollow(join(writeRoot, relPath), text);
+    generated[relPath] = sha(text);
+  }
+  if (gitignoreNext != null) {
+    writeNoFollow(join(writeRoot, '.gitignore'), gitignoreNext);
+  }
+  if (mergeSourcesDirty) {
+    writeNoFollow(snapPath, JSON.stringify(mergeSources, null, 2) + '\n');
+  }
+  if (outRoot == null) {
+    for (const p of deleted) {
+      const abs = join(writeRoot, p);
       if (existsSync(abs)) rmSync(abs);
       // prune now-empty parent dirs (e.g. .github/chatmodes after its last
       // file is dispositioned away) — empty dirs would trip the audit.

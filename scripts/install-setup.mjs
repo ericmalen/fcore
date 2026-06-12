@@ -4,7 +4,7 @@
 //   node <clone>/scripts/install-setup.mjs /path/to/project
 
 import { cpSync, existsSync, mkdirSync } from 'node:fs';
-import { join, resolve, dirname } from 'node:path';
+import { join, resolve, dirname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -23,6 +23,12 @@ if (!existsSync(target)) {
   console.error(`install-setup: target does not exist: ${target}`);
   process.exit(1);
 }
+// Refuse to copy the base checkout onto itself (or into/over a nested path) —
+// cpSync onto itself errors mid-copy with files already written.
+if (target === baseRoot || target.startsWith(baseRoot + sep) || baseRoot.startsWith(target + sep)) {
+  console.error(`install-setup: target overlaps the Agent Base checkout (${baseRoot}); refusing.`);
+  process.exit(1);
+}
 const inTree = spawnSync('git', ['rev-parse', '--is-inside-work-tree'], { cwd: target, encoding: 'utf8' });
 if (inTree.status !== 0 || inTree.stdout.trim() !== 'true') {
   console.error('install-setup: target is not a git repository.');
@@ -35,6 +41,15 @@ if (major < 20) {
 }
 
 const baseVersion = JSON.parse(readFileSync(join(baseRoot, 'package.json'), 'utf8')).version ?? '1.0.0';
+
+// Warn about destinations that already exist — the copy clobbers them. Setup is
+// branch-reversible, so a warning (not a prompt) is the right strength.
+const collisions = ALL_INSTALL_COPIES.map(([, dst]) => dst)
+  .filter((dst) => existsSync(join(target, dst)));
+if (collisions.length > 0) {
+  console.warn('install-setup: target already has files at these paths (revert via the setup branch if unwanted):');
+  for (const dst of collisions) console.warn(`  overwriting existing ${dst}`);
+}
 
 for (const [src, dst] of ALL_INSTALL_COPIES) {
   const from = join(baseRoot, src);

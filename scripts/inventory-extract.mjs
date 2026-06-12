@@ -10,10 +10,10 @@
 // Exit codes: 0 ok · 1 precondition failed · 2 internal error
 
 import { spawnSync } from 'node:child_process';
-import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
-import { join, resolve, sep } from 'node:path';
+import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
+import { join, resolve, sep, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { extractFile, sweepFile, isBinary, classifySurface } from './lib/extract.mjs';
+import { extractFile, extractImports, sweepFile, isBinary, classifySurface } from './lib/extract.mjs';
 
 const MIN_NODE_MAJOR = 20;
 
@@ -64,6 +64,17 @@ export function runInventory({ root, outDir, allowDirty = false, include = [] })
   const skipped = [];
   let nodeSeq = 0;
 
+  const universeSet = new Set(universe);
+
+  // Local per-developer files: enumerated surfaces, but conventionally
+  // gitignored so they never enter the universe — surface the discrepancy
+  // without inventorying their content.
+  for (const local of ['CLAUDE.local.md', '.claude/settings.local.json']) {
+    if (!universeSet.has(local) && existsSync(join(root, local))) {
+      skipped.push({ file: local, reason: 'local per-developer file (gitignored) — not repo content, review manually' });
+    }
+  }
+
   // The out dir is wiped wholesale below — refuse anything that is not a
   // strict subdirectory of root (outDir "." would delete the repo, ".git"
   // included; ".." or an absolute path, worse).
@@ -73,6 +84,30 @@ export function runInventory({ root, outDir, allowDirty = false, include = [] })
   }
   rmSync(outAbs, { recursive: true, force: true });
   mkdirSync(join(outAbs, 'nodes'), { recursive: true });
+
+  const importQueue = []; // { from, raw } — @-import edges to resolve after the pass
+
+  const addSurfaceFile = (path, text, fileMeta, blocks) => {
+    const ids = [];
+    for (const b of blocks) {
+      const id = `n${String(++nodeSeq).padStart(4, '0')}`;
+      ids.push(id);
+      nodes[id] = {
+        file: path,
+        kind: b.kind,
+        heading: b.heading,
+        level: b.level,
+        headingPath: b.headingPath,
+        startLine: b.startLine,
+        endLine: b.endLine,
+        bytes: Buffer.byteLength(b.text, 'utf8'),
+        sha256: fileMeta.sha256 && b.text === text ? fileMeta.sha256 : undefined,
+      };
+      writeFileSync(join(outAbs, 'nodes', id), b.text, 'utf8');
+    }
+    files.push({ ...fileMeta, nodes: ids });
+    for (const raw of fileMeta.imports ?? []) importQueue.push({ from: path, raw });
+  };
 
   for (const path of universe) {
     let buf;
@@ -98,24 +133,7 @@ export function runInventory({ root, outDir, allowDirty = false, include = [] })
     if (surface) {
       const { fileMeta, blocks } = extractFile(path, text);
       if (includeSet.has(path)) fileMeta.surface = 'forced-include';
-      const ids = [];
-      for (const b of blocks) {
-        const id = `n${String(++nodeSeq).padStart(4, '0')}`;
-        ids.push(id);
-        nodes[id] = {
-          file: path,
-          kind: b.kind,
-          heading: b.heading,
-          level: b.level,
-          headingPath: b.headingPath,
-          startLine: b.startLine,
-          endLine: b.endLine,
-          bytes: Buffer.byteLength(b.text, 'utf8'),
-          sha256: fileMeta.sha256 && b.text === text ? fileMeta.sha256 : undefined,
-        };
-        writeFileSync(join(outAbs, 'nodes', id), b.text, 'utf8');
-      }
-      files.push({ ...fileMeta, nodes: ids });
+      addSurfaceFile(path, text, fileMeta, blocks);
     } else {
       const hit = sweepFile(path, text);
       if (hit) {
@@ -123,6 +141,50 @@ export function runInventory({ root, outDir, allowDirty = false, include = [] })
         else sweepCandidates.push(hit);
       }
     }
+  }
+
+  // @-import resolution: in-universe targets that aren't already surfaces get
+  // force-included as 'imported' (same mechanism as includeSet); everything
+  // else lands in skipped[] so the planner sees it. Chained imports follow.
+  const surfaceSet = new Set(files.map((f) => f.path));
+  const handled = new Set();
+  while (importQueue.length) {
+    const { from, raw } = importQueue.shift();
+    if (raw.startsWith('~/') || raw.startsWith('/')) {
+      skipped.push({ file: raw, reason: `out-of-repo import (@${raw} in ${from}) — review manually` });
+      continue;
+    }
+    const target = posix.normalize(posix.join(posix.dirname(from), raw));
+    if (surfaceSet.has(target) || handled.has(target)) continue;
+    handled.add(target);
+    if (!universeSet.has(target)) {
+      skipped.push({ file: target, reason: `unresolved import (@${raw} in ${from})` });
+      continue;
+    }
+    let buf;
+    try {
+      buf = readFileSync(join(root, target));
+    } catch {
+      skipped.push({ file: target, reason: 'unreadable' });
+      continue;
+    }
+    if (isBinary(buf)) {
+      skipped.push({ file: target, reason: 'binary AI-surface file (flagged for manual review)' });
+      continue;
+    }
+    const text = buf.toString('utf8');
+    if (!Buffer.from(text, 'utf8').equals(buf)) {
+      skipped.push({ file: target, reason: 'non-UTF-8 encoding (lossy decode) — convert to UTF-8 or handle manually' });
+      continue;
+    }
+    const { fileMeta, blocks } = extractFile(target, text);
+    fileMeta.surface = 'imported';
+    const imports = extractImports(text);
+    if (imports.length) fileMeta.imports = imports;
+    addSurfaceFile(target, text, fileMeta, blocks);
+    surfaceSet.add(target);
+    const sci = sweepCandidates.findIndex((c) => c.file === target);
+    if (sci !== -1) sweepCandidates.splice(sci, 1); // promoted: no longer triage
   }
 
   const inventory = {
