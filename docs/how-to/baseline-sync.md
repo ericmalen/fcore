@@ -80,6 +80,13 @@ For each baseline file:
 
 This is the polished version of “pull from source” — not silent auto-sync.
 
+At a **current pin** (repair) there is no old → new delta: missing files are
+restored, and locally edited files are left untouched and reported as drift —
+they never block, and `--upgrade` exits 0 (policing content drift is
+`base-check`'s job, not sync's). A pin **ahead** of the target — stale
+`--base-root` checkout, deleted remote tags — is refused with exit 2, never a
+silent downgrade.
+
 ## CI templates
 
 Copy from a base checkout when the project has CI:

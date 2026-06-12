@@ -40,11 +40,13 @@ files by hand.
    node <checkout>/scripts/sync-baseline.mjs --root <project> --report --json
    ```
 
-   - If `conflicts` is non-empty: list each conflicting path and stop — the
-     user resolves local edits (keep theirs or revert to baseline), then
-     re-invokes this skill. Never resolve conflicts for them.
+   - If pin behind and `conflicts` is non-empty: list each conflicting path
+     and stop — the user resolves local edits (keep theirs or revert to
+     baseline), then re-invokes this skill. Never resolve conflicts for them.
+   - If pin current: `conflicts` are drift (locally edited baseline files) —
+     repair never touches or blocks on them; list them for the user.
    - If pin current AND `updates` is empty: report "already at latest
-     compatible release, baseline complete" and stop.
+     compatible release, baseline complete" (noting any drift) and stop.
    - If pin current with `updates` non-empty: these are missing baseline
      files; proceed as a repair.
 5. Apply on a branch in the project:
@@ -69,7 +71,8 @@ files by hand.
 ## Never
 
 - Never run against this base checkout itself.
-- Never proceed on a dirty tree; never apply with unresolved conflicts.
+- Never proceed on a dirty tree; never apply an upgrade with unresolved
+  conflicts (repair leaves drifted files untouched — report, don't resolve).
 - Never use `--allow-major` unless the user explicitly asks for a
   major-version upgrade and acknowledges breaking changes.
 - Never hand-edit synced baseline files to "fix" a conflict — that recreates

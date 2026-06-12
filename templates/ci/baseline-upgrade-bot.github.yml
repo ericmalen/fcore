@@ -37,7 +37,7 @@ jobs:
           echo "NPX_SPEC=$NPX_SPEC" >> "$GITHUB_ENV"
           # Private Agent Base repo? npm fetches git deps through git — route credentials, e.g.:
           # git config --global url."https://x-token:${{ secrets.KIT_TOKEN }}@github.com/".insteadOf "https://github.com/"
-          # --report exits 1 when conflicts exist — the JSON still has the plan.
+          # --report exits 1 when conflicts block an upgrade — the JSON still has the plan.
           npx --yes "$NPX_SPEC" sync --report --json \
             > "${RUNNER_TEMP}/plan.json" || true
           node -e '

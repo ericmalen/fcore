@@ -5,7 +5,8 @@
 //   node sync-baseline.mjs --check              # exit 1 if pin < latest compatible
 //   node sync-baseline.mjs --report             # JSON plan for bots / Renovate
 //   node sync-baseline.mjs --upgrade            # apply safe updates, bump pin
-//                                               # (at a current pin: restores missing baseline files)
+//                                               # (at a current pin: restores missing baseline files;
+//                                               #  local edits report as drift, never block repair)
 //   node sync-baseline.mjs --upgrade --dry-run  # show plan only
 //
 // Options:
@@ -18,7 +19,7 @@
 //   --allow-major          consider latest tag across major versions
 //   --json                 machine-readable stdout
 //
-// Exit: 0 ok · 1 pin behind or upgrade had conflicts · 2 usage/internal error
+// Exit: 0 ok · 1 pin behind or upgrade had conflicts · 2 usage/internal error (incl. pin ahead of target)
 
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
@@ -128,6 +129,16 @@ export function runSyncBaseline(opt) {
 
   const targetPin = latest;
 
+  // Pin ahead of target (stale --base-root checkout, deleted remote tags):
+  // proceeding would silently downgrade files and the marker.
+  if (!behind && pinSem && latestSem && compareSemver(pinSem, latestSem) > 0) {
+    return {
+      ok: false,
+      exitCode: 2,
+      error: `baseline pin ${pin} is ahead of target ${targetPin} — stale --base-root checkout or missing remote tags; refusing to sync`,
+    };
+  }
+
   let oldCo = null;
   let newCo = null;
   try {
@@ -156,18 +167,29 @@ export function runSyncBaseline(opt) {
       conflicts: plan.conflicts,
     };
 
+    // Local edits only block an upgrade (the old → new delta could overwrite
+    // them). At a current pin there is no delta: repair restores missing
+    // files, leaves edited files untouched, and reports them as drift —
+    // policing content drift is base-check's job, not sync's.
+    const blocked = behind && plan.conflicts.length > 0;
+    const drift = !behind && plan.conflicts.length
+      ? ` (${plan.conflicts.length} locally edited file(s) left untouched)`
+      : '';
+
     if (opt.report) {
       return {
-        ok: plan.conflicts.length === 0,
-        exitCode: plan.conflicts.length ? 1 : 0,
+        ok: !blocked,
+        exitCode: blocked ? 1 : 0,
         payload,
-        message: plan.conflicts.length
+        message: blocked
           ? `${plan.conflicts.length} conflict(s) block auto-sync`
-          : `${plan.updates.length} file(s) ready to sync`,
+          : behind
+            ? `${plan.updates.length} file(s) ready to sync`
+            : `${plan.updates.length} missing baseline file(s) to restore${drift}`,
       };
     }
 
-    if (plan.conflicts.length) {
+    if (blocked) {
       return {
         ok: false,
         exitCode: 1,
@@ -181,7 +203,7 @@ export function runSyncBaseline(opt) {
         ok: true,
         exitCode: 0,
         payload: { ...payload, applied: false },
-        message: 'already at latest compatible pin',
+        message: `already at latest compatible pin${drift}`,
       };
     }
 
@@ -190,7 +212,9 @@ export function runSyncBaseline(opt) {
         ok: true,
         exitCode: 0,
         payload: { ...payload, applied: false, dryRun: true },
-        message: `dry-run: would update ${plan.updates.length} file(s) to ${targetPin}`,
+        message: behind
+          ? `dry-run: would update ${plan.updates.length} file(s) to ${targetPin}`
+          : `dry-run: would restore ${plan.updates.length} missing baseline file(s) at ${targetPin}${drift}`,
       };
     }
 
@@ -218,7 +242,7 @@ export function runSyncBaseline(opt) {
       payload: { ...payload, applied: true, pin: targetPin, lastSyncedAt: today },
       message: behind
         ? `upgraded baseline ${pin} → ${targetPin} (${plan.updates.length} file(s))`
-        : `restored ${plan.updates.length} missing baseline file(s) at ${pin}`,
+        : `restored ${plan.updates.length} missing baseline file(s) at ${targetPin}${drift}`,
     };
   } finally {
     oldCo?.cleanup?.();

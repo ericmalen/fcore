@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, cpSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, cpSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -127,8 +127,93 @@ test('sync-baseline --upgrade restores missing baseline files at current pin', (
 
     const marker = readMarker(root);
     assert.equal(marker.pin, `v${BASE_VERSION}`);
+    assert.equal(marker.lastSyncedAt, new Date().toISOString().slice(0, 10));
   } finally {
     rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('sync-baseline --report at current pin lists missing baseline files', () => {
+  const root = mkdtempSync(join(tmpdir(), 'sync-rpt-fix-'));
+  try {
+    seedProject(root);
+    const res = runSyncBaseline({ root, baseRoot: BASE_ROOT, report: true, json: true });
+    assert.equal(res.exitCode, 0);
+    assert.equal(res.payload.behind, false);
+    assert.ok(res.payload.updateCount >= 1);
+    assert.match(res.message, /missing baseline file/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('sync-baseline --upgrade at current pin: restores missing, leaves local edits, exit 0', () => {
+  const root = mkdtempSync(join(tmpdir(), 'sync-drift-'));
+  try {
+    seedProject(root);
+    for (const [src, dst] of BASELINE_COPIES) {
+      cpSync(join(BASE_ROOT, src), join(root, dst), { recursive: true });
+    }
+    writeFileSync(join(root, '.claude/skills/docs/SKILL.md'), 'deliberate local edit\n');
+    rmSync(join(root, '.claude/skills/retro'), { recursive: true });
+
+    const res = runSyncBaseline({ root, baseRoot: BASE_ROOT, upgrade: true, json: true });
+    assert.equal(res.exitCode, 0);
+    assert.equal(res.payload.applied, true);
+    assert.equal(res.payload.conflictCount, 1);
+    assert.match(res.message, /left untouched/);
+
+    assert.equal(
+      readFileSync(join(root, '.claude/skills/retro/SKILL.md'), 'utf8'),
+      readFileSync(join(BASE_ROOT, '.claude/skills/retro/SKILL.md'), 'utf8'));
+    assert.equal(
+      readFileSync(join(root, '.claude/skills/docs/SKILL.md'), 'utf8'),
+      'deliberate local edit\n');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('sync-baseline --upgrade at current pin: local edits alone are a no-op, exit 0', () => {
+  const root = mkdtempSync(join(tmpdir(), 'sync-drift-noop-'));
+  try {
+    seedProject(root);
+    for (const [src, dst] of BASELINE_COPIES) {
+      cpSync(join(BASE_ROOT, src), join(root, dst), { recursive: true });
+    }
+    writeFileSync(join(root, '.claude/skills/docs/SKILL.md'), 'deliberate local edit\n');
+
+    const res = runSyncBaseline({ root, baseRoot: BASE_ROOT, upgrade: true, json: true });
+    assert.equal(res.exitCode, 0);
+    assert.equal(res.payload.applied, false);
+    assert.equal(res.payload.conflictCount, 1);
+    assert.match(res.message, /already at latest/);
+    assert.equal(
+      readFileSync(join(root, '.claude/skills/docs/SKILL.md'), 'utf8'),
+      'deliberate local edit\n');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('sync-baseline --upgrade refuses when pin is ahead of target: exit 2, no writes', () => {
+  const root = mkdtempSync(join(tmpdir(), 'sync-ahead-'));
+  const stale = mkdtempSync(join(tmpdir(), 'sync-stale-'));
+  try {
+    seedProject(root);
+    // Stale base checkout reports an older version than the project pin.
+    writeFileSync(join(stale, 'package.json'), JSON.stringify({ version: '0.1.0' }));
+
+    const res = runSyncBaseline({ root, baseRoot: stale, upgrade: true, json: true });
+    assert.equal(res.exitCode, 2);
+    assert.match(res.error, /ahead of target/);
+
+    const marker = readMarker(root);
+    assert.equal(marker.pin, `v${BASE_VERSION}`);
+    assert.equal(marker.standard, BASE_VERSION);
+    assert.ok(!existsSync(join(root, '.claude/skills/docs')));
+  } finally {
+    for (const d of [root, stale]) rmSync(d, { recursive: true, force: true });
   }
 });
 
