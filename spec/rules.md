@@ -147,7 +147,8 @@ Skill names avoid VS Code built-ins: `create-skill`, `create-agent`,
 **R-23 · Sibling links are Markdown links** · mechanical · audit, warning
 SKILL.md links sibling files with `[text](references/x.md)` — never bare
 (`references/x.md`) or relative (`./`, `../`) plain-text paths. This is the
-progressive-disclosure loading path in both tools.
+progressive-disclosure loading path in both tools. Paths inside code fences and
+inline code spans are exempt (command examples are not references).
 
 **R-24 · Progressive disclosure structure** · judgment · rubric
 SKILL.md is a lean router; depth lives in `references/`, `examples/`, `scripts/`.
@@ -210,7 +211,8 @@ and when to delegate to it (judgment — same PASS/FAIL pattern as R-21).
 
 **R-35 · Current model references** · mechanical · audit, warning
 `model:`, when present, is a current alias (`sonnet` / `opus` / `haiku` /
-`inherit`) or current full ID. Deprecated names (opus-4, sonnet-4 era) are findings.
+`fable` / `inherit`) or current full ID. Deprecated names (opus-4, sonnet-4 era)
+are findings.
 
 **R-36 · One agent, one responsibility** · judgment · rubric
 PASS: `migration-verifier` that only verifies.
@@ -256,8 +258,8 @@ agents). Brownfield: migration sources.
 
 **R-47 · Gitignore coverage** · mechanical · audit, info → warning
 `.gitignore` exists (in git repos) and covers `.claude/settings.local.json`.
-Matching is prefix-aware (a `.claude/` entry counts). One matcher, applied
-uniformly.
+Matching is prefix-aware (a `.claude` or `.claude/` entry counts). One matcher,
+applied uniformly.
 
 **R-48 · One README per asset folder** · mechanical · audit, info → warning
 `.claude/agents/`, `.claude/skills/`, and `.claude/rules/` (when present) each have
@@ -283,8 +285,9 @@ Agent Base docs, templates, and check metadata reference rules by R-ID only — 
 file line numbers. Thresholds are never restated without the R-ID alongside
 (shipped templates may carry the operative value, since consumer repos have no
 `spec/rules.md`, but must cite the R-ID). CI mechanically enforces the doc-link
-and rule ⇄ audit-check halves (`docs-consistency`, `rule-check-map`); the
-no-restatement clause is review-enforced. Not enforced in consumer repos.
+and rule ⇄ audit-check halves, including `--strict` escalation arrows
+(`docs-consistency`, `rule-check-map`); the no-restatement clause is
+review-enforced. Not enforced in consumer repos.
 
 ---
 

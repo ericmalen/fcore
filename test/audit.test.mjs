@@ -463,4 +463,109 @@ test('R-45: gitignored .vscode/settings.json fires; only a ".vscode/*"+negation 
   assert.equal(hit(base + '.vscode/\n!.vscode/settings.json\n'), 1, 'dir exclusion + file negation still ignored by git → fires');
   // contents glob leaves the dir itself un-excluded, so the negation works.
   assert.equal(hit(base + '.vscode/*\n!.vscode/settings.json\n'), 0, '.vscode/* + negation → committable → clean');
+  // ".vscode/**" is also a contents glob: excludes the file, negation re-includes.
+  assert.equal(hit(base + '.vscode/**\n'), 1, '.vscode/** → fires');
+  assert.equal(hit(base + '.vscode/**\n!.vscode/settings.json\n'), 0, '.vscode/** + negation → committable → clean');
+});
+
+// ── R-52: block-style YAML paths lists are valid frontmatter ────────────────
+
+test('R-52: block-style paths: list is accepted; missing paths still fires', () => {
+  const rulesRepo = (file) => makeRepo({
+    ...CONFORMANT,
+    '.claude/rules/README.md': '# Rules\n',
+    ...file,
+  });
+  const block = rulesRepo({ '.claude/rules/tests.md': '---\npaths:\n  - "**/*.test.ts"\n---\nTesting conventions.\n' });
+  const noPaths = rulesRepo({ '.claude/rules/style.md': '---\nscope: style\n---\nStyle conventions.\n' });
+  try {
+    assert.equal(of(audit({ root: block }), 'R-52').length, 0, 'block-style paths list must pass');
+    assert.equal(of(audit({ root: noPaths }), 'R-52').length, 1, 'frontmatter without paths must fire');
+  } finally {
+    rmSync(block, { recursive: true, force: true });
+    rmSync(noPaths, { recursive: true, force: true });
+  }
+});
+
+// ── R-47: bare ".claude" prefix entry counts (git ignores the dir either way) ─
+
+test('R-47: bare ".claude" and ".claude/" gitignore entries both count', () => {
+  for (const gi of ['.claude\n', '.claude/\n', '/.claude\n']) {
+    const repo = makeRepo({ ...CONFORMANT, '.gitignore': gi });
+    try {
+      assert.equal(of(audit({ root: repo }), 'R-47').length, 0, JSON.stringify(gi));
+    } finally {
+      rmSync(repo, { recursive: true, force: true });
+    }
+  }
+});
+
+// ── R-23: inline code spans are exempt ──────────────────────────────────────
+
+test('R-23: paths in inline code spans are exempt; bare relative paths still fire', () => {
+  const skill = (body) => ({
+    ...CONFORMANT,
+    '.claude/skills/demo/SKILL.md': `---\nname: demo\ndescription: Does demo work when demoing.\n---\n\n# demo\n\n${body}\n`,
+  });
+  const coded = makeRepo(skill('Run `node ./scripts/run.mjs` to start.'));
+  const bare = makeRepo(skill('See ./scripts/run.mjs to start.'));
+  try {
+    assert.equal(of(audit({ root: coded }), 'R-23').length, 0, 'inline code must not fire R-23');
+    assert.ok(of(audit({ root: bare }), 'R-23').length >= 1, 'a bare relative path must still fire R-23');
+  } finally {
+    rmSync(coded, { recursive: true, force: true });
+    rmSync(bare, { recursive: true, force: true });
+  }
+});
+
+// ── R-35: fable alias is current ────────────────────────────────────────────
+
+test('R-35: fable alias accepted; unknown model still fires', () => {
+  const agent = (model) => ({
+    ...CONFORMANT,
+    '.claude/agents/README.md': '# Agents\n',
+    '.claude/agents/probe.md': `---\ndescription: Probes things. Use when probing.\ntools: Read\nmodel: ${model}\n---\n\nProbes the system; never edits.\n\n## Procedures\n\n1. Probe.\n\n## Never\n\n- Edit.\n`,
+  });
+  const fable = makeRepo(agent('fable'));
+  const bogus = makeRepo(agent('gpt-5'));
+  try {
+    assert.equal(of(audit({ root: fable }), 'R-35').length, 0, 'fable is a current alias');
+    assert.equal(of(audit({ root: bogus }), 'R-35').length, 1, 'unknown model must fire');
+  } finally {
+    rmSync(fable, { recursive: true, force: true });
+    rmSync(bogus, { recursive: true, force: true });
+  }
+});
+
+// ── R-43: the committed clause — gitignored settings.json fires ─────────────
+
+test('R-43: gitignored .claude/settings.json fires (committed clause)', () => {
+  const ignored = makeRepo({
+    ...CONFORMANT,
+    '.gitignore': '.claude/settings.local.json\n.claude/settings.json\n',
+  });
+  const clean = makeRepo(CONFORMANT);
+  try {
+    const hits = of(audit({ root: ignored }), 'R-43').filter((f) => /gitignored/.test(f.message));
+    assert.equal(hits.length, 1);
+    assert.equal(hits[0].severity, 'info');
+    assert.equal(of(audit({ root: clean }), 'R-43').length, 0);
+  } finally {
+    rmSync(ignored, { recursive: true, force: true });
+    rmSync(clean, { recursive: true, force: true });
+  }
+});
+
+// ── R-21: "whenever" satisfies the when-clause nudge ────────────────────────
+
+test('R-21: a "whenever" description carries a when clause', () => {
+  const repo = makeRepo({
+    ...CONFORMANT,
+    '.claude/skills/wf/SKILL.md': '---\nname: wf\ndescription: Does wf work, activated whenever wf-ing.\n---\nbody\n',
+  });
+  try {
+    assert.equal(of(audit({ root: repo }), 'R-21').length, 0);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
 });

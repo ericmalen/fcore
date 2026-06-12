@@ -5,8 +5,8 @@
 import { join, relative, dirname, basename } from 'node:path';
 import {
   readSafe, exists, isDir, isGitRepo, walk, parseFrontmatter, frontmatterKeys,
-  nonBlankLines, stripFences, lineOf, parseJsonc, finding as F, isSetupTooling, isVendored,
-  isPayloadSkeleton,
+  nonBlankLines, stripFences, stripInlineCode, lineOf, parseJsonc, finding as F,
+  isSetupTooling, isVendored, isPayloadSkeleton,
 } from './util.mjs';
 
 // ── R-01..R-09: root instructions ───────────────────────────────────────────
@@ -110,8 +110,10 @@ export function checkPathScoping(ctx) {
     const rel = relative(root, abs).replace(/\\/g, '/');
     const text = readSafe(abs);
     if (text == null) continue;
-    const { frontmatter, body, hasFrontmatter } = parseFrontmatter(text);
-    if (!hasFrontmatter || !frontmatter.paths) {
+    const { body, hasFrontmatter } = parseFrontmatter(text);
+    // Key presence, not value truthiness — a block-style YAML list ("paths:"
+    // followed by "- ..." items) parses to an empty scalar in the minimal parser.
+    if (!hasFrontmatter || !frontmatterKeys(text).includes('paths')) {
       out.push(F('R-52', 'warning', rel, 'Rules file must have frontmatter with a paths: glob list.'));
     }
     if (nonBlankLines(body) > 50) {
@@ -197,7 +199,7 @@ export function checkSkills(ctx) {
     // R-21 hints (rubric owns the rule; these are non-blocking nudges)
     if (!desc) {
       out.push(F('R-21', 'info', rel, 'Description missing — the rubric requires what + when.'));
-    } else if (!/\bwhen\b/i.test(desc)) {
+    } else if (!/\bwhen(ever)?\b/i.test(desc)) {
       out.push(F('R-21', 'info', rel, 'Description has no "when" clause — activation quality suffers.'));
     }
     if (VSCODE_BUILTINS.has(folder)) {
@@ -206,7 +208,8 @@ export function checkSkills(ctx) {
     // R-23: sibling references must be Markdown links. Strip well-formed links
     // first so a path-shaped LABEL — e.g. [references/x.md](references/x.md) —
     // isn't flagged as a bare path (the target is already a proper link).
-    const stripped = stripFences(text);
+    // Inline code spans are exempt (command examples are not references).
+    const stripped = stripInlineCode(stripFences(text));
     const noLinks = stripped.replace(/\[[^\]]*\]\([^)]*\)/g, '');
     const bare = noLinks.match(/(?<!\]\()(?<![\w/.-])(references|examples|scripts)\/[\w./-]+\.(md|sh|mjs|js|py)/);
     if (bare) {
@@ -231,7 +234,7 @@ export function checkSkills(ctx) {
 
 // ── R-27..R-35: agents ──────────────────────────────────────────────────────
 
-const MODEL_ALIASES = new Set(['sonnet', 'opus', 'haiku', 'inherit']);
+const MODEL_ALIASES = new Set(['sonnet', 'opus', 'haiku', 'fable', 'inherit']);
 // Tracked deprecated/retired model-ID patterns (R-35). List tracked — update as
 // Anthropic retires IDs (same discipline as the R-22 built-ins list).
 const DEPRECATED_MODEL_PATTERNS = [
@@ -278,7 +281,7 @@ export function checkAgents(ctx) {
     }
     if (!frontmatter.description) {
       out.push(F('R-34', 'warning', rel, 'Missing description — the orchestrator cannot decide when to delegate.'));
-    } else if (!/\bwhen\b/i.test(frontmatter.description)) {
+    } else if (!/\bwhen(ever)?\b/i.test(frontmatter.description)) {
       out.push(F('R-34', 'info', rel, 'Description has no "when" clause (rubric hint).'));
     }
     const model = frontmatter.model;
@@ -318,7 +321,7 @@ export function checkReferences(ctx) {
     const rel = relative(root, abs).replace(/\\/g, '/');
     const text = readSafe(abs);
     if (!text) continue;
-    const stripped = stripFences(text);
+    const stripped = stripInlineCode(stripFences(text));
     const seen = new Set();
 
     const emit = (rawTarget, line) => {
@@ -391,6 +394,15 @@ export function checkClaudeSettings(ctx) {
     out.push(F('R-46', 'info', '.github/hooks',
       'Hooks should live in .claude/settings.json — read natively by BOTH tools.'));
   }
+  // R-43: a gitignored .claude/settings.json passes on disk but never gets
+  // committed — the rule requires it committed (same trap as R-45's check).
+  if (isGitRepo(root)) {
+    const gi = readSafe(join(root, '.gitignore'));
+    if (gi != null && settingsFileIgnored(gi, '.claude', 'settings.json')) {
+      out.push(F('R-43', 'info', rel,
+        '.claude/settings.json is gitignored — it passes on disk but will not be committed; un-ignore it (e.g. ".claude/*" + "!.claude/settings.json") or stop ignoring .claude/.'));
+    }
+  }
   return out;
 }
 
@@ -405,13 +417,13 @@ const VSCODE_REQUIRED = {
   'explorer.fileNesting.enabled': true,
 };
 
-// Is .vscode/settings.json effectively gitignored? Models git's rule that a
-// file CANNOT be re-included if a parent directory is excluded — so a bare
-// ".vscode/" (directory exclusion) ignores the file even with a later
-// "!.vscode/settings.json". Only a contents glob (".vscode/*") leaves the dir
-// itself un-excluded so a file negation can take effect.
-function vscodeSettingsIgnored(gi) {
-  const target = '.vscode/settings.json';
+// Is <dir>/<file> effectively gitignored? Models git's rule that a file CANNOT
+// be re-included if a parent directory is excluded — so a bare "<dir>/"
+// (directory exclusion) ignores the file even with a later "!<dir>/<file>".
+// Only a contents glob ("<dir>/*" or "<dir>/**") leaves the dir itself
+// un-excluded so a file negation can take effect.
+function settingsFileIgnored(gi, dir, file) {
+  const target = `${dir}/${file}`;
   const lines = gi.split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
   const parse = (l) => {
     const neg = l.startsWith('!');
@@ -421,14 +433,14 @@ function vscodeSettingsIgnored(gi) {
   let dirExcluded = false;
   for (const l of lines) {
     const { neg, pat } = parse(l);
-    if (pat === '.vscode' || pat === '**/.vscode') dirExcluded = !neg;
+    if (pat === dir || pat === `**/${dir}`) dirExcluded = !neg;
   }
   if (dirExcluded) return true;
   // Step 2: file-level patterns, last match wins (negations effective here).
   let ignored = false;
   for (const l of lines) {
     const { neg, pat } = parse(l);
-    if (pat === target || pat === '.vscode/*' || pat === '**/settings.json') ignored = !neg;
+    if (pat === target || pat === `${dir}/*` || pat === `${dir}/**` || pat === `**/${file}`) ignored = !neg;
   }
   return ignored;
 }
@@ -475,7 +487,7 @@ export function checkVscodeSettings(ctx) {
   // never gets committed — the shared settings silently don't ship.
   if (isGitRepo(root)) {
     const gi = readSafe(join(root, '.gitignore'));
-    if (gi != null && vscodeSettingsIgnored(gi)) {
+    if (gi != null && settingsFileIgnored(gi, '.vscode', 'settings.json')) {
       out.push(F('R-45', 'warning', rel,
         '.vscode/settings.json is gitignored — it passes on disk but will not be committed; un-ignore it with ".vscode/*" + "!.vscode/settings.json" (a file negation under a bare ".vscode/" does NOT work), or stop ignoring .vscode/.'));
     }
@@ -524,9 +536,14 @@ export function checkHygiene(ctx) {
       out.push(F('R-47', 'info', '.gitignore', 'Missing .gitignore.'));
     } else {
       const lines = gi.split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
-      const covered = lines.some((l) =>
-        l === '.claude/settings.local.json' || l === 'settings.local.json' || l === '**/settings.local.json'
-        || (l.endsWith('/') && '.claude/settings.local.json'.startsWith(l.replace(/^\//, ''))));
+      // Prefix-aware: a parent-dir entry counts, with or without the trailing
+      // slash (git ignores a directory for a bare ".claude" entry too).
+      const covered = lines.some((l) => {
+        const pat = l.replace(/^\//, '').replace(/\/$/, '');
+        return pat === '.claude/settings.local.json' || pat === 'settings.local.json'
+          || pat === '**/settings.local.json'
+          || '.claude/settings.local.json'.startsWith(`${pat}/`);
+      });
       if (!covered) {
         out.push(F('R-47', 'info', '.gitignore', 'Must cover .claude/settings.local.json (personal settings never committed).'));
       }

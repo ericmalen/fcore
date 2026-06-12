@@ -114,6 +114,12 @@ export function stripFences(text) {
   }).join('\n');
 }
 
+// Blank inline `code` spans with spaces (keeps line numbers and offsets stable).
+// Command examples in inline code are not path references (R-23, R-07).
+export function stripInlineCode(text) {
+  return text.replace(/(`+)[^`\n]*?\1/g, (m) => ' '.repeat(m.length));
+}
+
 export function lineOf(text, re) {
   const idx = text.search(re);
   if (idx === -1) return undefined;

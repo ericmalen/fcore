@@ -4,7 +4,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync } from 'nod
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { run, parseRules, parseEmitted } from '../scripts/rule-check-map.mjs';
+import { run, parseRules, parseEmitted, parseEscalation } from '../scripts/rule-check-map.mjs';
 
 const BASE_ROOT = fileURLToPath(new URL('..', import.meta.url));
 
@@ -26,6 +26,15 @@ test('live rule/emission totals match the spec (parse-regression tripwire)', () 
   assert.equal(emitted.size, 40);
 });
 
+test('live strict-escalation arrows match audit.mjs (9 arrows, in sync)', () => {
+  const { strictArrows } = parseRules(
+    readFileSync(join(BASE_ROOT, 'spec', 'rules.md'), 'utf8'));
+  const escalation = parseEscalation(
+    readFileSync(join(BASE_ROOT, 'scripts', 'audit.mjs'), 'utf8'));
+  assert.equal(strictArrows.size, 9);
+  assert.deepEqual([...strictArrows.entries()].sort(), [...escalation.entries()].sort());
+});
+
 test('parser ignores judgment-only rules and Agent Base-CI rules for the audit requirement', () => {
   const rules = parseRules([
     '**R-90 · A mechanical audit rule** · mechanical · audit, warning',
@@ -42,13 +51,16 @@ test('parseEmitted finds F() rule emissions in either quote style', () => {
   assert.deepEqual([...emitted].sort(), ['R-01', 'R-44']);
 });
 
-// Build a minimal Agent Base-shaped tree so run() can read both files.
-function seedKit(rules, checks) {
+// Build a minimal Agent Base-shaped tree so run() can read the files.
+// audit.mjs (the STRICT_ESCALATION carrier) is optional — absent means
+// an empty escalation map.
+function seedKit(rules, checks, auditSrc) {
   const root = mkdtempSync(join(tmpdir(), 'rcm-'));
   mkdirSync(join(root, 'spec'), { recursive: true });
   mkdirSync(join(root, 'scripts', 'lib', 'audit'), { recursive: true });
   writeFileSync(join(root, 'spec', 'rules.md'), rules);
   writeFileSync(join(root, 'scripts', 'lib', 'audit', 'checks.mjs'), checks);
+  if (auditSrc != null) writeFileSync(join(root, 'scripts', 'audit.mjs'), auditSrc);
   return root;
 }
 
@@ -76,4 +88,24 @@ test('a check emitting an undefined/retired rule fails the gate', () => {
     assert.equal(f[0].rule, 'R-40');
     assert.equal(f[0].kind, 'unknown-emission');
   } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test('strict-escalation drift fails the gate in both directions', () => {
+  const rules = [
+    '**R-01 · Escalating** · mechanical · audit, info → warning',
+    '**R-02 · Plain** · mechanical · audit, warning',
+  ].join('\n') + '\n';
+  const checks = "out.push(F('R-01', 'info', 'x', 'y'));\nout.push(F('R-02', 'warning', 'x', 'y'));\n";
+  const inSync = seedKit(rules, checks, "const STRICT_ESCALATION = {\n  'R-01': 'warning',\n};\n");
+  const missing = seedKit(rules, checks, 'const STRICT_ESCALATION = {};\n');
+  const wrongTarget = seedKit(rules, checks, "const STRICT_ESCALATION = {\n  'R-01': 'error',\n};\n");
+  const stale = seedKit(rules, checks, "const STRICT_ESCALATION = {\n  'R-01': 'warning',\n  'R-02': 'error',\n};\n");
+  try {
+    assert.deepEqual(run(inSync), []);
+    assert.deepEqual(run(missing).map((f) => [f.rule, f.kind]), [['R-01', 'missing-escalation']]);
+    assert.deepEqual(run(wrongTarget).map((f) => [f.rule, f.kind]), [['R-01', 'missing-escalation']]);
+    assert.deepEqual(run(stale).map((f) => [f.rule, f.kind]), [['R-02', 'stale-escalation']]);
+  } finally {
+    for (const r of [inSync, missing, wrongTarget, stale]) rmSync(r, { recursive: true, force: true });
+  }
 });
