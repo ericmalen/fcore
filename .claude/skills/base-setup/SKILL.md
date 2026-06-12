@@ -31,8 +31,10 @@ repo is untouched until THEY merge. Abort = delete the branch.
    message if unmet):
    - target exists, is NOT this base checkout, and is a git repo:
      `git rev-parse --is-inside-work-tree`
-   - clean working tree: `git status --porcelain` is empty (ask the user to
-     commit/stash if not — do not proceed dirty)
+   - clean working tree: `git status --porcelain` is empty — one exception:
+     an untracked `.claude/skills/agent-base-bootstrap/` (the one-shot
+     launcher the npx bin drops) — delete that directory and re-check. For
+     anything else ask the user to commit/stash — do not proceed dirty
    - `node --version` >= 20
 2. Freshen this checkout — only if it is a clone (has `.git`):
    `git pull --ff-only` (on failure, warn and continue — never block setup

@@ -23,11 +23,22 @@ mapping.
 ## Bootstrap commands (LLM phases)
 
 These stage the running release to `~/.agent-base/versions/<tag>/`
-(copy-once, immutable — no `.git`, never pulled) and print the exact prompt
-to paste into your AI session opened in the project. They never modify the
-target repository.
+(copy-once, immutable — no `.git`, never pulled), then hand off down a
+launch chain:
 
-| Command | Prints a prompt for |
+1. `claude` found on PATH (not Windows) → spawn it interactively in the
+   target with the bootstrap prompt as the initial message.
+2. Otherwise → write a one-shot launcher skill into the target at
+   `.claude/skills/agent-base-bootstrap/SKILL.md` (untracked; it orders its
+   own deletion as step 1, so the base-* clean-tree preconditions hold) and
+   print "type `/agent-base-bootstrap`" plus the paste-able prompt.
+3. Unwritable target → print the prompt only.
+
+The launcher skill is the only thing a bootstrap command ever writes into
+the target, and it never enters a commit. Flags: `--no-launch` skips
+step 1; `--print` forces step 3 (never modifies the target).
+
+| Command | Starts |
 |---|---|
 | `setup [path]` | `base-setup` — full agent-base setup of a repository |
 | `orchestrate [path]` | `base-orchestrate` — repo-specific orchestration generation |
@@ -35,6 +46,8 @@ target repository.
 
 `path` defaults to the current directory. When run from a clone (a checkout
 with `.git`), staging is skipped and the prompt points at the clone itself.
+Windows always uses the launcher-skill path: `claude` installs as a `.cmd`
+shim there, which cannot safely receive a multi-line prompt argument.
 
 ## Deterministic commands
 

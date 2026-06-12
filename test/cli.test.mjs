@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { cpSync, mkdtempSync, readFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -52,6 +52,31 @@ test('cli: headless-guard delegation produces guard output lines', () => {
   assert.match(r.stdout, /^run=true$/m);
   assert.match(r.stdout, /^reason=eligible-task$/m);
   assert.match(r.stdout, /^task=T-001$/m);
+});
+
+test('cli: setup --no-launch drops the launcher skill and prints the prompt', () => {
+  const target = mkdtempSync(join(tmpdir(), 'ab-cli-target-'));
+  const r = run(['setup', target, '--no-launch']);
+  assert.equal(r.status, 0);
+  // repo has .git → dev mode, no staging into the real home
+  assert.match(r.stdout, /running from clone/);
+  assert.match(r.stdout, /\/agent-base-bootstrap/);
+  assert.match(r.stdout, /base-setup\/SKILL\.md/);
+  assert.ok(existsSync(join(target, '.claude', 'skills', 'agent-base-bootstrap', 'SKILL.md')));
+});
+
+test('cli: setup --print touches nothing and prints the prompt only', () => {
+  const target = mkdtempSync(join(tmpdir(), 'ab-cli-target-'));
+  const r = run(['setup', target, '--print']);
+  assert.equal(r.status, 0);
+  assert.match(r.stdout, /Paste this prompt/);
+  assert.ok(!existsSync(join(target, '.claude')));
+});
+
+test('cli: bootstrap command rejects unknown flags', () => {
+  const r = run(['setup', '--frobnicate']);
+  assert.equal(r.status, 2);
+  assert.match(r.stderr, /unknown flag --frobnicate/);
 });
 
 test('cli: cache prune rejects bad --keep', () => {

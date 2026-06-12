@@ -18,7 +18,9 @@ files by hand.
    with a plain-language message if unmet):
    - target exists, is NOT this base checkout, and is a git repo
    - set up: `.claude/agent-base.json` marker present
-   - clean working tree: `git status --porcelain` is empty
+   - clean working tree: `git status --porcelain` is empty — one exception:
+     an untracked `.claude/skills/agent-base-bootstrap/` (the one-shot
+     launcher the npx bin drops); delete it and re-check
    - `node --version` >= 20
 2. Freshen this checkout — only if it is a clone (has `.git`):
    `git pull --ff-only` (on failure, warn and continue). An npx-staged

@@ -16,7 +16,9 @@ Agent Base-side only — `install-setup.mjs` never ships this skill.
 ## Preconditions (hard — stop with plain language if unmet)
 
 1. Target path exists, is NOT this base checkout, and is a git repo.
-2. Clean working tree in the target (`git status --porcelain` empty).
+2. Clean working tree in the target (`git status --porcelain` empty) — one
+   exception: an untracked `.claude/skills/agent-base-bootstrap/` (the
+   one-shot launcher the npx bin drops); delete it and re-check.
 3. Target shows agent-base setup baseline (at minimum `.claude/agent-base.json` and
    `base-check` skill). If missing, tell the user to run `/base-setup`
    first.
