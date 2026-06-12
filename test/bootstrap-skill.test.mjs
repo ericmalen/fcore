@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
 import { writeBootstrapSkill, BOOTSTRAP_SKILL_DIR } from '../bin/lib/bootstrap-skill.mjs';
-import { findClaude } from '../bin/lib/launch.mjs';
+import { findClaude, launchClaude } from '../bin/lib/launch.mjs';
 
 test('writeBootstrapSkill drops a self-deleting launcher pointing at the staged skill', () => {
   const target = mkdtempSync(join(tmpdir(), 'ab-target-'));
@@ -41,4 +41,10 @@ test('writeBootstrapSkill carries the command through (refresh, dev clone)', () 
 test('findClaude returns null on win32 and for a missing binary', () => {
   assert.equal(findClaude({ platform: 'win32' }), null);
   assert.equal(findClaude({ cmd: 'definitely-not-a-real-cli-7f3a' }), null);
+});
+
+test('launchClaude passes through the exit code; null when the spawn fails', () => {
+  // node --version stands in for a clean interactive session (exit 0)
+  assert.equal(launchClaude({ cmd: process.execPath, prompt: '--version' }), 0);
+  assert.equal(launchClaude({ cmd: 'definitely-not-a-real-cli-7f3a', prompt: 'x' }), null);
 });

@@ -25,7 +25,12 @@ export function pkgRootFromHere() {
   return resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 }
 
-export function versionsDir(home = homedir()) {
+// AGENT_BASE_HOME relocates the release store root (tests, sandboxed CI).
+function defaultHome() {
+  return process.env.AGENT_BASE_HOME || homedir();
+}
+
+export function versionsDir(home = defaultHome()) {
   return join(home, '.agent-base', 'versions');
 }
 
@@ -35,7 +40,7 @@ export function versionsDir(home = homedir()) {
  *   dev    — running from a git clone; nothing staged, path = the clone
  *   copied — true when this call performed the copy (false: already staged)
  */
-export function stageRelease({ pkgRoot = pkgRootFromHere(), home = homedir() } = {}) {
+export function stageRelease({ pkgRoot = pkgRootFromHere(), home = defaultHome() } = {}) {
   if (existsSync(join(pkgRoot, '.git'))) {
     return { path: pkgRoot, tag: null, dev: true, copied: false };
   }
@@ -68,7 +73,7 @@ export function stageRelease({ pkgRoot = pkgRootFromHere(), home = homedir() } =
 }
 
 /** Staged tags, newest first. Entries without a sentinel are flagged partial. */
-export function listStaged(home = homedir()) {
+export function listStaged(home = defaultHome()) {
   const dir = versionsDir(home);
   if (!existsSync(dir)) return [];
   return readdirSync(dir)
@@ -83,7 +88,7 @@ export function listStaged(home = homedir()) {
 const PARTIAL_STALE_MS = 60 * 60 * 1000;
 
 /** Remove all but the newest `keep` staged releases. Returns removed tags. */
-export function pruneStaged({ keep = 2, home = homedir(), now = Date.now() } = {}) {
+export function pruneStaged({ keep = 2, home = defaultHome(), now = Date.now() } = {}) {
   const removed = [];
   for (const e of listStaged(home).slice(Math.max(0, keep))) {
     rmSync(e.path, { recursive: true, force: true });

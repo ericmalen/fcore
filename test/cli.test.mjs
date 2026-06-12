@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { cpSync, existsSync, mkdtempSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -134,6 +134,47 @@ test('cli: cache prune rejects bad --keep', () => {
   const r = run(['cache', 'prune', '--keep', 'lots']);
   assert.equal(r.status, 2);
   assert.match(r.stderr, /--keep must be a non-negative integer/);
+});
+
+test('cli: cache list rejects unexpected args', () => {
+  const r = run(['cache', 'list', '--bogus']);
+  assert.equal(r.status, 2);
+  assert.match(r.stderr, /unexpected args --bogus/);
+});
+
+test('cli: piped stdio never auto-launches — falls back to the skill drop', () => {
+  // no flags + claude possibly on PATH: the TTY gate must take the fallback
+  // path; timeout turns a regression (hung interactive session) into a fail
+  const target = mkdtempSync(join(tmpdir(), 'ab-cli-target-'));
+  const r = run(['setup', target], { timeout: 30000 });
+  assert.equal(r.status, 0);
+  assert.match(r.stdout, /\/agent-base-bootstrap/);
+  assert.doesNotMatch(r.stdout, /launching Claude Code/);
+  assert.ok(existsSync(join(target, '.claude', 'skills', 'agent-base-bootstrap', 'SKILL.md')));
+});
+
+test('cli: cache list/prune honor AGENT_BASE_HOME', () => {
+  const home = mkdtempSync(join(tmpdir(), 'ab-cli-home-'));
+  const env = { ...process.env, AGENT_BASE_HOME: home };
+
+  const empty = run(['cache', 'list'], { env });
+  assert.equal(empty.status, 0);
+  assert.match(empty.stdout, /no staged releases/);
+
+  for (const v of ['1.0.0', '1.1.0', '1.2.0']) {
+    const dir = join(home, '.agent-base', 'versions', `v${v}`);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, '.agent-base-staged'), 'x\n');
+  }
+  const list = run(['cache', 'list'], { env });
+  assert.equal(list.status, 0);
+  assert.match(list.stdout, /^v1\.2\.0 /m);
+
+  const prune = run(['cache', 'prune', '--keep', '1'], { env });
+  assert.equal(prune.status, 0);
+  assert.match(prune.stdout, /pruned: v1\.1\.0, v1\.0\.0/);
+  assert.ok(existsSync(join(home, '.agent-base', 'versions', 'v1.2.0')));
+  assert.ok(!existsSync(join(home, '.agent-base', 'versions', 'v1.0.0')));
 });
 
 test('cli: apply --dry-run with no value exits nonzero WITHOUT applying', () => {

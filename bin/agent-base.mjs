@@ -6,7 +6,10 @@
 // stage the release to ~/.agent-base/versions/<tag>/ then hand off via the
 // launch chain: spawn `claude` in the target → drop a one-shot
 // /agent-base-bootstrap launcher skill → print the prompt to paste
-// (--no-launch skips the spawn, --print touches nothing).
+// (--no-launch skips the spawn, --print never writes to the target; both
+// still stage). Auto-launch needs a real terminal — piped stdio (scripts,
+// CI) skips straight to the fallback instead of hanging an interactive
+// session.
 // The clone workflow is unchanged — this
 // bin is additive and never ships into projects (see scripts/lib/baseline.mjs
 // allowlist; AGENTS.md "Do Not").
@@ -48,7 +51,7 @@ skill into the project and prints the prompt to paste):
   orchestrate [path]      generate repo-specific orchestration (base-orchestrate)
   refresh [path]          upgrade a project's baseline pin (base-refresh)
   flags: --no-launch      never spawn claude (drop launcher + print)
-         --print          print the prompt only; touch nothing
+         --print          print the prompt only; never writes to the target
 
 Deterministic (delegates to the matching scripts/ entry point):
   install <path>          copy setup tooling into a project (install-setup.mjs)
@@ -114,12 +117,15 @@ if (LLM_ENTRIES.has(command)) {
   console.log(stagedNotice({ checkoutPath: path, dev, copied }));
 
   // Launch chain: spawn claude → drop launcher skill → print the prompt.
-  if (!flags.length) {
+  // TTY-gated: under piped stdio an interactive claude session would hang.
+  if (!flags.length && process.stdin.isTTY && process.stdout.isTTY) {
     const claude = findClaude();
     if (claude) {
       console.log(launchNotice({ targetPath }));
       const prompt = bootstrapPrompt({ command, checkoutPath: path, targetPath, dev });
-      process.exit(launchClaude({ cmd: claude, prompt, cwd: targetPath }));
+      const code = launchClaude({ cmd: claude, prompt, cwd: targetPath });
+      if (code !== null) process.exit(code);
+      // spawn itself failed (claude vanished since the probe) — fall through
     }
   }
   let skillDropped = false;
@@ -138,6 +144,10 @@ if (LLM_ENTRIES.has(command)) {
 if (command === 'cache') {
   const [sub, ...cacheArgs] = rest;
   if (sub === 'list' || sub === undefined) {
+    if (cacheArgs.length) {
+      console.error(`agent-base cache list: unexpected args ${cacheArgs.join(' ')}`);
+      process.exit(2);
+    }
     const entries = listStaged();
     if (!entries.length) console.log('cache: no staged releases.');
     for (const e of entries) console.log(`${e.tag}  ${e.path}${e.partial ? '  (partial — re-staged on next use)' : ''}`);

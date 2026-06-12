@@ -42,15 +42,17 @@ npx github:ericmalen/agent-base#v1.2.0 setup
 
 This stages the release at a stable path, then hands off down a chain:
 
-1. **Claude Code CLI on your PATH** → it launches `claude` right in your
-   repo with setup already started. Answer its questions; that's it.
+1. **Claude Code CLI on your PATH** (running in a real terminal, not a
+   script) → it launches `claude` right in your repo with setup already
+   started. Answer its questions; that's it.
 2. **No `claude` (Copilot users, Windows)** → it drops a one-shot
    `/agent-base-bootstrap` launcher skill into the repo (untracked, deletes
    itself on use). Open Claude Code or Copilot (agent mode) in the repo and
    type `/agent-base-bootstrap`.
 3. **Fallback** → it prints the exact prompt to paste into your AI session.
 
-`--no-launch` skips step 1; `--print` skips 1 and 2 (touches nothing).
+`--no-launch` skips step 1; `--print` skips 1 and 2 (never writes to the
+repo — the release is still staged).
 Non-GitHub hosting uses the `git+<https-url>#<tag>` spec form — see the
 [CLI reference](../reference/agent-base-cli.md).
 

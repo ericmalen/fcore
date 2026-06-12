@@ -1,9 +1,10 @@
 // launch.mjs — auto-launch the Claude Code CLI with the bootstrap prompt.
 // Best case for the bootstrap commands: spawn `claude` interactively in the
 // TARGET with the prompt as the initial message, so the user runs one npx
-// command and the flow simply starts. Detection is a PATH probe; anything
-// else (no CLI, Copilot-only, Windows, --no-launch) falls back to the
-// bootstrap-skill drop + printed prompt in agent-base.mjs.
+// command and the flow simply starts. Detection is a PATH probe (the TTY
+// gate lives in agent-base.mjs); anything else (no CLI, Copilot-only,
+// Windows, piped stdio, --no-launch) falls back to the bootstrap-skill
+// drop + printed prompt in agent-base.mjs.
 //
 // Windows is excluded deliberately: `claude` installs as a .cmd shim there,
 // which Node refuses to spawn without shell:true, and shell:true cannot
@@ -19,9 +20,15 @@ export function findClaude({ cmd = 'claude', platform = process.platform } = {})
   return r.status === 0 ? cmd : null;
 }
 
-/** Spawn the CLI interactively in the target; returns its exit code. */
+/**
+ * Spawn the CLI interactively in the target; returns its exit code, or
+ * null when the spawn itself failed (caller falls back to the skill drop).
+ */
 export function launchClaude({ cmd = 'claude', prompt, cwd }) {
   const r = spawnSync(cmd, [prompt], { stdio: 'inherit', cwd });
-  if (r.error) console.error(`agent-base: failed to launch ${cmd}: ${r.error.message}`);
+  if (r.error) {
+    console.error(`agent-base: failed to launch ${cmd}: ${r.error.message}`);
+    return null;
+  }
   return r.status ?? 1;
 }
