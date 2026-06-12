@@ -37,16 +37,16 @@ From a project root (or pass `--root`), via npx at your pin — no clone needed:
 
 ```sh
 # CI / weekly nudge — exit 1 when pin is behind
-npx github:ericmalen/agent-base#v1.1.0 sync --check
+npx github:ericmalen/agent-base#v1.2.0 sync --check
 
 # Bot-friendly JSON plan (files to update, conflicts)
-npx github:ericmalen/agent-base#v1.1.0 sync --report --json
+npx github:ericmalen/agent-base#v1.2.0 sync --report --json
 
 # Apply safe updates (skips files with local edits vs the old release)
-npx github:ericmalen/agent-base#v1.1.0 sync --upgrade
+npx github:ericmalen/agent-base#v1.2.0 sync --upgrade
 
 # Preview only
-npx github:ericmalen/agent-base#v1.1.0 sync --upgrade --dry-run
+npx github:ericmalen/agent-base#v1.2.0 sync --upgrade --dry-run
 ```
 
 The same commands work from a clone

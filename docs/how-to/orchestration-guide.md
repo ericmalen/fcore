@@ -50,7 +50,7 @@ preconditions — failing one stops the run):
 From the project:
 
 ```sh
-npx github:ericmalen/agent-base#v1.1.0 orchestrate
+npx github:ericmalen/agent-base#v1.2.0 orchestrate
 ```
 
 then paste the printed prompt into your AI session. Or, from a clone
