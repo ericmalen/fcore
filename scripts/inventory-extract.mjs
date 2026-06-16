@@ -14,6 +14,7 @@ import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'node
 import { join, resolve, sep, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { extractFile, extractImports, sweepFile, isBinary, classifySurface } from './lib/extract.mjs';
+import { flagValue } from './lib/cli-args.mjs';
 
 const MIN_NODE_MAJOR = 20;
 
@@ -216,7 +217,7 @@ if (isMain) {
   const args = process.argv.slice(2);
   const opt = { root: process.cwd(), out: '.setup', allowDirty: false, json: false, include: [] };
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--root') opt.root = args[++i];
+    if (args[i] === '--root') opt.root = flagValue(args, i++, '--root', fail);
     else if (args[i] === '--allow-dirty') opt.allowDirty = true;
     else if (args[i] === '--json') opt.json = true;
     else if (args[i] === '--include') opt.include.push(...(args[++i] ?? '').split(',').filter(Boolean));

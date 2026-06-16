@@ -14,6 +14,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadManifest, loadInventory } from './lib/manifest.mjs';
 import { splitLinesKeepEnds } from './lib/extract.mjs';
+import { flagValue } from './lib/cli-args.mjs';
 
 const fence = (text) => '```\n' + text.replace(/```/g, '`​``') + (text.endsWith('\n') ? '' : '\n') + '```\n';
 
@@ -192,10 +193,11 @@ const isMain = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(imp
 if (isMain) {
   const args = process.argv.slice(2);
   const opt = { root: process.cwd(), out: null };
+  const bad = (m) => { console.error(`report: ${m}`); process.exit(2); };
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--root') opt.root = args[++i];
-    else if (args[i] === '--out') opt.out = args[++i];
-    else { console.error(`report: unknown flag ${args[i]}`); process.exit(2); }
+    if (args[i] === '--root') opt.root = flagValue(args, i++, '--root', bad);
+    else if (args[i] === '--out') opt.out = flagValue(args, i++, '--out', bad);
+    else bad(`unknown flag ${args[i]}`);
   }
   try {
     const md = generateReport({ root: opt.root });

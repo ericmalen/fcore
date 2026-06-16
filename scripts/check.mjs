@@ -23,6 +23,7 @@ import {
 } from './lib/manifest.mjs';
 import { splitLinesKeepEnds } from './lib/extract.mjs';
 import { apply } from './apply.mjs';
+import { flagValue } from './lib/cli-args.mjs';
 
 const sha = (t) => createHash('sha256').update(t).digest('hex');
 
@@ -175,11 +176,7 @@ if (isMain) {
   const opt = { root: process.cwd(), templates: null, skipRepro: false, json: false };
   const usage = (msg) => { console.error(`check: ${msg}`); process.exit(2); };
   let i = 0;
-  const value = (flag) => {
-    const v = args[++i];
-    if (v === undefined || v.startsWith('--')) usage(`${flag} requires a value`);
-    return v;
-  };
+  const value = (flag) => { const v = flagValue(args, i, flag, usage); i += 1; return v; };
   for (; i < args.length; i++) {
     if (args[i] === '--root') opt.root = value('--root');
     else if (args[i] === '--templates') opt.templates = value('--templates');

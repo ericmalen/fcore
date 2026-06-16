@@ -13,6 +13,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseTasksMd } from './lib/orchestration/parse-tasks.mjs';
 import { decideHeadlessRun } from './lib/orchestration/headless-guard.mjs';
+import { flagValue } from './lib/cli-args.mjs';
 
 export function headlessGuard({ root, openBranches = [] }) {
   const { doc, errors } = parseTasksMd(readFileSync(join(resolve(root), 'tasks.md'), 'utf8'));
@@ -27,10 +28,11 @@ const isMain = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(imp
 if (isMain) {
   const args = process.argv.slice(2);
   const opt = { root: process.cwd(), openBranchesFile: null };
+  const bad = (m) => { console.error(`headless-guard: ${m}`); process.exit(2); };
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--root') opt.root = args[++i];
-    else if (args[i] === '--open-branches') opt.openBranchesFile = args[++i];
-    else { console.error(`headless-guard: unknown flag ${args[i]}`); process.exit(2); }
+    if (args[i] === '--root') opt.root = flagValue(args, i++, '--root', bad);
+    else if (args[i] === '--open-branches') opt.openBranchesFile = flagValue(args, i++, '--open-branches', bad);
+    else bad(`unknown flag ${args[i]}`);
   }
 
   let openBranches = [];

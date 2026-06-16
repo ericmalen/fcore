@@ -13,6 +13,7 @@ import {
   checkAgents, checkReferences, checkClaudeSettings, checkVscodeSettings,
   checkHygiene,
 } from './lib/audit/checks.mjs';
+import { flagValue } from './lib/cli-args.mjs';
 
 // --strict escalation (spec: "normal → strict" arrows)
 const STRICT_ESCALATION = {
@@ -69,11 +70,12 @@ const isMain = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(imp
 if (isMain) {
   const args = process.argv.slice(2);
   const opt = { root: process.cwd(), json: false, strict: false };
+  const bad = (m) => { console.error(`audit: ${m}`); process.exit(2); };
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--root') opt.root = args[++i];
+    if (args[i] === '--root') opt.root = flagValue(args, i++, '--root', bad);
     else if (args[i] === '--json') opt.json = true;
     else if (args[i] === '--strict') opt.strict = true;
-    else { console.error(`audit: unknown flag ${args[i]}`); process.exit(2); }
+    else bad(`unknown flag ${args[i]}`);
   }
 
   const report = audit(opt);
