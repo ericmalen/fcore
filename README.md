@@ -3,6 +3,10 @@
 **Set up any repo for AI-assisted coding with Claude Code and GitHub Copilot —
 one shared set of config files, kept to a common standard.**
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+[![Node](https://img.shields.io/badge/node-%E2%89%A5%2020-3c873a.svg)](https://nodejs.org)
+[![AI tools](https://img.shields.io/badge/AI-Claude%20Code%20%2B%20Copilot-7c5cff.svg)](#what-this-is)
+
 ## What this is
 
 Agent Base brings any repo — brand-new or existing — to a consistent AI-coding
