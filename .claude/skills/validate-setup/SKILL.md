@@ -45,9 +45,11 @@ when no recognizable fixture/flag is present.
    same fixture dir; sabotage only after mixed-messy's clean run completes.
    Collect per-fixture result JSON + summaries and merge into the one report
    exactly as in sequential mode. Default is sequential (easiest to debug).
-3. Sabotage (mixed-messy only, after its clean run): follow
-   [sabotage procedure](references/sabotage.md) — 3 seeded defects, fresh
-   verifier subagent per defect, record caught/missed. Catch-rate = n/3.
+3. Sabotage (after mixed-messy's clean run): follow
+   [sabotage procedure](references/sabotage.md) — 4 seeded defects (3
+   manifest-level on mixed-messy + 1 injection-disposition on the `injection`
+   fixture), fresh verifier subagent per defect, record caught/missed.
+   Catch-rate = n/4.
 3b. npx packaging e2e (once per validation run, not per fixture): from a
    throwaway dir, `npx --yes "git+file://<agent-base>#<current-branch>" audit
    --root $WORK/fx-mixed-messy --json` — exercises npm's real git-pack

@@ -1,7 +1,7 @@
 // Seeded-defect harness: a gate's value is proven by FAILING bad runs.
 // Extractor-, audit-, and check-gate defects run here as active unit tests
 // against fixtures. Verifier-level sabotage cannot be unit-tested — that
-// matrix lives with the validate-setup skill (see the todos at the end).
+// matrix lives with the validate-setup skill (see the note at the end).
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -358,13 +358,12 @@ test('defect: split range past node end → apply throws instead of silently tru
 // Round-trip property tests (the constructive exit criterion) live in roundtrip.test.mjs.
 
 // ── verifier defects (manual matrix, recorded per tool) ─────────────────────
-// Sabotage runs: seed N known defects (unjustified drops, dilution rewrites in
-// literals, bogus out-of-scope rulings) and record invocation-② catch rate.
-// These cannot be unit tests; the validate-setup skill's sabotage matrix
-// owns them (.claude/skills/validate-setup/references/sabotage.md). Listed
-// here so the suite documents the full negative-test surface in one place.
-
-test.todo('sabotage (validate-setup matrix): unjustified drop — verifier must flag');
-test.todo('sabotage (validate-setup matrix): dilution rewrite in a merge literal — verifier must flag');
-test.todo('sabotage (validate-setup matrix): bogus out-of-scope ruling on a sweep candidate — verifier must flag');
-test.todo('sabotage (validate-setup matrix): injection fixture — agents must disposition the steering text, not obey it');
+// Sabotage runs: seed known defects (unjustified drop, dilution rewrite in a
+// merge literal, bogus out-of-scope ruling, prompt-injection disposition) and
+// record the verifier's invocation-② catch rate. These need a live verifier
+// agent, so they cannot be node:test units — the validate-setup skill's
+// sabotage matrix owns all four
+// (.claude/skills/validate-setup/references/sabotage.md, catch-rate n/4). The
+// mechanical half of the injection case (verbatim extraction of steering text)
+// IS unit-tested — see the injection fixture in fixtures.test.mjs. Listed here
+// so the suite documents the full negative-test surface in one place.
