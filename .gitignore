@@ -5,3 +5,12 @@ reports/
 
 # python bytecode (skill-creator scripts)
 __pycache__/
+
+# OS / editor cruft
+.DS_Store
+
+# dependencies (engine is zero-dep, but contributors may `npm install`)
+node_modules/
+
+# session worktrees — transient checkouts, never live config
+.claude/worktrees/
