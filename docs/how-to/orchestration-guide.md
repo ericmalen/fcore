@@ -50,7 +50,7 @@ preconditions — failing one stops the run):
 From the project:
 
 ```sh
-npx github:ericmalen/agent-base#v1.2.0 orchestrate
+npx github:ericmalen/agent-base#v1.2.1 orchestrate
 ```
 
 which launches Claude Code with the flow started (without the `claude`

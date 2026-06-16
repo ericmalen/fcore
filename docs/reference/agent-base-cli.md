@@ -8,7 +8,7 @@ installer allowlist in `scripts/lib/baseline.mjs` decides what ships).
 ## Invocation
 
 ```sh
-npx github:ericmalen/agent-base#v1.2.0 <command> [args]
+npx github:ericmalen/agent-base#v1.2.1 <command> [args]
 ```
 
 The `#<tag>` ref is the same release tag recorded as the project's pin in

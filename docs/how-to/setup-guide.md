@@ -23,7 +23,7 @@ tooling, and runs every script itself.
 Emit the clean target state directly:
 
 ```sh
-npx github:ericmalen/agent-base#v1.2.0 starter /path/to/new-repo --git
+npx github:ericmalen/agent-base#v1.2.1 starter /path/to/new-repo --git
 # or, from a clone:
 node ~/tools/agent-base/scripts/build-starter.mjs /path/to/new-repo --git
 ```
@@ -39,7 +39,7 @@ rather download than run the script.)
 From your repo root:
 
 ```sh
-npx github:ericmalen/agent-base#v1.2.0 setup
+npx github:ericmalen/agent-base#v1.2.1 setup
 ```
 
 This stages the release at a stable path, then hands off down a chain:

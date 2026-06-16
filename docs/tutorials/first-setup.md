@@ -29,12 +29,12 @@ Base refuses to run on a dirty tree so its own changes stay reviewable.
 ## 2. Start setup
 
 ```sh
-npx github:ericmalen/agent-base#v1.2.0 setup
+npx github:ericmalen/agent-base#v1.2.1 setup
 ```
 
 What happens, in order:
 
-1. The release is **staged** to `~/.agent-base/versions/v1.2.0/` (a cached
+1. The release is **staged** to `~/.agent-base/versions/v1.2.1/` (a cached
    build — safe to delete later).
 2. If the `claude` CLI is on your PATH, Agent Base launches Claude Code right
    here with setup already started. No CLI (Copilot or Windows)? It drops a

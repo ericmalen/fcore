@@ -46,7 +46,7 @@ first-time setup or bringing existing AI config up to the team standard.
 From your project, no clone needed:
 
 ```sh
-npx github:ericmalen/agent-base#v1.2.0 setup
+npx github:ericmalen/agent-base#v1.2.1 setup
 ```
 
 This stages the release, then launches Claude Code in your project with
@@ -67,7 +67,7 @@ tool, and run `/base-setup /path/to/project`.
 For a brand-new repo, emit the clean standard layout directly:
 
 ```sh
-npx github:ericmalen/agent-base#v1.2.0 starter /path/to/new-repo --git
+npx github:ericmalen/agent-base#v1.2.1 starter /path/to/new-repo --git
 # or from a clone: node ~/tools/agent-base/scripts/build-starter.mjs /path/to/new-repo --git
 ```
 
@@ -88,7 +88,7 @@ For repos with multiple layers or packages that need a generated multi-agent
 team and a `tasks.md` backlog:
 
 ```sh
-npx github:ericmalen/agent-base#v1.2.0 orchestrate
+npx github:ericmalen/agent-base#v1.2.1 orchestrate
 ```
 
 which launches Claude Code with the flow started — without the `claude`
