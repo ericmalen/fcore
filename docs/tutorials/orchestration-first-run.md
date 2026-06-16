@@ -5,7 +5,7 @@ project. You learn the five-session flow without touching a real codebase.
 
 ## What you need
 
-- This base checkout open in Claude Code or Copilot agent mode (a clone, or the release `npx agent-base orchestrate` stages — it opens the session for you when the `claude` CLI is on PATH)
+- This base checkout open in Claude Code or Copilot agent mode (a clone, or the release `npx github:ericmalen/agent-base#v1.2.0 orchestrate` stages — it opens the session for you when the `claude` CLI is on PATH)
 - Node ≥ 20
 - Familiarity with [setup](../how-to/setup-guide.md) (target must be
   adopted first — fixtures below are pre-built for orchestration tests)

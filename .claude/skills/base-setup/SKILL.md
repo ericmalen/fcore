@@ -1,6 +1,6 @@
 ---
 name: base-setup
-description: Sets up any repository for AI-assisted coding with agent-base (starter or existing project setup). Run from an open base checkout (clone or npx-staged release) with the project's path, or follow this file directly after `npx agent-base setup` / cloning Agent Base (one-prompt bootstrap). Use when asked to set up Agent Base, set up AI config, or bring a repo to the team's AI-coding standard.
+description: Sets up any repository for AI-assisted coding with agent-base (starter or existing project setup). Run from an open base checkout (clone or npx-staged release) with the project's path, or follow this file directly after `npx github:<owner>/agent-base#<tag> setup` / cloning Agent Base (one-prompt bootstrap). Use when asked to set up Agent Base, set up AI config, or bring a repo to the team's AI-coding standard.
 argument-hint: "[/path/to/project]"
 ---
 
@@ -14,7 +14,8 @@ You are executing this file in one of two modes — determine which first:
   run in FRESH contexts.
 - **Bootstrap mode (one-prompt flow)** — the user's repo is your working
   directory; a base checkout exists elsewhere (a temp clone, or the
-  staged release `npx agent-base setup` printed) and you were told to follow
+  staged release `npx github:<owner>/agent-base#<tag> setup` printed) and you
+  were told to follow
   this file. The TARGET is the current working directory. Do steps 1 and 3,
   then follow "Bootstrap handoff" instead of orchestrating.
 

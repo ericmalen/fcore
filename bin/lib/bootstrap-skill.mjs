@@ -27,12 +27,12 @@ export function writeBootstrapSkill({ command, checkoutPath, targetPath, dev = f
 function skillContent({ command, checkoutPath, targetPath, dev }) {
   return `---
 name: agent-base-bootstrap
-description: One-shot launcher dropped by \`npx agent-base ${command}\`. Use when the user types /agent-base-bootstrap or asks to start the staged agent-base ${command} flow. Deletes itself first.
+description: One-shot launcher dropped by \`npx github:<owner>/agent-base#<tag> ${command}\`. Use when the user types /agent-base-bootstrap or asks to start the staged agent-base ${command} flow. Deletes itself first.
 ---
 
 # agent-base-bootstrap (one-shot launcher)
 
-Dropped by \`npx agent-base ${command}\`. Execute top to bottom:
+Dropped by \`npx github:<owner>/agent-base#<tag> ${command}\`. Execute top to bottom:
 
 1. Delete this skill's directory NOW — it is single-use and must not
    survive into the working tree the flow checks: remove
