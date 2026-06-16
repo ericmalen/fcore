@@ -32,10 +32,21 @@ d="$(mktemp -d)/repo"; node scripts/build-starter.mjs "$d" && node scripts/audit
   [`spec/rules.md`](./spec/rules.md); never restate a rule's text.
 - Behavior-changing edits to `scripts/`, `templates/`, or `test/` update the
   affected docs in the same change.
-- Setup-flow features that touch the marker or installed assets add/adjust a
-  fixture in [`test/fixtures/defs.mjs`](./test/fixtures/defs.mjs) and a matching
-  assertion in [`scripts/validate-assert.mjs`](./scripts/validate-assert.mjs),
-  so the manual `validate-setup` matrix covers them.
+- **Where a new feature gets tested.** Match the feature to the layer that
+  owns it:
+  - A new mechanical rule → an emitting check in
+    [`scripts/lib/audit/checks.mjs`](./scripts/lib/audit/checks.mjs); the
+    `rule-check-map` gate fails CI if a rule has no check (or vice versa).
+  - Setup-flow behavior (marker fields, installed assets, apply/check/audit
+    interplay) → a deterministic test in
+    [`test/roundtrip.test.mjs`](./test/roundtrip.test.mjs) that runs `apply` +
+    `check` (incl. reproducibility) + `audit` — this is the CI regression lock
+    (e.g. the R-55 optional-skill cases).
+  - Full pipeline coverage → add/adjust a fixture in
+    [`test/fixtures/defs.mjs`](./test/fixtures/defs.mjs) (document any new
+    `expect` field there) plus a matching assertion in
+    [`scripts/validate-assert.mjs`](./scripts/validate-assert.mjs), so the
+    manual `validate-setup` matrix exercises it end-to-end.
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org)
   (`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`), scoped where it
   helps (e.g. `fix(cli): …`).

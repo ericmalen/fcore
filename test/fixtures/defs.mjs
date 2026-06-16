@@ -4,6 +4,23 @@
 // Sentinels: distinctive strings planted in content. The harness asserts every
 // sentinel surfaces in the inventory — as extracted node bytes or as a sweep
 // candidate. A sentinel that falls through is the silent-loss failure mode.
+//
+// Each fixture is { files, sentinels, expect }. The `expect` object is the
+// fixture's contract; two harnesses read it:
+//   • test/fixtures.test.mjs (inventory expectations, run in `npm test`):
+//       surfaces / minSurfaces — exact / minimum AI-config surfaces extracted
+//       candidates             — exact sweep-candidate count
+//       minNodes               — minimum extracted nodes
+//       sweepMustInclude       — paths the sweep must flag (array)
+//       brokenRef              — a referenced path that does not exist
+//       excluded               — paths the git universe must NOT include (array)
+//       mustExtractVerbatim    — substring that must appear verbatim as node bytes
+//   • scripts/validate-assert.mjs (post-setup, run by the validate-setup matrix):
+//       optionalSkills         — R-55: the optional skills base-plan must select;
+//                                validate-assert checks the marker selected
+//                                exactly these and each is installed live.
+// Add a field here only alongside the harness code that reads it (see
+// CONTRIBUTING.md "Conventions").
 
 import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
