@@ -12,16 +12,36 @@ the Markdown companion is rendered, never written by hand.
 1. Read the invocation brief — it names one project path. Load
    `<target>/docs/orchestration/repo-profile.json`; if missing, stop and
    report (discovery runs first).
-2. Load the question bank: `.claude/skills/interview-guide/SKILL.md` in the
-   base checkout. For each decisions field, decide ask vs confirm per its "Ask
-   when" column, using the profile's `gaps[]` and conventions as evidence.
-3. Collect answers. Interactive session: ask the human, one question at a
+2. Re-run check: if `<target>/docs/orchestration/decisions.json` already
+   exists, compute the reuse partition before loading the question bank:
+
+   ```
+   node --input-type=module -e '
+   import { readFileSync, existsSync } from "node:fs";
+   import { partitionDecisionReuse } from "./scripts/lib/orchestration/schemas.mjs";
+   const p = process.argv[1];
+   const existing = existsSync(p) ? JSON.parse(readFileSync(p, "utf8")) : null;
+   console.log(JSON.stringify(partitionDecisionReuse(existing)));
+   ' <target>/docs/orchestration/decisions.json
+   ```
+
+   Fields in `kept` are carried forward verbatim and reported to the human as
+   NOT re-asked — this overrides step 3's "always asked" fields; a re-run is
+   not a policy reset. Only fields in `ask` go through step 3.
+3. Load the question bank: `.claude/skills/interview-guide/SKILL.md` in the
+   base checkout. For each field still in `ask` (all seven on a fresh run),
+   decide ask vs confirm per its "Ask when" column, using the profile's
+   `gaps[]` and conventions as evidence.
+4. Collect answers. Interactive session: ask the human, one question at a
    time, offering the finite options only. Dispatched run: answers come in
    the brief; map each onto the field's enum. An answer that fits no enum
    value gets re-asked or reported — never coerced silently.
-4. Apply the guide's consistency checks across the answer set.
-5. Assemble `decisions.json` (`schemaVersion: 1` + the seven fields) and
-   validate BEFORE writing, from the base checkout:
+5. Apply the guide's consistency checks across the full answer set (kept +
+   newly answered) — a flagged tension re-asks the involved fields even if
+   they came from `kept`.
+6. Assemble `decisions.json` (`schemaVersion: 1` + the seven fields, kept
+   values merged with newly answered ones) and validate BEFORE writing, from
+   the base checkout:
 
    ```
    node --input-type=module -e '
@@ -33,8 +53,9 @@ the Markdown companion is rendered, never written by hand.
    ' /tmp/decisions.json
    ```
 
-6. Only on `valid`: write `<target>/docs/orchestration/decisions.json`, then
-   render the companion in the same step:
+7. Only on `valid`: write `<target>/docs/orchestration/decisions.json`, then
+   render the companion in the same step (always re-rendered, even when every
+   value came from `kept`):
 
    ```
    node --input-type=module -e '
@@ -45,8 +66,9 @@ the Markdown companion is rendered, never written by hand.
    ' <target>/docs/orchestration/decisions.json <target>/docs/orchestration/decisions.md
    ```
 
-7. Report the seven values, which were asked vs confirmed-from-evidence, and
-   the validator output. Stop — no blueprint work.
+8. Report the seven values, which were kept from the prior run, which were
+   asked, which were confirmed-from-evidence, and the validator output. Stop —
+   no blueprint work.
 
 ## Never
 

@@ -26,3 +26,11 @@ test('interview-guide: every enum value is a reachable answer', () => {
     }
   }
 });
+
+// B3 re-run reuse: the guide must document that an existing decisions.json
+// wins over the "Ask when" column, including the "always asked" fields.
+test('interview-guide: documents the re-run reuse rule and partitionDecisionReuse', () => {
+  assert.match(skill, /Re-run reuse/);
+  assert.match(skill, /partitionDecisionReuse/);
+  assert.match(skill, /not a policy reset/);
+});

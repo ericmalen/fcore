@@ -64,6 +64,19 @@ request), `threshold` (route at the agent-team layer count — the default), or
 `manual` (no block; invoke by hand). Without this block the generated fleet is
 unreachable from an ad-hoc request — the trigger nothing fires.
 
+There is also a *timing* dimension: orchestration is evidence-driven, so a
+repo with no code layer that has a test command has nothing for discovery to
+profile — a preflight guard stops `/base-orchestrate` before it burns a
+discovery phase on an empty repo, rather than asking you to describe the
+project you're planning to build. The team grows with the repo instead: set
+up baseline config, build the first layer with tests, generate a small team,
+then re-run `/base-orchestrate` each time a new layer ships. Re-runs are
+cheap — the profile and blueprint always re-derive from current evidence, but
+policy decisions from the prior run carry forward unchanged (a re-run is not
+a policy reset), and generation stays deterministic, so growing the team
+costs one more gate approval, not a fresh interview. See
+[Re-orchestrating as the repo grows](../how-to/orchestration-guide.md#re-orchestrating-as-the-repo-grows).
+
 ## Quality flywheel
 
 The optional lifecycle skills `retro`, `log-report`, and `eval-runner` (R-55)

@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 
 import {
-  planGeneration, manifestFor, findUserEdits,
+  planGeneration, manifestFor, findUserEdits, findOrphans,
   renderOrchestrationRouting, upsertManagedRegion,
   ROUTING_REGION_START, ROUTING_REGION_END,
 } from '../scripts/lib/orchestration/scaffold.mjs';
@@ -236,4 +236,29 @@ test('C5: template improvement → version bump → regenerated file, no conflic
   const oldEntry = v1Manifest.generated.find((g) => g.path === '.claude/agents/cli-engineer.md');
   assert.equal(entry.templateVersion, '1.1.0');
   assert.notEqual(entry.sha256, oldEntry.sha256);
+});
+
+// ── B4: orphan removal on re-run ────────────────────────────────────────────
+
+test('findOrphans: dropping a specialist + its paired skill orphans exactly those paths', () => {
+  const bp = loadFixture('maxi-repo.synthesized.blueprint.json');
+  const prior = manifestFor(planGeneration(bp, registry, readTemplate).files);
+
+  const shrunk = JSON.parse(JSON.stringify(bp));
+  shrunk.specialists = shrunk.specialists.filter((s) => s.name !== 'db-engineer');
+  const { files: replanned, errors } = planGeneration(shrunk, registry, readTemplate);
+  assert.deepEqual(errors, []);
+
+  const orphans = findOrphans(prior, replanned);
+  assert.deepEqual(orphans.sort(), [
+    '.claude/agents/db-engineer.md',
+    '.claude/skills/db-migration/SKILL.md',
+  ]);
+});
+
+test('findOrphans: unchanged plan orphans nothing', () => {
+  const bp = loadFixture('maxi-repo.synthesized.blueprint.json');
+  const { files } = planGeneration(bp, registry, readTemplate);
+  const prior = manifestFor(files);
+  assert.deepEqual(findOrphans(prior, files), []);
 });

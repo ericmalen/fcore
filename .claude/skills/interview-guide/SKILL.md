@@ -10,7 +10,22 @@ exactly one `decisions.json` field (enums in `DECISION_ENUMS`,
 [schemas.mjs](../../../scripts/lib/orchestration/schemas.mjs)), and a
 question is asked ONLY when
 the profile and repo docs do not already evidence an answer — evidenced
-fields are confirmed ("the repo suggests X — keep it?"), not re-asked.
+fields are confirmed ("the repo suggests X — keep it?"), not re-asked. On a
+re-run (an existing `decisions.json` in the target) a third source of "already
+answered" applies — see Re-run reuse below — and takes priority over this
+section's "Ask when" column, including the three fields marked "always
+asked": a re-run is not a policy reset.
+
+## Re-run reuse
+
+When `<target>/docs/orchestration/decisions.json` already exists, compute
+`partitionDecisionReuse(existing)` (`schemas.mjs`) before consulting the
+table below. A field in `kept` is reported to the human as carried forward
+and NOT asked, even if its row says "always asked" — that column governs
+fresh interviews only. Only fields in `ask` (missing, or invalid for their
+enum — schema evolution or corruption) go through the question bank below.
+`decisions.md` is always re-rendered from the merged (kept + newly answered)
+doc, even when nothing changed.
 
 ## Question bank
 

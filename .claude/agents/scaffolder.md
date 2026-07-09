@@ -15,13 +15,16 @@ manifest is the only state it owns.
    generation time a SKIP (missing template) is as fatal as a FAIL — every
    referenced template must exist. REJECT → stop and report.
 2. Generate, from the base checkout (all-or-nothing; the script refuses to
-   touch a target whose previously generated files were hand-edited):
+   touch a target whose previously generated files were hand-edited). On a
+   re-run, a prior-manifest path absent from the new plan — a specialist or
+   paired skill the blueprint dropped — is deleted as an orphan once the
+   USER-EDIT gate has cleared:
 
    ```
    node --input-type=module -e '
-   import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+   import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync, readdirSync, rmdirSync } from "node:fs";
    import { dirname, join } from "node:path";
-   import { planGeneration, manifestFor, findUserEdits } from "./scripts/lib/orchestration/scaffold.mjs";
+   import { planGeneration, manifestFor, findUserEdits, findOrphans } from "./scripts/lib/orchestration/scaffold.mjs";
    const target = process.argv[1];
    const manifestPath = join(target, "docs/orchestration/generation-manifest.json");
    const bp = JSON.parse(readFileSync(join(target, "docs/orchestration/blueprint.json"), "utf8"));
@@ -30,8 +33,9 @@ manifest is the only state it owns.
                   skill: (id) => `templates/orchestration/skills/${id}.template.md`,
                   doc:   (id) => `templates/orchestration/docs/${id}.md` };
    const readTemplate = (kind, id) => existsSync(dirs[kind](id)) ? readFileSync(dirs[kind](id), "utf8") : null;
+   let prior = null;
    if (existsSync(manifestPath)) {
-     const prior = JSON.parse(readFileSync(manifestPath, "utf8"));
+     prior = JSON.parse(readFileSync(manifestPath, "utf8"));
      const readTargetFile = (p) => existsSync(join(target, p)) ? readFileSync(join(target, p), "utf8") : null;
      const conflicts = findUserEdits(prior, readTargetFile);
      if (conflicts.length) {
@@ -42,9 +46,16 @@ manifest is the only state it owns.
    }
    const { files, errors } = planGeneration(bp, registry, readTemplate);
    if (errors.length) { console.error(errors.join("\n")); process.exit(1); }
+   const orphans = prior ? findOrphans(prior, files) : [];
+   for (const p of orphans) { const full = join(target, p); if (existsSync(full)) rmSync(full); }
    for (const f of files) { const p = join(target, f.path); mkdirSync(dirname(p), { recursive: true }); writeFileSync(p, f.content); }
+   for (const p of orphans) {
+     if (!p.startsWith(".claude/skills/")) continue;
+     const dir = dirname(join(target, p));
+     if (existsSync(dir) && readdirSync(dir).length === 0) rmdirSync(dir);
+   }
    writeFileSync(manifestPath, JSON.stringify(manifestFor(files), null, 2) + "\n");
-   console.log(`wrote ${files.length} files + manifest`);
+   console.log(`wrote ${files.length} files + manifest${orphans.length ? `, removed ${orphans.length} orphan(s)` : ""}`);
    ' <target>
    ```
 
@@ -92,7 +103,8 @@ manifest is the only state it owns.
 - Never bump or invent template versions — pins come from Agent Base's
   template registry verbatim.
 - Never track living state (tasks.md, handoff log, checklists, the AGENTS.md
-  routing region) in the manifest.
+  routing region) in the manifest — so orphan removal can never touch them,
+  even when the agent that owned a checklist is dropped from the blueprint.
 
 ## Documents
 

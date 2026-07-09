@@ -44,6 +44,7 @@ preconditions — failing one stops the run):
 | Baseline setup present | `.claude/agent-base.json` and `.claude/skills/base-check/` exist in the target |
 | Node ≥ 20 | `node --version` |
 | Checkout fresh | Clones: `git -C ~/tools/agent-base pull --ff-only`. staged releases are immutable at their tag — pick a newer tag instead |
+| Target has ≥ 1 code layer with a test signal | `node <agent-base>/scripts/orchestrate-preflight.mjs --root /path/to/project` exits 0 |
 
 ## Quick start
 
@@ -67,8 +68,9 @@ The skill orchestrates discovery and generation in fresh contexts and stops at
 human gates. Details below.
 
 **Repeat users:** freshen the checkout (clones: `git pull --ff-only`; npx:
-re-run at the newer tag), then `/base-orchestrate /path/to/repo` again to
-regenerate from an updated blueprint or Agent Base templates.
+re-run at the newer tag), then `/base-orchestrate /path/to/repo` again — see
+[Re-orchestrating as the repo grows](#re-orchestrating-as-the-repo-grows) for
+what changes on a repeat run.
 
 ## When to use orchestration
 
@@ -209,6 +211,49 @@ On Copilot, every scope count uses in-session subagents — see
 
 Nothing merges automatically: the orchestrator stops at PR / diff presentation.
 
+## Re-orchestrating as the repo grows
+
+Orchestration is evidence-driven: discovery profiles what exists, it never
+interviews you about what you're planning to build. A repo with no code layer
+that has a test command has nothing for it to generate from — the preflight
+guard (see Pre-flight checklist above) stops `/base-orchestrate` before
+Phase 1 rather than failing deep in discovery or synthesis. So the intended
+lifecycle for a new project is:
+
+1. `/base-setup` — baseline AI config only, no orchestration.
+2. Build the first layer, with tests. (Plain Claude/Copilot + the baseline
+   skills is enough for this — you don't need orchestration to write the
+   first layer that orchestration will later dispatch work to.)
+3. `/base-orchestrate /path/to/project` — first run (`mode=fresh`). Generates
+   a small team: one specialist for that layer, plus `code-reviewer` and
+   `feature-orchestrator`.
+4. A new layer ships (e.g. an API alongside the CLI).
+5. `/base-orchestrate /path/to/project` again — the preflight guard now
+   reports `mode=re-run` (it detects prior `decisions.json` or
+   `generation-manifest.json`). The team grows to match:
+
+   - **Re-derived, always:** the profile (Session 1 re-profiles fresh — new
+     layer, new `internalEdges`, new `dispatch_order`), the blueprint
+     (Session 3 re-synthesizes from the fresh profile), the generated files
+     and manifest (Session 4 regenerates).
+   - **Reused, never re-asked:** every decisions field from the prior run
+     that's still valid for its enum — including the three fields normally
+     "always asked." A re-run is not a policy reset; Gate 1 shows a
+     kept-vs-asked table instead of the full seven questions.
+   - **Removed:** a specialist or paired skill the new blueprint no longer
+     needs (e.g. a layer was deleted) — the scaffolder deletes the orphaned
+     file(s) and reports the count. A hand-edited orphan blocks first, as a
+     USER-EDIT conflict, same as any other generated file.
+   - **Untouched:** living state — `tasks.md`, `handoff-log.jsonl`,
+     `checklists/`, the `AGENTS.md` routing region — is never
+     manifest-tracked, so a re-run never touches it even when the agent that
+     owned a checklist is dropped.
+
+Before re-running, it's worth checking for drift first (`drift-checker` from
+the base checkout) so any TEMPLATE-DRIFT or USER-EDIT surfaces before you
+spend three sessions getting back to the scaffolder step, which would refuse
+a USER-EDIT anyway.
+
 ## Lifecycle skills (installed at setup)
 
 These optional lifecycle skills (R-55) are installed by `base-orchestrate` as a
@@ -237,7 +282,9 @@ in the troubleshooting guide.
 - **Drift:** run `drift-checker` from the base checkout when templates change.
 - **Health gate:** invoke `evaluator` before distributing Agent Base updates.
 - **Regenerate:** re-run `scaffolder` against the stored blueprint — never
-  hand-edit generated agent files.
+  hand-edit generated agent files. To grow the team as the repo grows, re-run
+  `/base-orchestrate` itself — see
+  [Re-orchestrating as the repo grows](#re-orchestrating-as-the-repo-grows).
 - **Update Agent Base:** re-run setup if the baseline skills need refreshing;
   orchestration assets are independent of the setup branch machinery.
 - **Schedule it:** once execution works interactively, add the

@@ -158,6 +158,20 @@ export function findUserEdits(priorManifest, readTargetFile) {
     .map((entry) => entry.path);
 }
 
+// Orphan detection for a re-run (B4): a path the PRIOR manifest tracked that
+// the freshly planned files no longer include — e.g. a layer's specialist
+// dropped from the blueprint, or a paired skill un-selected. Runs only after
+// findUserEdits has cleared, so a hand-edited orphan already stopped the run
+// upstream — this never deletes anything a human touched. Living state
+// (tasks.md, handoff log, checklists, the AGENTS.md routing region) is never
+// manifest-tracked, so it can never appear here.
+export function findOrphans(priorManifest, plannedFiles) {
+  const plannedPaths = new Set(plannedFiles.map((f) => f.path));
+  return priorManifest.generated
+    .filter((entry) => !plannedPaths.has(entry.path))
+    .map((entry) => entry.path);
+}
+
 // ── always-loaded routing block (R-56) ──────────────────────────────────────
 //
 // The orchestration trigger the MAIN LOOP reads. Generated agents teach the

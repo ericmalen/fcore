@@ -10,6 +10,13 @@ session leaves either **no artifact** or a **schema-valid one** — never a
 half-written file. Re-dispatching the same agent in a fresh context is always
 safe.
 
+## Preconditions
+
+| Symptom | Likely cause | Recovery |
+|---|---|---|
+| Run stops immediately: "orchestration needs at least one code layer with a test command…" | The preflight guard (precondition 6) found no `package.json` test signal, no test files, and no other-ecosystem manifest | Not a bug — the repo has nothing for discovery to profile yet. Build the first layer (with a real test command), then re-run `/base-orchestrate`. See [Re-orchestrating as the repo grows](./orchestration-guide.md#re-orchestrating-as-the-repo-grows) |
+| Guard blocks a repo you know has code | The probe is a cheap heuristic (npm-shaped test signals, shallow file scan, a fixed list of other-ecosystem manifest names) — it can false-negative on unusual layouts | Run `node <agent-base>/scripts/orchestrate-preflight.mjs --root /path/to/project` directly to see the reason; if the repo genuinely has a testable layer the probe missed, file an Agent Base issue — don't bypass the guard by hand-authoring a profile |
+
 ## Session 1 — Profile
 
 | Symptom | Likely cause | Recovery |
@@ -27,6 +34,7 @@ safe.
 | `decisions.json` rejected | Answer recorded outside the enum | Validator output names the field and allowed values, e.g. `tddPolicy must be one of test-first \| test-with-change \| optional (got tdd)`. Re-answer that question |
 | `decisions.md` doesn't match what you answered | Someone hand-edited the Markdown (it's rendered, never authored) | Delete `decisions.md`, re-render: `node -e "import('<agent-base>/scripts/lib/orchestration/render-decisions.mjs').then(m=>require('fs').writeFileSync('docs/orchestration/decisions.md',m.renderDecisionsMd(JSON.parse(require('fs').readFileSync('docs/orchestration/decisions.json','utf8')))))"`. `drift-checker` flags this state as USER-EDIT |
 | Want to change an approved answer later | — | Re-dispatch `requirements-interviewer` for the affected field, then re-run Sessions 3–4 (blueprint and generated agents derive from decisions) |
+| Interviewer re-asks a question you already answered, on a re-run | The prior `decisions.json` is missing that field or its value no longer fits the enum (schema evolution, hand-edit, corruption) — `partitionDecisionReuse` only carries forward what's still valid | Check `docs/orchestration/decisions.json` for that field; if the value looks fine, the schema may have changed — this is expected, just answer it again |
 
 ## Session 3 — Blueprint
 
@@ -43,6 +51,7 @@ safe.
 | Scaffolder reports a conflict and stops | A previously generated file was hand-edited (manifest SHA ≠ disk SHA) | Decide per file: keep your edit → move the change into the Agent Base template or blueprint and regenerate; discard → `git checkout -- <file>` then re-run the scaffolder. It never overwrites on conflict |
 | Re-run produces a diff on files you didn't touch | Agent Base templates moved between runs (TEMPLATE-DRIFT) | Expected after an Agent Base `git pull`. Run `drift-checker` from the base checkout to classify, review the diff, commit the regeneration |
 | Generated agents fail the target audit | Generation bug | `node <agent-base>/scripts/audit.mjs --strict` in the target names the R-IDs; file it against the Agent Base template (triage: template defect), don't hand-fix generated files |
+| Old specialist (or its paired skill) still present after its layer was removed | You haven't re-run `/base-orchestrate` since the layer disappeared — orphan removal only happens during scaffolding | Re-run `/base-orchestrate` (`mode=re-run`); Phase 4 deletes any prior-manifest file absent from the new plan and reports the count. A hand-edited orphan blocks first, as a USER-EDIT conflict, same as any other generated file |
 
 ## Session 5 — Execute
 

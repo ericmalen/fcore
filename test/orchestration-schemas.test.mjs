@@ -10,6 +10,7 @@ import {
   validateHandoffLog,
   validateSyncPlan,
   validateTrackerSyncConfig,
+  partitionDecisionReuse,
   DECISION_ENUMS,
 } from '../scripts/lib/orchestration/schemas.mjs';
 
@@ -158,6 +159,47 @@ test('validateDecisionsDoc: missing top-level fields all report', () => {
   const errors = validateDecisionsDoc({});
   assert.equal(errors.length, 1 + Object.keys(DECISION_ENUMS).length);
   assert.equal(errors[0], 'schemaVersion must be 1 (got undefined)');
+});
+
+// ── partitionDecisionReuse (B3 re-run) ──────────────────────────────────────
+
+test('partitionDecisionReuse: null/missing existing doc → everything asked', () => {
+  assert.deepEqual(partitionDecisionReuse(null), { kept: {}, ask: Object.keys(DECISION_ENUMS) });
+  assert.deepEqual(partitionDecisionReuse(undefined), { kept: {}, ask: Object.keys(DECISION_ENUMS) });
+});
+
+test('partitionDecisionReuse: non-object input → everything asked', () => {
+  for (const input of [[], 'decisions', 42]) {
+    assert.deepEqual(partitionDecisionReuse(input), { kept: {}, ask: Object.keys(DECISION_ENUMS) });
+  }
+});
+
+test('partitionDecisionReuse: wrong schemaVersion → everything asked, even with valid values', () => {
+  const doc = { ...loadFixture('maxi-repo.decisions.json'), schemaVersion: 2 };
+  assert.deepEqual(partitionDecisionReuse(doc), { kept: {}, ask: Object.keys(DECISION_ENUMS) });
+});
+
+test('partitionDecisionReuse: fully valid doc → all seven kept, none asked (incl. "always asked" fields)', () => {
+  const doc = loadFixture('maxi-repo.decisions.json');
+  const { kept, ask } = partitionDecisionReuse(doc);
+  assert.deepEqual(ask, []);
+  for (const field of Object.keys(DECISION_ENUMS)) assert.equal(kept[field], doc[field]);
+});
+
+test('partitionDecisionReuse: one invalid enum value → only that field asked, six kept', () => {
+  const doc = { ...loadFixture('maxi-repo.decisions.json'), qaDepth: 'e2e-only' };
+  const { kept, ask } = partitionDecisionReuse(doc);
+  assert.deepEqual(ask, ['qaDepth']);
+  assert.equal(Object.keys(kept).length, 6);
+  assert.ok(!('qaDepth' in kept));
+});
+
+test('partitionDecisionReuse: missing field (schema evolution) → asked, rest kept', () => {
+  const doc = { ...loadFixture('maxi-repo.decisions.json') };
+  delete doc.securityRequirements;
+  const { kept, ask } = partitionDecisionReuse(doc);
+  assert.deepEqual(ask, ['securityRequirements']);
+  assert.equal(Object.keys(kept).length, 6);
 });
 
 // ── validateBlueprint (A3) ──────────────────────────────────────────────────

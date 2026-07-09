@@ -141,6 +141,27 @@ export const DECISION_ENUMS = {
   orchestrationRouting: ['always', 'threshold', 'manual'],
 };
 
+// Re-run reuse rule (B3): an existing decisions.json field valid for its
+// DECISION_ENUMS enum WINS and is never re-asked, including the three
+// "always asked" policy fields — a re-run is not a policy reset. Only
+// missing or enum-invalid fields (schema evolution, corruption) go to `ask`.
+// A wrong schemaVersion, or a doc that isn't a plain object, treats
+// everything as unanswered — this is deliberately NOT validateDecisionsDoc:
+// a doc failing validation for one bad field should still let the other six
+// be reused.
+export function partitionDecisionReuse(existing) {
+  if (!isPlainObject(existing) || existing.schemaVersion !== 1) {
+    return { kept: {}, ask: Object.keys(DECISION_ENUMS) };
+  }
+  const kept = {};
+  const ask = [];
+  for (const [field, values] of Object.entries(DECISION_ENUMS)) {
+    if (values.includes(existing[field])) kept[field] = existing[field];
+    else ask.push(field);
+  }
+  return { kept, ask };
+}
+
 export function validateDecisionsDoc(doc) {
   if (!isPlainObject(doc)) return ['decisions must be an object'];
   const errors = [];
