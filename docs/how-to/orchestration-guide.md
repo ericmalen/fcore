@@ -114,8 +114,9 @@ skills and writes a schema-valid `repo-profile.json`.
 [`maxi-repo.profile.json`](../../test/fixtures/orchestration/maxi-repo.profile.json)):
 
 - One `layers[]` entry per package/app you'd name yourself; each has a real
-  `path`, `stack`, and `testCmd` (or `null` plus a matching `gaps[]` entry —
-  never a guessed command)
+  `path`, `stack`, `manifestPath` (the file evidencing the stack — e.g.
+  `package.json`, `pyproject.toml`, `main.tf`), and `testCmd` (or `null` plus
+  a matching `gaps[]` entry — never a guessed command)
 - `internalEdges[]` lists consumer→provider pairs you recognize (`[]` is
   correct for single-package repos)
 - Everything the analyst couldn't evidence is in `gaps[]`, not invented

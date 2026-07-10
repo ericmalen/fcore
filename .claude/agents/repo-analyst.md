@@ -19,7 +19,7 @@ never decisions or blueprints.
    against the target path (evidence only, no guessing — every undetected
    value is `null` where the schema allows, plus a `gaps[]` entry):
    - `structure-detector` (B1): `name`, `type`, `packageManager`, `layers[]`
-     with stacks and test/build commands.
+     with stacks, manifest paths, and test/build commands.
    - `dependency-mapper` (B2): internal edges (merged into
      `internalEdges[]`; `[]` = none found, a recorded fact, not an omission)
      and key external deps; refines layer `stack` strings. "No internal

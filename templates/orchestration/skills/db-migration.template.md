@@ -11,7 +11,9 @@ How the layer specialist changes schema in
 1. Locate the migration directory and tooling under
    `<!-- agent-base:slot:layer-path -->`. Read the most recent migration
    end-to-end: its naming scheme, up/down structure, and how it is
-   registered. That is your pattern.
+   registered. That is your pattern. The layer manifest
+   (`<!-- agent-base:slot:manifest-path -->`) names the migration tooling
+   and its version.
 2. Every schema edit ships with a new migration. Never edit a migration
    that has been applied anywhere — not to fix a typo, not to squash. If a
    prior migration is wrong, write a new one that corrects it.

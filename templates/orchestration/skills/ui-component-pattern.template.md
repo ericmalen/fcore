@@ -13,6 +13,8 @@ How the layer specialist adds or modifies components in
    building — same level (page, container, leaf), similar props surface.
    Read it fully: file layout, prop typing, styling approach, test
    placement. That component is your template; do not invent a new style.
+   The layer manifest (`<!-- agent-base:slot:manifest-path -->`) names the
+   framework and build tooling in play.
 2. Follow the naming conventions the pattern demonstrates — file name,
    component name, prop names, test file name. Layer conventions:
    <!-- agent-base:slot:conventions -->.

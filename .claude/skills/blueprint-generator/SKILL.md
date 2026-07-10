@@ -44,7 +44,9 @@ policy agents keep their templateId as name (`code-reviewer`, `qa-agent`,
 
 Engineer specialists: `layer-path`, `stack`, `test-cmd` (the layer's
 fields; a `null` testCmd blocks synthesis — report, don't invent),
-`conventions` (joined from `conventions.*`, omitting nulls).
+`manifest-path` (the layer's `manifestPath`; a `null` manifestPath blocks
+synthesis the same way — report, don't invent), `conventions` (joined from
+`conventions.*`, omitting nulls).
 `code-reviewer`: `checklist-path`
 (`docs/orchestration/checklists/review-checklist.md`), `conventions`.
 Orchestrator: `tasks-path` (`tasks.md`), `handoff-log-path`

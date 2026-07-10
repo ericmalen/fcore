@@ -254,7 +254,7 @@ test('C5: template improvement → version bump → regenerated file, no conflic
   const improved = readTemplate('agent', 'generic-specialist') + '\n<!-- improved guidance -->\n';
   const sha = (t) => createHash('sha256').update(t, 'utf8').digest('hex');
   const bumpedRegistry = JSON.parse(JSON.stringify(registry));
-  bumpedRegistry.agents['generic-specialist'] = { version: '1.1.0', sha256: sha(improved) };
+  bumpedRegistry.agents['generic-specialist'] = { version: '1.2.0', sha256: sha(improved) };
   const readBumped = (kind, id) => (kind === 'agent' && id === 'generic-specialist') ? improved : readTemplate(kind, id);
 
   // pristine target → no conflicts, regeneration proceeds
@@ -263,7 +263,7 @@ test('C5: template improvement → version bump → regenerated file, no conflic
   assert.deepEqual(v2.errors, []);
   const entry = manifestFor(v2.files).generated.find((g) => g.path === '.claude/agents/cli-engineer.md');
   const oldEntry = v1Manifest.generated.find((g) => g.path === '.claude/agents/cli-engineer.md');
-  assert.equal(entry.templateVersion, '1.1.0');
+  assert.equal(entry.templateVersion, '1.2.0');
   assert.notEqual(entry.sha256, oldEntry.sha256);
 });
 

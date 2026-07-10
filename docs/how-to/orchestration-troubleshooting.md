@@ -52,6 +52,7 @@ safe.
 | Re-run produces a diff on files you didn't touch | Agent Base templates moved between runs (TEMPLATE-DRIFT) | Expected after an Agent Base `git pull`. Run `drift-checker` from the base checkout to classify, review the diff, commit the regeneration |
 | Generated agents fail the target audit | Generation bug | `node <agent-base>/scripts/audit.mjs --strict` in the target names the R-IDs; file it against the Agent Base template (triage: template defect), don't hand-fix generated files |
 | Old specialist (or its paired skill) still present after its layer was removed | You haven't re-run `/base-orchestrate` since the layer disappeared — orphan removal only happens during scaffolding | Re-run `/base-orchestrate` (`mode=re-run`); Phase 4 deletes any prior-manifest file absent from the new plan and reports the count. A hand-edited orphan blocks first, as a USER-EDIT conflict, same as any other generated file |
+| Re-scaffold or `drift-checker` fails with `unfilled slot "manifest-path"` | The blueprint predates the `manifest-path` slot (template `generic-specialist` ≥ 1.1.0, paired skills ≥ 1.2.0) — an older `blueprint.json` doesn't carry it | Re-run `/base-orchestrate` (`mode=re-run`); Session 1 re-profiles fresh (now including `manifestPath` per layer) and Session 3 re-synthesizes the blueprint with the new slot |
 
 ## Session 5 — Execute
 

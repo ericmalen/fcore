@@ -8,6 +8,7 @@
       "slots": {
         "layer-path": "apps/ui",
         "stack": "React + TypeScript + Vite",
+        "manifest-path": "apps/ui/package.json",
         "test-cmd": "npm test --workspace ui",
         "conventions": "kebab-case files, PascalCase React components"
       },
@@ -23,6 +24,7 @@
       "slots": {
         "layer-path": "apps/api",
         "stack": "Express + TypeScript",
+        "manifest-path": "apps/api/package.json",
         "test-cmd": "npm test --workspace api",
         "conventions": "kebab-case files"
       },
@@ -38,6 +40,7 @@
       "slots": {
         "layer-path": "packages/db",
         "stack": "Prisma + PostgreSQL",
+        "manifest-path": "packages/db/package.json",
         "test-cmd": "npm test --workspace db",
         "conventions": "migrations alongside schema changes"
       },

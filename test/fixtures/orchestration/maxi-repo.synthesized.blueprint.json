@@ -8,6 +8,7 @@
       "slots": {
         "layer-path": "apps/ui",
         "stack": "React + TypeScript + Vite",
+        "manifest-path": "apps/ui/package.json",
         "test-cmd": "npm test --workspace ui",
         "conventions": "kebab-case files, PascalCase React components; feature/<ticket>-<slug>; conventional-commits"
       },
@@ -23,6 +24,7 @@
       "slots": {
         "layer-path": "apps/api",
         "stack": "Express + TypeScript",
+        "manifest-path": "apps/api/package.json",
         "test-cmd": "npm test --workspace api",
         "conventions": "kebab-case files, PascalCase React components; feature/<ticket>-<slug>; conventional-commits"
       },
@@ -38,6 +40,7 @@
       "slots": {
         "layer-path": "packages/db",
         "stack": "Prisma + PostgreSQL",
+        "manifest-path": "packages/db/package.json",
         "test-cmd": "npm test --workspace db",
         "conventions": "kebab-case files, PascalCase React components; feature/<ticket>-<slug>; conventional-commits"
       },
@@ -53,6 +56,7 @@
       "slots": {
         "layer-path": "packages/shared",
         "stack": "TypeScript (Zod schemas)",
+        "manifest-path": "packages/shared/package.json",
         "test-cmd": "npm test --workspace shared",
         "conventions": "kebab-case files, PascalCase React components; feature/<ticket>-<slug>; conventional-commits"
       },

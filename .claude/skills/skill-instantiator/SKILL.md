@@ -24,8 +24,9 @@ its pin would produce a file no manifest version describes (C5).
 ## Procedure
 
 1. Slot map = `entry.slots` ONLY — no injected quartet. Skill templates use
-   exactly the `layer-path`, `stack`, `test-cmd`, and `conventions` slots;
-   strict substitution rejects anything missing or extra.
+   exactly the `layer-path`, `stack`, `test-cmd`, `manifest-path`, and
+   `conventions` slots; strict substitution rejects anything missing or
+   extra.
 2. Instantiate every paired skill; validate all before writing any. From the
    base checkout root:
 

@@ -36,4 +36,4 @@ only inside that layer.
 
 ## Documents
 
-<!-- agent-base:slot:layer-path -->/package.json
+<!-- agent-base:slot:manifest-path -->

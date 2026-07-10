@@ -8,6 +8,7 @@
       "slots": {
         "layer-path": ".",
         "stack": "Node.js CLI (zero-dependency)",
+        "manifest-path": "package.json",
         "test-cmd": "node --test",
         "conventions": "snake_case files, dev/<initials>/<slug> branches, freeform imperative commits"
       },

@@ -66,9 +66,9 @@ for (const [skillId] of Object.entries(registry.skills)) {
     const specialist = bp.specialists.find((s) => (s.pairedSkills ?? []).includes(skillId));
     assert.ok(specialist, `no maxi specialist lists pairedSkills "${skillId}"`);
     const tpl = readFileSync(join(SKILL_TEMPLATES, `${skillId}.template.md`), 'utf8');
-    // C2 invariant stated directly, not via the fixture: exactly these 4 slots
+    // C2 invariant stated directly, not via the fixture: exactly these 5 slots
     const markers = new Set([...tpl.matchAll(/<!--\s*agent-base:slot:([a-z0-9-]+)\s*-->/g)].map((m) => m[1]));
-    assert.deepEqual([...markers].sort(), ['conventions', 'layer-path', 'stack', 'test-cmd']);
+    assert.deepEqual([...markers].sort(), ['conventions', 'layer-path', 'manifest-path', 'stack', 'test-cmd']);
     const { content, errors } = instantiateTemplate(tpl, specialist.slots);
     assert.deepEqual(errors, []);
     assert.ok(!content.includes('agent-base:slot'));

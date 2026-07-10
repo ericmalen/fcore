@@ -7,6 +7,7 @@
       "name": "ui",
       "path": "apps/ui",
       "stack": "React + TypeScript + Vite",
+      "manifestPath": "apps/ui/package.json",
       "testCmd": "npm test --workspace ui",
       "buildCmd": "npm run build --workspace ui"
     },
@@ -14,6 +15,7 @@
       "name": "api",
       "path": "apps/api",
       "stack": "Express + TypeScript",
+      "manifestPath": "apps/api/package.json",
       "testCmd": "npm test --workspace api",
       "buildCmd": "npm run build --workspace api"
     },
@@ -21,6 +23,7 @@
       "name": "db",
       "path": "packages/db",
       "stack": "Prisma + PostgreSQL",
+      "manifestPath": "packages/db/package.json",
       "testCmd": "npm test --workspace db",
       "buildCmd": null
     },
@@ -28,6 +31,7 @@
       "name": "shared",
       "path": "packages/shared",
       "stack": "TypeScript (Zod schemas)",
+      "manifestPath": "packages/shared/package.json",
       "testCmd": "npm test --workspace shared",
       "buildCmd": "npm run build --workspace shared"
     }

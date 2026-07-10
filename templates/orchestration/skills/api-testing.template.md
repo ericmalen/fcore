@@ -12,7 +12,9 @@ How the layer specialist tests endpoint changes in
    `<!-- agent-base:slot:layer-path -->` that exercise endpoints similar to the
    one you changed — same router, same handler style. Read at least one
    end-to-end before writing anything: its setup, fixtures, assertion style,
-   and file placement are your pattern.
+   and file placement are your pattern. The layer manifest
+   (`<!-- agent-base:slot:manifest-path -->`) names the test framework and
+   HTTP tooling in play — match them.
 2. Write or extend tests beside the ones you found, in the same directory
    and naming style. Follow the layer conventions:
    <!-- agent-base:slot:conventions -->.

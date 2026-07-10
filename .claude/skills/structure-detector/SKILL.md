@@ -37,6 +37,16 @@ All inspection happens in the project path named by the caller.
      runtime role from manifest signals (`bin`, `type`, `engines`), e.g.
      "Node.js CLI (zero-dependency)". Refine with dependency-mapper output
      when available.
+   - `manifestPath`: root-relative path of the file that evidences the
+     layer's stack — its dependency manifest (`package.json`,
+     `pyproject.toml`, `requirements.txt`, `go.mod`, `Cargo.toml`,
+     `pom.xml`/`build.gradle`, `*.csproj`, `Gemfile`, `composer.json`; for a
+     Terraform root, its primary module file such as `main.tf` or
+     `versions.tf`). You already read this file to name the stack — record
+     its path. A layer with no dependency manifest records its primary
+     config or entry file (the file you would read first to understand the
+     layer); `null` plus a `gaps[]` entry only when no such file exists at
+     all.
    - `testCmd` / `buildCmd`: the runnable command for THAT layer, derived
      from declared scripts (workspace form, e.g. `npm test --workspace api`,
      when the root manages packages). A missing test script is `null` plus

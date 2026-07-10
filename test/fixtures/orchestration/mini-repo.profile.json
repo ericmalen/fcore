@@ -7,6 +7,7 @@
       "name": "cli",
       "path": ".",
       "stack": "Node.js CLI (zero-dependency)",
+      "manifestPath": "package.json",
       "testCmd": "node --test",
       "buildCmd": null
     }

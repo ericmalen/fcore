@@ -64,10 +64,10 @@ export function validateRepoProfile(profile) {
       for (const field of ['name', 'path', 'stack']) {
         if (!isNonEmptyString(layer[field])) e(`${where}.${field} must be a non-empty string`);
       }
-      // Commands must be present: a string when detected, explicit null when
-      // not — discovery may not omit them silently (gaps[] is where absence
-      // is reported as a finding).
-      for (const field of ['testCmd', 'buildCmd']) {
+      // Commands/manifest must be present: a string when detected, explicit
+      // null when not — discovery may not omit them silently (gaps[] is
+      // where absence is reported as a finding).
+      for (const field of ['testCmd', 'buildCmd', 'manifestPath']) {
         if (!isStringOrNull(layer[field])) {
           e(`${where}.${field} must be a string or null (null = not detected)`);
         }

@@ -52,6 +52,7 @@ test('validateRepoProfile: malformed fixture — broken layer entries, edges, co
   assert.deepEqual(validateRepoProfile(loadFixture('profile-malformed-bad-layer.json')), [
     'layers[0].stack must be a non-empty string',
     'layers[0].testCmd must be a string or null (null = not detected)',
+    'layers[0].manifestPath must be a string or null (null = not detected)',
     'layers[1] must be an object',
     'internalEdges[0].from "ui" is not a layer name',
     'internalEdges[1] is a self-edge ("api")',
@@ -79,9 +80,11 @@ test('validateRepoProfile: commands must be string or null, never omitted or mis
   const profile = loadFixture('mini-repo.profile.json');
   delete profile.layers[0].testCmd;       // omitted
   profile.layers[0].buildCmd = false;     // mistyped
+  delete profile.layers[0].manifestPath;  // omitted
   assert.deepEqual(validateRepoProfile(profile), [
     'layers[0].testCmd must be a string or null (null = not detected)',
     'layers[0].buildCmd must be a string or null (null = not detected)',
+    'layers[0].manifestPath must be a string or null (null = not detected)',
   ]);
 });
 
