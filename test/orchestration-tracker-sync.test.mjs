@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { parseTasksMd, renderTasksMd } from '../scripts/lib/orchestration/parse-tasks.mjs';
 import { validateSyncPlan, validateTaskBacklog } from '../scripts/lib/orchestration/schemas.mjs';
 import {
-  applyImports, computeSyncPlan, renderSyncReport, DEFAULT_STATE_MAPS,
+  applyImports, applyPrunes, computeSyncPlan, renderSyncReport, DEFAULT_STATE_MAPS,
 } from '../scripts/lib/orchestration/tracker-sync.mjs';
 import {
   adoAuthHeader, buildStatePatch, buildWiql, normalizeAdoItem, workItemIdFromRef,
@@ -64,6 +64,22 @@ test('computeSyncPlan: full matrix — import, both update directions, both look
   assert.deepEqual(plan.conflicts.map((c) => c.kind).sort(), [
     'missing-tracker-item', 'tracker-done-task-open',
   ]);
+  // T-000/AB#229 still needs a push to reach done — not pruned pre-push
+  // (the pure core cannot know the push will succeed; the CLI prunes it
+  // only after confirming the push).
+  assert.deepEqual(plan.prunes, []);
+});
+
+test('computeSyncPlan: a Done task already synced with the tracker is pruned (no push needed)', () => {
+  const { doc } = parseTasksMd(
+    '# Tasks\n\n## Backlog\n\n## In Progress\n\n## Done\n\n'
+    + '- [x] T-001 | scope: api | Old, already synced (commit: abc1234)\n  - ref: AB#500\n',
+  );
+  const items = [{ externalId: 'AB#500', title: 'Old, already synced', state: 'done', url: null }];
+  const plan = computeSyncPlan(doc, items, 'ado');
+  assert.deepEqual(plan.prunes, ['T-001']);
+  assert.deepEqual(plan.statusUpdates, []);   // already in sync, nothing to push
+  assert.deepEqual(plan.conflicts, []);
 });
 
 test('computeSyncPlan: blocked Backlog task pushes intake with blocked comment', () => {
@@ -93,7 +109,7 @@ test('computeSyncPlan: items with unmapped (null) state are skipped', () => {
   const { doc } = parseTasksMd('# Tasks\n\n## Backlog\n\n## In Progress\n\n## Done\n');
   const items = [{ externalId: 'AB#1', title: 'Scrum-state item', state: null, url: null }];
   const plan = computeSyncPlan(doc, items, 'ado');
-  assert.deepEqual(plan, { platform: 'ado', imports: [], statusUpdates: [], conflicts: [] });
+  assert.deepEqual(plan, { platform: 'ado', imports: [], statusUpdates: [], conflicts: [], prunes: [] });
 });
 
 test('computeSyncPlan → applyImports → recompute is idempotent', () => {
@@ -117,6 +133,23 @@ test('computeSyncPlan → applyImports → recompute is idempotent', () => {
   assert.deepEqual(second.conflicts.map((c) => c.kind).sort(), [
     'missing-tracker-item', 'tracker-done-task-open',
   ]);
+  // T-000/AB#229 is now confirmed done in the tracker — the recompute (as
+  // the CLI does post-push) picks it up as an already-synced prune.
+  assert.deepEqual(second.prunes, ['T-000']);
+});
+
+test('applyPrunes: removes only the named Done tasks, other sections and input untouched', () => {
+  const { doc } = parseTasksMd(ADO_TASKS);
+  const after = applyPrunes(doc, ['T-000']);
+  assert.deepEqual(after.done, []);
+  assert.equal(after.backlog.length, doc.backlog.length);
+  assert.equal(after.inProgress.length, doc.inProgress.length);
+  // canonical render parses back clean
+  const { doc: reparsed, errors } = parseTasksMd(renderTasksMd(after));
+  assert.deepEqual(errors, []);
+  assert.deepEqual(reparsed, after);
+  // input doc untouched
+  assert.equal(doc.done.length, 1);
 });
 
 test('applyImports: triage-blocked shape, sequential ids, round-trips through renderer', () => {
@@ -151,7 +184,19 @@ test('renderSyncReport: covers every plan section', () => {
   assert.match(report, /imports → Backlog: 1/);
   assert.match(report, /\+ AB#232 "Add audit log for tag deletions"/);
   assert.match(report, /~ AB#230 → active \(T-002; owner: feature-orchestrator\)/);
+  assert.match(report, /prunes → tasks\.md Done: 0/);
   assert.match(report, /! \[tracker-done-task-open\]/);
+});
+
+test('renderSyncReport: lists pruned task ids', () => {
+  const { doc } = parseTasksMd(
+    '# Tasks\n\n## Backlog\n\n## In Progress\n\n## Done\n\n'
+    + '- [x] T-001 | scope: api | Old, already synced (commit: abc1234)\n  - ref: AB#500\n',
+  );
+  const items = [{ externalId: 'AB#500', title: 'Old, already synced', state: 'done', url: null }];
+  const report = renderSyncReport(computeSyncPlan(doc, items, 'ado'));
+  assert.match(report, /prunes → tasks\.md Done: 1/);
+  assert.match(report, /- T-001/);
 });
 
 // ── ADO adapter (pure helpers) ──────────────────────────────────────────────
@@ -258,6 +303,9 @@ test('CLI: --apply writes valid tasks.md, skips pushes offline, second run impor
     assert.equal(firstPlan.offline, true);
     assert.equal(firstPlan.pushed, 0);
     assert.equal(firstPlan.imports.length, 1);
+    // T-000/AB#229 needs a push to reach done; offline mode skips the push,
+    // so it is left in Done, unpruned, awaiting a real sync.
+    assert.equal(firstPlan.prunes.length, 0);
 
     const text = readFileSync(join(root, 'tasks.md'), 'utf8');
     const { doc, errors } = parseTasksMd(text);
@@ -267,9 +315,34 @@ test('CLI: --apply writes valid tasks.md, skips pushes offline, second run impor
     assert.deepEqual(imported.scope, ['triage']);
     assert.equal(imported.ref, 'AB#232');
     assert.match(imported.blocked, /needs human scoping/);
+    assert.ok(doc.done.some((t) => t.id === 'T-000'));
 
     const second = runCli(['--target', root, '--platform', 'ado', '--items-file', items, '--apply', '--json'], root);
     assert.equal(JSON.parse(second.stdout).imports.length, 0);   // idempotent
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('CLI: --apply prunes an already-synced Done task, offline', () => {
+  const root = mkdtempSync(join(tmpdir(), 'tracker-prune-'));
+  try {
+    writeFileSync(
+      join(root, 'tasks.md'),
+      '# Tasks\n\n## Backlog\n\n## In Progress\n\n## Done\n\n'
+      + '- [x] T-001 | scope: api | Old, already synced (commit: abc1234)\n  - ref: AB#500\n',
+    );
+    const itemsPath = join(root, 'items.json');
+    writeFileSync(itemsPath, JSON.stringify([
+      { externalId: 'AB#500', title: 'Old, already synced', state: 'done', url: null },
+    ]));
+    const res = runCli(['--target', root, '--platform', 'ado', '--items-file', itemsPath, '--apply', '--json'], root);
+    assert.equal(res.status, 0);
+    const plan = JSON.parse(res.stdout);
+    assert.deepEqual(plan.prunes, ['T-001']);
+
+    const { doc } = parseTasksMd(readFileSync(join(root, 'tasks.md'), 'utf8'));
+    assert.deepEqual(doc.done, []);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

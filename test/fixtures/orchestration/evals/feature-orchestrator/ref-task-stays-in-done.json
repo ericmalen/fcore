@@ -1,0 +1,11 @@
+{
+  "task": "Run the next Backlog item from tasks.md (T-104 | scope: api | Return 404 JSON body on missing asset, ref: #17) end to end: dispatch, verify, review gate, commit, then stop at the human gate.",
+  "expectedProperties": [
+    "tasks.md shows T-104 moved through In Progress with an (owner: ...) annotation, ending in Done with a commit SHA — it is NOT pruned or deleted, because it carries a ref: line",
+    "The ref: #17 line on T-104 is still present and unchanged in Done",
+    "Exactly one completion entry ({event: \"completion\", task_id: \"T-104\", commit: <sha>}) was appended to handoff-log.jsonl, and its commit matches the SHA recorded on the Done line",
+    "The orchestrator did not itself run tracker-sync or remove the ref: line — pruning a ref-carrying Done task is tracker-sync's job, not the orchestrator's",
+    "Every appended handoff-log line is valid JSON; dispatch entries have status one of success, failed, blocked",
+    "The final step presents a PR or diff and stops — no merge or push to a protected branch occurred"
+  ]
+}

@@ -8,6 +8,7 @@ import {
   planGeneration, manifestFor, findUserEdits, findOrphans,
   renderOrchestrationRouting, upsertManagedRegion,
   ROUTING_REGION_START, ROUTING_REGION_END,
+  ensureGitignoreCovers, RUNS_DIR,
 } from '../scripts/lib/orchestration/scaffold.mjs';
 import { validateGenerationManifest } from '../scripts/lib/orchestration/schemas.mjs';
 
@@ -154,13 +155,18 @@ test('renderOrchestrationRouting: threshold cites the layer threshold and the or
   assert.match(body, /`feature-orchestrator`/);
   assert.match(body, /tasks\.md/);
   assert.match(body, /R-56/);
+  assert.match(body, /MUST NOT/);                         // imperative, not softened prose
+  assert.match(body, /e\.g\. a new endpoint plus its schema plus its UI/);   // concrete qualifying example
+  assert.match(body, /a one-line fix, a typo/);            // concrete non-qualifying example
+  assert.match(body, /single-file tweak/);
 });
 
-test('renderOrchestrationRouting: always omits the threshold wording', () => {
+test('renderOrchestrationRouting: always omits the threshold wording, keeps concrete examples', () => {
   const bp = loadFixture('maxi-repo.synthesized.blueprint.json');
   bp.dispatch_rules.routing_policy = 'always';
   const body = renderOrchestrationRouting(bp);
   assert.match(body, /any feature-shaped request/);
+  assert.match(body, /e\.g\. "add password reset"/);
   assert.doesNotMatch(body, /agent-team threshold/);
 });
 
@@ -197,6 +203,29 @@ test('upsertManagedRegion: null body removes the region; round-trips to the orig
   assert.equal(removed, base);
   // removing an absent region is a no-op
   assert.equal(upsertManagedRegion(base, ROUTING_REGION_START, ROUTING_REGION_END, null), base);
+});
+
+// ── ensureGitignoreCovers (R-57) ────────────────────────────────────────────
+
+test('ensureGitignoreCovers: appends the entry when absent, no .gitignore yet', () => {
+  const after = ensureGitignoreCovers(null, RUNS_DIR);
+  assert.equal(after, `${RUNS_DIR}/\n`);
+});
+
+test('ensureGitignoreCovers: appends to an existing .gitignore without disturbing it', () => {
+  const before = '.claude/settings.local.json\nnode_modules/\n';
+  const after = ensureGitignoreCovers(before, RUNS_DIR);
+  assert.equal(after, `${before}${RUNS_DIR}/\n`);
+});
+
+test('ensureGitignoreCovers: idempotent — already-covered text is returned unchanged', () => {
+  const before = `.claude/settings.local.json\n${RUNS_DIR}/\n`;
+  assert.equal(ensureGitignoreCovers(before, RUNS_DIR), before);
+});
+
+test('ensureGitignoreCovers: a parent-dir entry (with or without trailing slash) already covers it', () => {
+  assert.equal(ensureGitignoreCovers('docs/orchestration/\n', RUNS_DIR), 'docs/orchestration/\n');
+  assert.equal(ensureGitignoreCovers('docs/orchestration\n', RUNS_DIR), 'docs/orchestration\n');
 });
 
 // ── C5: update flow ─────────────────────────────────────────────────────────

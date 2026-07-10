@@ -88,7 +88,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "orch/run-${{ github.run_id }}"
-          claude -p "You are feature-orchestrator. Read .claude/agents/feature-orchestrator.md and execute its procedures for exactly one task: ${{ steps.guard.outputs.task }}. You are running headless: commit each unit of work as the procedures require, but do NOT push and do NOT open a PR — the pipeline does that after you finish. Stop after moving the task to Done or returning it to Backlog as blocked." \
+          claude -p "You are feature-orchestrator. Read .claude/agents/feature-orchestrator.md and execute its procedures for exactly one task: ${{ steps.guard.outputs.task }}. You are running headless: commit each unit of work as the procedures require, but do NOT push and do NOT open a PR — the pipeline does that after you finish. Stop after completing the task (its completion logged and the task pruned or updated per tasks-format.md) or returning it to Backlog as blocked." \
             --permission-mode acceptEdits \
             --allowedTools "Read,Edit,Write,Bash,Glob,Grep,Task" \
             --max-turns 80

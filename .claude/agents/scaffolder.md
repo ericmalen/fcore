@@ -63,7 +63,23 @@ manifest is the only state it owns.
    (they are owned by the running system afterwards): for any generated
    agent whose blueprint entry has a `checklist-path` slot, create that file
    containing `# Review checklist` + newline; create `<target>/tasks.md` in
-   canonical empty form (title + three section headings) when missing.
+   canonical empty form (title + three section headings) when missing. Also
+   ensure the target's `.gitignore` covers `docs/orchestration/runs/` (R-57 —
+   ephemeral per-task outputs) via `ensureGitignoreCovers`, idempotent:
+
+   ```
+   node --input-type=module -e '
+   import { readFileSync, writeFileSync, existsSync } from "node:fs";
+   import { join } from "node:path";
+   import { ensureGitignoreCovers, RUNS_DIR } from "./scripts/lib/orchestration/scaffold.mjs";
+   const target = process.argv[1];
+   const giPath = join(target, ".gitignore");
+   const before = existsSync(giPath) ? readFileSync(giPath, "utf8") : "";
+   const after = ensureGitignoreCovers(before, RUNS_DIR);
+   if (after !== before) writeFileSync(giPath, after);
+   console.log(after === before ? "runs/ already gitignored" : "runs/ added to .gitignore");
+   ' <target>
+   ```
 4. Routing region (R-56), also living state and never manifest-tracked:
    upsert the main-loop routing block into the target's `AGENTS.md` (inherited
    by `CLAUDE.md` via `@AGENTS.md`). Idempotent — re-running leaves it
@@ -89,8 +105,9 @@ manifest is the only state it owns.
    routing region must come out byte-identical. Any mismatch is a defect to
    report, never to patch by hand.
 6. Run the Agent Base audit against the target (`node scripts/audit.mjs --root
-   <target>`) and report: file list with SHAs, stubs created, routing region
-   upserted/omitted, audit findings, validator outputs. Then stop.
+   <target>`) and report: file list with SHAs, stubs created, `.gitignore`
+   runs/ coverage, routing region upserted/omitted, audit findings, validator
+   outputs. Then stop.
 
 ## Never
 

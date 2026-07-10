@@ -9,7 +9,7 @@ import {
   isSetupTooling, isVendored, isPayloadSkeleton,
 } from './util.mjs';
 import { OPTIONAL_NAMES } from '../baseline.mjs';
-import { ROUTING_REGION_START } from '../orchestration/scaffold.mjs';
+import { ROUTING_REGION_START, ROUTING_REGION_END, renderOrchestrationRouting, RUNS_DIR } from '../orchestration/scaffold.mjs';
 
 // ── R-01..R-09: root instructions ───────────────────────────────────────────
 
@@ -631,18 +631,73 @@ export function checkHygiene(ctx) {
 // MAIN LOOP, so it lives in always-loaded AGENTS.md — generated agents alone
 // never tell the main loop WHEN to dispatch the fleet. A `manual` (or absent)
 // routing_policy emits no region by design, so the check skips it.
+//
+// Beyond presence, a region is checked for the key facts a main loop actually
+// needs to act on it (orchestrator name, threshold under `threshold` policy,
+// a tasks.md pointer) at warning — those are stable across prose iterations.
+// A region whose body has simply gone stale relative to the current renderer
+// (prose iterated since generation) is a separate info nudge, not a warning:
+// warning would refire on every previously generated target each time the
+// routing prose is strengthened.
 export function checkOrchestrationRouting(ctx) {
   const { root } = ctx;
   const out = [];
   if (!exists(join(root, 'docs', 'orchestration', 'generation-manifest.json'))) return out;
   const bpText = readSafe(join(root, 'docs', 'orchestration', 'blueprint.json'));
   if (bpText == null) return out;
-  let policy;
-  try { policy = parseJsonc(bpText)?.dispatch_rules?.routing_policy; } catch { return out; }
+  let blueprint;
+  try { blueprint = parseJsonc(bpText); } catch { return out; }
+  const policy = blueprint?.dispatch_rules?.routing_policy;
   if (policy !== 'always' && policy !== 'threshold') return out;
+
   const agents = readSafe(join(root, 'AGENTS.md'));
-  if (agents == null || !agents.includes(ROUTING_REGION_START)) {
-    out.push(F('R-56', 'info', 'AGENTS.md', 'Orchestration is generated but AGENTS.md has no main-loop routing region — re-run scaffolder (R-56).'));
+  const startIdx = agents == null ? -1 : agents.indexOf(ROUTING_REGION_START);
+  const endIdx = agents == null ? -1 : agents.indexOf(ROUTING_REGION_END);
+  if (startIdx === -1 || endIdx === -1 || endIdx < startIdx) {
+    out.push(F('R-56', 'warning', 'AGENTS.md', 'Orchestration is generated but AGENTS.md has no main-loop routing region — re-run scaffolder (R-56).'));
+    return out;
+  }
+
+  const body = agents.slice(startIdx + ROUTING_REGION_START.length, endIdx);
+  const orchestratorName = blueprint?.orchestrator?.name;
+  if (orchestratorName && !body.includes(orchestratorName)) {
+    out.push(F('R-56', 'warning', 'AGENTS.md', `Routing region does not name the generated orchestrator ("${orchestratorName}").`));
+  }
+  if (policy === 'threshold') {
+    const threshold = blueprint?.dispatch_rules?.agent_team_min_scopes;
+    if (threshold != null && !body.includes(`${threshold}+`)) {
+      out.push(F('R-56', 'warning', 'AGENTS.md', `Routing region does not cite the agent-team threshold (${threshold}+ layers).`));
+    }
+  }
+  if (!body.includes('tasks.md')) {
+    out.push(F('R-56', 'warning', 'AGENTS.md', 'Routing region does not reference tasks.md.'));
+  }
+
+  const rendered = renderOrchestrationRouting(blueprint);
+  if (rendered != null && body.trim() !== rendered.trim()) {
+    out.push(F('R-56', 'info', 'AGENTS.md', 'Routing region is stale — its body no longer matches what the scaffolder renders today; re-run scaffolder step 4.'));
+  }
+
+  return out;
+}
+
+// ── R-57: orchestration run artifacts ───────────────────────────────────────
+
+// Ephemeral per-task outputs (screenshots, transcripts) that dispatched
+// specialists may write during a task; the orchestrator deletes the run
+// directory at completion (never committed, never manifest-tracked).
+export function checkOrchestrationRuns(ctx) {
+  const { root } = ctx;
+  const out = [];
+  if (!exists(join(root, 'docs', 'orchestration', 'generation-manifest.json'))) return out;
+  const gi = readSafe(join(root, '.gitignore'));
+  const lines = (gi ?? '').split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
+  const covered = lines.some((l) => {
+    const pat = l.replace(/^\//, '').replace(/\/$/, '');
+    return pat === RUNS_DIR || `${RUNS_DIR}/`.startsWith(`${pat}/`);
+  });
+  if (!covered) {
+    out.push(F('R-57', 'info', '.gitignore', `Orchestration is generated but .gitignore does not cover ${RUNS_DIR}/ (ephemeral per-task outputs, R-57).`));
   }
   return out;
 }

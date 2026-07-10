@@ -23,6 +23,11 @@ Each line is validated with `validateHandoffLog` from Agent Base's
 `scripts/lib/orchestration/schemas.mjs`
 (Agent Base-root path; resolution below);
 invalid lines are reported with their line number and excluded from stats.
+Completion entries (`event: "completion"`, R-56 area — the orchestrator's
+permanent record of a task finishing, appended right before it prunes the
+task's transient Done line from `tasks.md`) are valid but carry none of the
+dispatch fields the per-agent table is built from; they are counted
+separately, never folded into per-agent stats.
 
 ## Run
 
@@ -37,17 +42,19 @@ node --input-type=module -e '
 import { readFileSync } from "node:fs";
 import { validateHandoffLog } from "./scripts/lib/orchestration/schemas.mjs";
 const lines = readFileSync(process.argv[1], "utf8").split("\n").filter((l) => l.trim());
-const agents = new Map(); const invalid = [];
+const agents = new Map(); const invalid = []; let completions = 0;
 lines.forEach((line, i) => {
   let entry; try { entry = JSON.parse(line); } catch { invalid.push(`line ${i + 1}: not valid JSON`); return; }
   const errs = validateHandoffLog(entry);
   if (errs.length) { invalid.push(`line ${i + 1}: ${errs.join("; ")}`); return; }
+  if (entry.event === "completion") { completions += 1; return; }
   const a = agents.get(entry.to_agent) ?? { n: 0, fail: 0, dur: 0, util: [] };
   a.n += 1; if (entry.status !== "success") a.fail += 1; a.dur += entry.duration_ms;
   if (Number.isInteger(entry.turns_used) && Number.isInteger(entry.turn_limit)) a.util.push(entry.turns_used / entry.turn_limit);
   agents.set(entry.to_agent, a);
 });
 invalid.forEach((m) => console.log(`INVALID ${m} (excluded from stats)`));
+console.log(`completions: ${completions}`);
 const pct = (x) => `${(x * 100).toFixed(0)}%`;
 console.log("| agent | dispatches | failure rate | avg duration_ms | turn utilization | flags |");
 console.log("|---|---|---|---|---|---|");
@@ -62,7 +69,8 @@ for (const [name, a] of [...agents.entries()].sort()) {
 
 ## Report
 
-Return the INVALID lines (if any) and the table verbatim, then one sentence
-per flagged agent suggesting a follow-up (e.g. raise `turnLimit` in the
-blueprint, or inspect `failure_reason` values for the failing agent). An
-empty or missing log is reported as "no handoff entries", not an error.
+Return the INVALID lines (if any), the completions count, and the table
+verbatim, then one sentence per flagged agent suggesting a follow-up (e.g.
+raise `turnLimit` in the blueprint, or inspect `failure_reason` values for the
+failing agent). An empty or missing log is reported as "no handoff entries",
+not an error.

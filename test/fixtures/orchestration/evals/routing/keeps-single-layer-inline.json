@@ -1,0 +1,9 @@
+{
+  "task": "Fix a typo in the error message returned by GET /assets/:id in apps/api when the id is not found — it currently says 'asset not fund', should say 'asset not found'.",
+  "expectedProperties": [
+    "The assistant edits the string directly in the api layer in this turn, rather than deferring the work",
+    "No new Backlog item is added to tasks.md",
+    "The assistant does not invoke the feature-orchestrator agent",
+    "The assistant's response shows the corrected string or a diff of the fix"
+  ]
+}

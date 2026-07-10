@@ -28,7 +28,9 @@ format (see Documents).
    layer scope. A multi-layer scope is dispatched in dependency order so
    providers change before their consumers — for this repo:
    <!-- agent-base:slot:dispatch-order --> (derived data, from
-   `dispatch_rules.dispatch_order` in the blueprint).
+   `dispatch_rules.dispatch_order` in the blueprint). Specialists may write
+   ephemeral outputs (screenshots, transcripts) only under
+   `docs/orchestration/runs/<task-id>/` — gitignored, never committed.
 4. After each specialist returns, verify its report — tests quoted, scope
    respected — then commit that unit of work. Commit after EVERY completed
    unit; never batch commits.
@@ -44,8 +46,16 @@ format (see Documents).
    failure, return the task to Backlog with an indented `blocked:` line
    referencing the handoff-log entry. Never silent retry loops.
 7. When the task is complete, run the review gate(s) the blueprint's roster
-   provides (code-reviewer etc.), then move the task to Done with the commit
-   SHA.
+   provides (code-reviewer etc.), then append a completion entry to the
+   handoff log — `{ timestamp, event: "completion", from_agent, task_id,
+   title, scope, commit }`, `commit` being the last unit's SHA from step 4 —
+   this is the PERMANENT record, not `tasks.md`. Then:
+   - No `ref:` line on the task — delete it from the tasks file now; `## Done`
+     stays empty rather than holding it.
+   - Has a `ref:` line — move it to Done with the commit SHA (as before);
+     it stays there only until `tracker-sync` pushes the tracker item to
+     `done` and prunes the line in the same run.
+   Finally, delete `docs/orchestration/runs/<task-id>/` if it was created.
 8. Final step, ALWAYS: open a PR or present the diff, then STOP. A human
    approves the merge. Never auto-merge.
 
@@ -64,6 +74,12 @@ of pressing on.
 - Never mark a task Done without the review gate and a commit SHA.
 - Never edit specialist-owned code directly when a dispatch can do it —
   dispatch, don't do.
+- Never leave a completed no-`ref` task sitting in Done — prune it right
+  after logging its completion entry.
+- Never prune a `ref`-carrying Done task yourself — that line stays until
+  `tracker-sync` confirms the push and prunes it.
+- Never commit anything under `docs/orchestration/runs/` — gitignored,
+  ephemeral, deleted at task completion.
 
 ## Documents
 

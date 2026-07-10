@@ -290,7 +290,7 @@ at setup (base-plan selection, materialized by apply), by `agent-base skills
 add`, or by base-orchestrate; sync-baseline upgrades only the selected set and
 never reports an unselected optional as removed.
 
-**R-56 · Orchestration routing trigger** · mechanical · audit, info → warning
+**R-56 · Orchestration routing trigger** · mechanical · audit, warning
 An orchestration-generated project (one with
 `docs/orchestration/generation-manifest.json`) carries a main-loop-facing
 routing block in its always-loaded instructions (`AGENTS.md`, inherited by
@@ -299,8 +299,21 @@ to capture qualifying work as a `tasks.md` backlog item and defer to
 `feature-orchestrator` rather than implement inline. Generation upserts the
 region from the blueprint (threshold from `dispatch_rules.agent_team_min_scopes`;
 behavior from `dispatch_rules.routing_policy` ∈ `always | threshold | manual`).
-`manual` emits no region and is exempt. Living instruction state, not a generated
-asset — never manifest-tracked (same class as `tasks.md`).
+`manual` emits no region and is exempt. A present region must name the
+blueprint's orchestrator, cite the `agent_team_min_scopes` threshold under
+`threshold` policy, and reference `tasks.md` — each missing key fact is a
+warning. A region whose body no longer matches what the renderer would emit
+today (prose iterated since generation) is a separate info nudge to re-run the
+scaffolder — not a warning, since prose changes shouldn't flag every
+previously generated target. Living instruction state, not a generated asset —
+never manifest-tracked (same class as `tasks.md`).
+
+**R-57 · Orchestration run artifacts** · mechanical · audit, info → warning
+Orchestration-generated projects gitignore `docs/orchestration/runs/` —
+ephemeral per-task outputs (e.g. screenshots, transcripts) that dispatched
+specialists may write during a task. The orchestrator deletes a task's run
+directory at completion; never committed, never manifest-tracked (same class
+as `tasks.md`).
 
 **R-51 · Rule-ID indirection** · mechanical · Agent Base CI
 Agent Base docs, templates, and check metadata reference rules by R-ID only — never by

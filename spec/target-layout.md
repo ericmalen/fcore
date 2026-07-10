@@ -96,7 +96,8 @@ substitution — never hand-authored; every generated file is recorded
 ```
 <repo-root>/
 ├── tasks.md                       work-intake backlog — the only
-│                                  repo-root addition
+│                                  repo-root addition; Done entries are
+│                                  transient (pruned on completion, R-56 area)
 │
 ├── .claude/
 │   ├── agents/<generated>.md      orchestrator + one agent per
@@ -109,13 +110,25 @@ substitution — never hand-authored; every generated file is recorded
     ├── decisions.md               rendered companion — never hand-edited
     ├── blueprint.json             generation input (validated pre-handoff)
     ├── generation-manifest.json   sha256 record of every generated file
-    ├── handoff-log.jsonl          dispatch log, appended at runtime
+    ├── handoff-log.jsonl          dispatch log, appended at runtime —
+    │                              permanent record of task completions
+    ├── runs/<task-id>/            ephemeral per-task outputs (screenshots,
+    │                              transcripts); gitignored (R-57), deleted
+    │                              by the orchestrator at task completion
     ├── checklists/
     │   └── review-checklist.md    retro flywheel; append-only CHK items
     └── evals/
-        └── <agent-name>/          golden-example evals, one JSON per
-                                   golden (minGoldens per blueprint)
+        ├── <agent-name>/          golden-example evals, one JSON per
+        │                          golden (minGoldens per blueprint)
+        └── routing/               main-loop routing-decision goldens
+                                   (does the fleet get dispatched?)
 ```
+
+`tasks.md`'s `## Done` section is a transient holding area, not a permanent
+log: a completed task with no tracker `ref:` is pruned immediately after its
+completion is logged to `handoff-log.jsonl`; a `ref:`-carrying task waits in
+Done only until `tracker-sync` pushes its status and prunes it. The permanent
+record of every completion is the handoff log, not `tasks.md`.
 
 Generated agents and skills land in the standard `.claude/` homes and obey the
 same rules as authored ones. The optional lifecycle skills (`retro`,

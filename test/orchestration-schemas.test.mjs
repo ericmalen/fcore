@@ -265,6 +265,16 @@ test('validateBlueprint: orchestrator name colliding with a specialist is reject
   ]);
 });
 
+test('validateBlueprint: "routing" is a reserved agent name (specialist or orchestrator)', () => {
+  const specialist = loadFixture('maxi-repo.blueprint.json');
+  specialist.specialists[0].name = 'routing';
+  assert.ok(validateBlueprint(specialist).includes('specialists[0].name "routing" is reserved (docs/orchestration/evals/routing/)'));
+
+  const orchestrator = loadFixture('maxi-repo.blueprint.json');
+  orchestrator.orchestrator.name = 'routing';
+  assert.ok(validateBlueprint(orchestrator).includes('orchestrator.name "routing" is reserved (docs/orchestration/evals/routing/)'));
+});
+
 test('validateBlueprint: dispatch_order required ([] = unconstrained) and item-checked', () => {
   const missing = loadFixture('maxi-repo.blueprint.json');
   delete missing.dispatch_rules.dispatch_order;
@@ -417,6 +427,52 @@ test('validateHandoffLog: optional capture fields validated only when present', 
   ]);
 });
 
+// ── validateHandoffLog: completion entries (R-56 area) ──────────────────────
+
+const validCompletion = () => ({
+  timestamp: '2026-06-10T13:45:02Z',
+  event: 'completion',
+  from_agent: 'feature-orchestrator',
+  task_id: 'T-001',
+  title: 'Add asset-tagging endpoint',
+  scope: ['api', 'db'],
+  commit: 'abc1234',
+});
+
+test('validateHandoffLog: well-formed completion entry validates clean', () => {
+  assert.deepEqual(validateHandoffLog(validCompletion()), []);
+});
+
+test('validateHandoffLog: completion entry missing required fields all report', () => {
+  assert.deepEqual(validateHandoffLog({ event: 'completion' }), [
+    'timestamp must be an ISO 8601 string (got undefined)',
+    'from_agent must be a non-empty string',
+    'task_id must match T-### (got undefined)',
+    'title must be a non-empty string',
+    'scope must be an array',
+    'commit must be a non-empty string',
+  ]);
+});
+
+test('validateHandoffLog: completion entry rejects dispatch-only fields', () => {
+  const entry = { ...validCompletion(), to_agent: 'api-engineer', status: 'success', retry_count: 0 };
+  assert.deepEqual(validateHandoffLog(entry), [
+    'to_agent is a dispatch-entry field and must not appear on a completion entry',
+    'status is a dispatch-entry field and must not appear on a completion entry',
+    'retry_count is a dispatch-entry field and must not appear on a completion entry',
+  ]);
+});
+
+test('validateHandoffLog: completion entry rejects an empty scope array', () => {
+  assert.deepEqual(validateHandoffLog({ ...validCompletion(), scope: [] }), ['scope must be a non-empty array']);
+});
+
+test('validateHandoffLog: unknown event value is rejected outright', () => {
+  assert.deepEqual(validateHandoffLog({ ...validCompletion(), event: 'dispatched' }), [
+    'event must be "completion" when present (got dispatched) — dispatch entries omit it',
+  ]);
+});
+
 // ── validateSyncPlan (F3, DD-14) ────────────────────────────────────────────
 
 const validSyncPlan = () => ({
@@ -424,6 +480,7 @@ const validSyncPlan = () => ({
   imports: [{ externalId: 'AB#231', title: 'Rate-limit the tagging endpoint', url: 'https://dev.azure.com/x/y/_workitems/edit/231' }],
   statusUpdates: [{ taskId: 'T-002', externalId: 'AB#230', to: 'active', comment: 'owner: feature-orchestrator' }],
   conflicts: [{ kind: 'duplicate-ref', detail: 'ref "AB#9" appears on T-004 and T-005' }],
+  prunes: ['T-000'],
 });
 
 test('validateSyncPlan: well-formed plan validates clean', () => {
@@ -444,6 +501,16 @@ test('validateSyncPlan: non-object and missing arrays report', () => {
     'imports must be an array',
     'statusUpdates must be an array',
     'conflicts must be an array',
+    'prunes must be an array',
+  ]);
+});
+
+test('validateSyncPlan: bad prune entries report per index', () => {
+  const plan = validSyncPlan();
+  plan.prunes = ['T-000', '000', 42];
+  assert.deepEqual(validateSyncPlan(plan), [
+    'prunes[1] must match T-### (got 000)',
+    'prunes[2] must match T-### (got 42)',
   ]);
 });
 

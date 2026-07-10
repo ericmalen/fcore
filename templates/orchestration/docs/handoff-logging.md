@@ -39,6 +39,32 @@ Field rules:
   one retry, so values above 1 indicate a protocol violation.
 - Optional when capturable: `model`, `turns_used`, `turn_limit`.
 
+## Completion entries
+
+A second entry shape, appended once per task — after the review gate and
+commit, right before the orchestrator prunes (or moves to Done) the task's
+line in `tasks.md` (`tasks-format.md`). This is the PERMANENT record of the
+task's completion; `tasks.md` only holds a transient line, deleted or pruned
+once this entry exists.
+
+```json
+{
+  "timestamp": "2026-06-10T14:02:11Z",
+  "event": "completion",
+  "from_agent": "feature-orchestrator",
+  "task_id": "T-001",
+  "title": "Add asset-tagging endpoint",
+  "scope": ["api", "db"],
+  "commit": "abc1234"
+}
+```
+
+`event: "completion"` is the discriminator — dispatch entries above omit it.
+A completion entry never carries dispatch-only fields (`to_agent`,
+`artifacts`, `decision_summary`, `duration_ms`, `status`, `retry_count`,
+`failure_reason`); analytics (`log-report`) count these separately from
+per-agent dispatch stats.
+
 ## Rules
 
 - One entry per dispatch-and-return unit — including failures and retries;

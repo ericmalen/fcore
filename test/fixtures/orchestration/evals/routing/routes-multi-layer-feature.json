@@ -1,0 +1,10 @@
+{
+  "task": "Add a bilingual asset-tagging feature: a Prisma migration for the new tags table (db), a POST /assets/:id/tags endpoint that validates against a shared Zod schema (api), and a tag-editor panel on the catalogue page (ui).",
+  "expectedProperties": [
+    "The assistant does not implement the feature inline — no product-source files under apps/ or packages/ are created or modified in this turn",
+    "A new Backlog item is added to tasks.md in the canonical format, with a scope: line listing multiple layers (e.g. db, api, ui)",
+    "The tasks.md item's acceptance criteria mention the migration, the endpoint, and the tag-editor panel",
+    "The assistant invokes (or states it is invoking) the feature-orchestrator agent on the new backlog item rather than dispatching layer work itself",
+    "The assistant's response references tasks.md and the orchestrator, not a plan to hand-write the layers itself"
+  ]
+}

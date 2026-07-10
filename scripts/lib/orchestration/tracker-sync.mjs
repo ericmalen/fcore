@@ -41,6 +41,7 @@ export function computeSyncPlan(tasksDoc, trackerItems, platform) {
   const imports = [];
   const statusUpdates = [];
   const conflicts = [];
+  const prunes = [];
 
   const items = trackerItems.filter((it) => it.state !== null);
   const itemsById = new Map(items.map((it) => [it.externalId, it]));
@@ -70,7 +71,13 @@ export function computeSyncPlan(tasksDoc, trackerItems, platform) {
     }
   }
 
-  // tasks.md → tracker: push the task's state wherever it differs.
+  // tasks.md → tracker: push the task's state wherever it differs. A Done
+  // task the tracker ALREADY confirms `done` (no push needed) is pruned here
+  // — Done is a transient holding area for ref'd tasks awaiting sync, and the
+  // handoff log's completion entry is the permanent record, not this line.
+  // A Done task that still needs a push to reach `done` is NOT pruned here —
+  // this core is pure/pre-push, so it cannot know the push will succeed; the
+  // CLI prunes those only after actually confirming the push (DD-14).
   for (const [ref, { task, state }] of taskByRef) {
     const item = itemsById.get(ref);
     if (!item) {
@@ -80,7 +87,10 @@ export function computeSyncPlan(tasksDoc, trackerItems, platform) {
       });
       continue;
     }
-    if (item.state === state) continue;
+    if (item.state === state) {
+      if (state === 'done') prunes.push(task.id);
+      continue;
+    }
     if (item.state === 'done' && state !== 'done') {
       // Tracker says finished, backlog says not — a human closed it out of
       // band or the task regressed; never silently reopen or close.
@@ -98,7 +108,7 @@ export function computeSyncPlan(tasksDoc, trackerItems, platform) {
     });
   }
 
-  return { platform, imports, statusUpdates, conflicts };
+  return { platform, imports, statusUpdates, conflicts, prunes };
 }
 
 // applyImports(tasksDoc, imports) → new doc with one Backlog task per import:
@@ -130,6 +140,20 @@ export function applyImports(tasksDoc, imports) {
   return doc;
 }
 
+// applyPrunes(tasksDoc, taskIds) → new doc with the given Done task ids
+// removed. Done is a transient holding area for ref'd tasks awaiting tracker
+// sync (tasks-format.md); the handoff log's completion entry is the
+// permanent record, so pruning here loses no history. Input doc is not
+// mutated.
+export function applyPrunes(tasksDoc, taskIds) {
+  const prune = new Set(taskIds);
+  return {
+    backlog: tasksDoc.backlog.map((t) => ({ ...t })),
+    inProgress: tasksDoc.inProgress.map((t) => ({ ...t })),
+    done: tasksDoc.done.filter((t) => !prune.has(t.id)).map((t) => ({ ...t })),
+  };
+}
+
 // Human-readable dry-run report (the CLI default output).
 export function renderSyncReport(plan) {
   const out = [`tracker-sync plan (${plan.platform})`];
@@ -139,6 +163,8 @@ export function renderSyncReport(plan) {
   for (const u of plan.statusUpdates) {
     out.push(`  ~ ${u.externalId} → ${u.to} (${u.taskId}${u.comment ? `; ${u.comment}` : ''})`);
   }
+  out.push('', `prunes → tasks.md Done: ${plan.prunes.length}`);
+  for (const id of plan.prunes) out.push(`  - ${id}`);
   out.push('', `conflicts (human resolution): ${plan.conflicts.length}`);
   for (const c of plan.conflicts) out.push(`  ! [${c.kind}] ${c.detail}`);
   return out.join('\n') + '\n';

@@ -97,7 +97,7 @@ steps:
       git config user.name "orchestrator-run pipeline"
       git config user.email "orchestrator-run@dev.azure.com"
       git checkout -b "orch/run-$(Build.BuildId)"
-      claude -p "You are feature-orchestrator. Read .claude/agents/feature-orchestrator.md and execute its procedures for exactly one task: $(guardTask). You are running headless: commit each unit of work as the procedures require, but do NOT push and do NOT open a PR — the pipeline does that after you finish. Stop after moving the task to Done or returning it to Backlog as blocked." \
+      claude -p "You are feature-orchestrator. Read .claude/agents/feature-orchestrator.md and execute its procedures for exactly one task: $(guardTask). You are running headless: commit each unit of work as the procedures require, but do NOT push and do NOT open a PR — the pipeline does that after you finish. Stop after completing the task (its completion logged and the task pruned or updated per tasks-format.md) or returning it to Backlog as blocked." \
         --permission-mode acceptEdits \
         --allowedTools "Read,Edit,Write,Bash,Glob,Grep,Task" \
         --max-turns 80

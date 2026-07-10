@@ -11,7 +11,7 @@ import { readMarker } from './lib/audit/util.mjs';
 import {
   checkRootInstructions, checkShim, checkPathScoping, checkSkills,
   checkAgents, checkReferences, checkClaudeSettings, checkVscodeSettings,
-  checkHygiene, checkOrchestrationRouting,
+  checkHygiene, checkOrchestrationRouting, checkOrchestrationRuns,
 } from './lib/audit/checks.mjs';
 import { flagValue } from './lib/cli-args.mjs';
 
@@ -27,7 +27,7 @@ const STRICT_ESCALATION = {
   'R-47': 'warning',
   'R-48': 'warning',
   'R-55': 'warning',
-  'R-56': 'warning',
+  'R-57': 'warning',
 };
 
 export function audit({ root, strict = false }) {
@@ -45,6 +45,7 @@ export function audit({ root, strict = false }) {
     ...checkVscodeSettings(ctx),
     ...checkHygiene(ctx),
     ...checkOrchestrationRouting(ctx),
+    ...checkOrchestrationRuns(ctx),
   ];
 
   if (strict) {

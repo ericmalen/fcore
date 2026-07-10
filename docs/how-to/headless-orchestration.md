@@ -51,9 +51,10 @@ to push — the pipeline pushes.
 ## Audit trail
 
 Git history on the `orch/` branch + `docs/orchestration/handoff-log.jsonl`
-(the orchestrator logs every dispatch) + the pipeline run logs. No custom
-server, ever. Use the `log-report` skill over the handoff log for per-agent
-health.
+(the orchestrator logs every dispatch, plus one permanent completion entry
+per finished task — `tasks.md`'s own `## Done` line is transient and gets
+pruned) + the pipeline run logs. No custom server, ever. Use the `log-report`
+skill over the handoff log for per-agent health.
 
 ## Cost and tuning
 

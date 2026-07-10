@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 
 import { audit } from '../scripts/audit.mjs';
-import { ROUTING_REGION_START, ROUTING_REGION_END } from '../scripts/lib/orchestration/scaffold.mjs';
+import { ROUTING_REGION_START, ROUTING_REGION_END, renderOrchestrationRouting } from '../scripts/lib/orchestration/scaffold.mjs';
 
 function makeRepo(files, { git = true } = {}) {
   const dir = mkdtempSync(join(tmpdir(), 'aikit-audit-'));
@@ -759,29 +759,36 @@ test('.claude/worktrees contents are not audited (no compat, no findings)', () =
 
 // ── R-56 orchestration routing trigger ───────────────────────────────────────
 
-const ORCH = (policy) => ({
-  'docs/orchestration/generation-manifest.json': '{ "schemaVersion": 1, "generated": [] }\n',
-  'docs/orchestration/blueprint.json': `{ "dispatch_rules": { "routing_policy": "${policy}", "agent_team_min_scopes": 3 } }\n`,
-});
-const ROUTING_BLOCK = `${ROUTING_REGION_START}\n## Orchestration routing\nbody\n${ROUTING_REGION_END}`;
+const ORCH_BLUEPRINT = {
+  orchestrator: { name: 'feature-orchestrator' },
+  dispatch_rules: { routing_policy: 'threshold', agent_team_min_scopes: 3 },
+};
 
-test('R-56: generated orchestration without the AGENTS.md routing region fires', () => {
-  const repo = makeRepo({ ...CONFORMANT, ...ORCH('threshold') });
+const ORCH = (blueprint) => ({
+  'docs/orchestration/generation-manifest.json': '{ "schemaVersion": 1, "generated": [] }\n',
+  'docs/orchestration/blueprint.json': JSON.stringify(blueprint) + '\n',
+});
+
+const regionOf = (body) => `${ROUTING_REGION_START}\n${body}\n${ROUTING_REGION_END}`;
+const ROUTING_BLOCK = regionOf(renderOrchestrationRouting(ORCH_BLUEPRINT));
+
+test('R-56: generated orchestration without the AGENTS.md routing region fires (warning)', () => {
+  const repo = makeRepo({ ...CONFORMANT, ...ORCH(ORCH_BLUEPRINT) });
   try {
     const r56 = of(audit({ root: repo }), 'R-56');
     assert.equal(r56.length, 1);
     assert.equal(r56[0].file, 'AGENTS.md');
-    assert.equal(r56[0].severity, 'info');
+    assert.equal(r56[0].severity, 'warning');
   } finally {
     rmSync(repo, { recursive: true, force: true });
   }
 });
 
-test('R-56: routing region present → no finding', () => {
+test('R-56: routing region present and matches renderer → no finding', () => {
   const repo = makeRepo({
     ...CONFORMANT,
     'AGENTS.md': CONFORMANT['AGENTS.md'] + '\n' + ROUTING_BLOCK + '\n',
-    ...ORCH('threshold'),
+    ...ORCH(ORCH_BLUEPRINT),
   });
   try {
     assert.equal(of(audit({ root: repo }), 'R-56').length, 0);
@@ -791,7 +798,10 @@ test('R-56: routing region present → no finding', () => {
 });
 
 test('R-56: manual policy is exempt; non-orchestrated repos never fire', () => {
-  const manual = makeRepo({ ...CONFORMANT, ...ORCH('manual') });
+  const manual = makeRepo({
+    ...CONFORMANT,
+    ...ORCH({ ...ORCH_BLUEPRINT, dispatch_rules: { routing_policy: 'manual' } }),
+  });
   const plain = makeRepo({ ...CONFORMANT }); // no generation manifest
   try {
     assert.equal(of(audit({ root: manual }), 'R-56').length, 0);
@@ -802,11 +812,124 @@ test('R-56: manual policy is exempt; non-orchestrated repos never fire', () => {
   }
 });
 
-test('R-56: escalates to warning under --strict', () => {
-  const repo = makeRepo({ ...CONFORMANT, ...ORCH('threshold') });
+test('R-56: region missing the orchestrator name fires a warning', () => {
+  const badBody = renderOrchestrationRouting(ORCH_BLUEPRINT).replace('feature-orchestrator', 'some-other-agent');
+  const repo = makeRepo({
+    ...CONFORMANT,
+    'AGENTS.md': CONFORMANT['AGENTS.md'] + '\n' + regionOf(badBody) + '\n',
+    ...ORCH(ORCH_BLUEPRINT),
+  });
+  try {
+    const r56 = of(audit({ root: repo }), 'R-56');
+    const warnings = r56.filter((f) => f.severity === 'warning');
+    assert.equal(warnings.length, 1);
+    assert.match(warnings[0].message, /name.*orchestrator/i);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test('R-56: threshold region missing the numeric threshold fires a warning', () => {
+  const badBody = renderOrchestrationRouting(ORCH_BLUEPRINT).replace('3+', '9+');
+  const repo = makeRepo({
+    ...CONFORMANT,
+    'AGENTS.md': CONFORMANT['AGENTS.md'] + '\n' + regionOf(badBody) + '\n',
+    ...ORCH(ORCH_BLUEPRINT),
+  });
+  try {
+    const r56 = of(audit({ root: repo }), 'R-56');
+    const warnings = r56.filter((f) => f.severity === 'warning');
+    assert.equal(warnings.length, 1);
+    assert.match(warnings[0].message, /threshold/i);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test('R-56: region missing tasks.md reference fires a warning', () => {
+  const badBody = renderOrchestrationRouting(ORCH_BLUEPRINT).replace(/tasks\.md/g, 'the backlog file');
+  const repo = makeRepo({
+    ...CONFORMANT,
+    'AGENTS.md': CONFORMANT['AGENTS.md'] + '\n' + regionOf(badBody) + '\n',
+    ...ORCH(ORCH_BLUEPRINT),
+  });
+  try {
+    const r56 = of(audit({ root: repo }), 'R-56');
+    const warnings = r56.filter((f) => f.severity === 'warning');
+    assert.equal(warnings.length, 1);
+    assert.match(warnings[0].message, /tasks\.md/);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test('R-56: stale region (key facts intact, prose differs) fires info only', () => {
+  const staleBody = renderOrchestrationRouting(ORCH_BLUEPRINT) + '\n\nHuman-added note.';
+  const repo = makeRepo({
+    ...CONFORMANT,
+    'AGENTS.md': CONFORMANT['AGENTS.md'] + '\n' + regionOf(staleBody) + '\n',
+    ...ORCH(ORCH_BLUEPRINT),
+  });
+  try {
+    const r56 = of(audit({ root: repo }), 'R-56');
+    assert.equal(r56.length, 1);
+    assert.equal(r56[0].severity, 'info');
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test('R-56: already warning at baseline, --strict is a no-op', () => {
+  const repo = makeRepo({ ...CONFORMANT, ...ORCH(ORCH_BLUEPRINT) });
   try {
     assert.equal(of(audit({ root: repo, strict: true }), 'R-56')[0].severity, 'warning');
   } finally {
     rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+// ── R-57 orchestration run artifacts ────────────────────────────────────────
+
+test('R-57: generated orchestration without .gitignore coverage of runs/ fires info', () => {
+  const repo = makeRepo({ ...CONFORMANT, ...ORCH(ORCH_BLUEPRINT) });
+  try {
+    const r57 = of(audit({ root: repo }), 'R-57');
+    assert.equal(r57.length, 1);
+    assert.equal(r57[0].severity, 'info');
+    assert.equal(r57[0].file, '.gitignore');
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test('R-57: exact entry or parent-dir entry in .gitignore covers it', () => {
+  const exact = makeRepo({
+    ...CONFORMANT,
+    '.gitignore': CONFORMANT['.gitignore'] + 'docs/orchestration/runs/\n',
+    ...ORCH(ORCH_BLUEPRINT),
+  });
+  const parent = makeRepo({
+    ...CONFORMANT,
+    '.gitignore': CONFORMANT['.gitignore'] + 'docs/orchestration/\n',
+    ...ORCH(ORCH_BLUEPRINT),
+  });
+  try {
+    assert.equal(of(audit({ root: exact }), 'R-57').length, 0);
+    assert.equal(of(audit({ root: parent }), 'R-57').length, 0);
+  } finally {
+    rmSync(exact, { recursive: true, force: true });
+    rmSync(parent, { recursive: true, force: true });
+  }
+});
+
+test('R-57: escalates to warning under --strict; non-orchestrated repos never fire', () => {
+  const repo = makeRepo({ ...CONFORMANT, ...ORCH(ORCH_BLUEPRINT) });
+  const plain = makeRepo({ ...CONFORMANT });
+  try {
+    assert.equal(of(audit({ root: repo, strict: true }), 'R-57')[0].severity, 'warning');
+    assert.equal(of(audit({ root: plain }), 'R-57').length, 0);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+    rmSync(plain, { recursive: true, force: true });
   }
 });

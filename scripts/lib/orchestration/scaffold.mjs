@@ -186,20 +186,24 @@ export const ROUTING_REGION_END = '<!-- agent-base:orchestration-routing:end -->
 
 // Body for the routing region, derived purely from the blueprint. Returns null
 // when routing_policy is `manual` (or absent) — the main loop keeps deciding by
-// hand and no region is emitted.
+// hand and no region is emitted. Imperative + concrete examples (rather than
+// abstract "feature-shaped") — R-56's own eval coverage (evals/routing/,
+// eval-runner SKILL.md) exists specifically to measure and tighten this
+// wording, since it is the one link in the trigger chain that is prose, not
+// a mechanical gate.
 export function renderOrchestrationRouting(blueprint) {
   const dr = blueprint?.dispatch_rules ?? {};
   const policy = dr.routing_policy;
   if (policy !== 'always' && policy !== 'threshold') return null;
   const orchestrator = blueprint?.orchestrator?.name ?? 'feature-orchestrator';
   const trigger = policy === 'always'
-    ? 'For any feature-shaped request — work that adds or changes product behavior —'
-    : `When a request spans ${dr.agent_team_min_scopes}+ layers (the agent-team threshold) or is otherwise discrete, trackable, multi-step work,`;
+    ? 'any feature-shaped request — work that adds or changes product behavior (e.g. "add password reset", "let users export their data")'
+    : `a request spanning ${dr.agent_team_min_scopes}+ layers (the agent-team threshold) — e.g. a new endpoint plus its schema plus its UI — or otherwise discrete, trackable, multi-step work`;
   return [
     '## Orchestration routing',
     '',
-    `This repo has a generated orchestration fleet (R-56). ${trigger} do NOT`,
-    'implement it inline. Instead:',
+    `This repo has a generated orchestration fleet (R-56). For ${trigger},`,
+    'you MUST NOT implement it inline yourself. Instead:',
     '',
     '1. Capture it as a Backlog item in `tasks.md` (canonical format:',
     '   `docs/orchestration/tasks-format.md`) with its `scope:` layers and',
@@ -208,7 +212,8 @@ export function renderOrchestrationRouting(blueprint) {
     '   specialists per `docs/orchestration/dispatch-rules.md`, verifies their',
     '   reports, and gates at the PR.',
     '',
-    'Smaller or single-layer changes proceed inline as usual.',
+    'Proceed inline as usual for anything smaller — a one-line fix, a typo, a',
+    'single-file tweak, or anything scoped to one layer.',
   ].join('\n');
 }
 
@@ -235,6 +240,30 @@ export function upsertManagedRegion(text, startMarker, endMarker, body) {
   }
   const base = src.replace(/\n*$/, '');
   return (base ? `${base}\n\n` : '') + block + '\n';
+}
+
+// ── ephemeral run artifacts (R-57) ──────────────────────────────────────────
+
+// Ephemeral per-task outputs (screenshots, transcripts) dispatched
+// specialists may write during a task; the orchestrator deletes the run
+// directory at completion. Never committed, never manifest-tracked (same
+// class as tasks.md).
+export const RUNS_DIR = 'docs/orchestration/runs';
+
+// Idempotent .gitignore append: adds RUNS_DIR (as a directory entry) when no
+// existing line already covers it — an exact match or a parent-dir entry,
+// with or without a trailing slash. Mirrors checkOrchestrationRuns's
+// coverage test (R-57) so "covered" means the same thing on both sides.
+export function ensureGitignoreCovers(text, dirPath) {
+  const src = text ?? '';
+  const lines = src.split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
+  const covered = lines.some((l) => {
+    const pat = l.replace(/^\//, '').replace(/\/$/, '');
+    return pat === dirPath || `${dirPath}/`.startsWith(`${pat}/`);
+  });
+  if (covered) return src;
+  const base = src.replace(/\n*$/, '');
+  return (base ? `${base}\n` : '') + `${dirPath}/\n`;
 }
 
 // Manifest for a plan — same entry order as files; validates against

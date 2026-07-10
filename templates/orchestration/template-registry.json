@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "agents": {
     "orchestrator": {
-      "version": "1.2.1",
-      "sha256": "27a85a721db1f61f2952e3f00f9db1bbf501780da82f8dd7d9427ee4aae8ff61"
+      "version": "1.3.0",
+      "sha256": "e1dbc3bb799dec539332b2a5f3f7a73cbe88d0bf6f7757b5f8aa4d358b900a0b"
     },
     "generic-specialist": {
       "version": "1.0.1",
@@ -58,16 +58,16 @@
       "sha256": "437cfbd7def2662765c08ffde92ec38b5b0282416aa5ade01bb81491620fc25d"
     },
     "tasks-format": {
-      "version": "1.2.1",
-      "sha256": "6c4b847f4e6ff0a3486a78c45f002f818ce98cb334c97f5520ee46d5f1be3bc8"
+      "version": "1.3.0",
+      "sha256": "3fe18ebbb4cd7cd169118bb8174c9e96d06310ae6ac9aabae51d51beb9862049"
     },
     "handoff-logging": {
-      "version": "1.1.0",
-      "sha256": "75ea1ad7db5d9fe801e9bc315f640f6eb32ebe872ce14181011e891cae1974fa"
+      "version": "1.2.0",
+      "sha256": "d3a0ede74d4b44db6667e83716aad39c5bbf0505b88a472b89f5085bb62fd1f4"
     },
     "README": {
-      "version": "1.1.2",
-      "sha256": "fc15967072e6fa10021119d4522a9b8b46dad0e6d3d04d45133d617c8269f773"
+      "version": "1.1.3",
+      "sha256": "9b6ebe2fce68108a6c739869b863abca0f96d2232dc76eec340cf16fb2cfdc00"
     },
     "triage-rules": {
       "version": "1.0.1",

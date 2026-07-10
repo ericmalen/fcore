@@ -29,6 +29,12 @@ versioned with the code and needs no external tracker.
 - Three sections, always present, in this order: `## Backlog`,
   `## In Progress`, `## Done`. Section membership IS the task status; the
   checkbox mirrors it (`[ ]` / `[~]` / `[x]`).
+- `## Done` is a transient holding area, not a permanent log: a task with no
+  `ref:` is pruned immediately after its completion is logged; a `ref:`-
+  carrying task sits in Done only until `tracker-sync` pushes the tracker
+  item to `done` and prunes it in the same run. The permanent record of every
+  completion is the completion entry in `handoff-log.jsonl`
+  (`handoff-logging.md`), not this file.
 - One task per line: `- [<box>] T-### | scope: <layers> | <title>`.
   - `T-###` ids are unique across the whole file and never reused.
   - `scope:` lists the layers the task touches, comma-separated — this drives
@@ -67,8 +73,10 @@ to the tracker on the next sync.
   while an orchestrator session is active). Specialists never touch it —
   they report results in their final message; the orchestrator applies all
   status changes.
-- The orchestrator moves a task's line between sections as work proceeds and
-  appends the commit SHA when it lands in Done.
+- The orchestrator moves a task's line between sections as work proceeds. On
+  completion it logs a completion entry to `handoff-log.jsonl`, then either
+  deletes the task's line (no `ref:`) or moves it to Done with the commit SHA
+  (has a `ref:`, awaiting `tracker-sync`).
 - A task that fails twice returns to Backlog with a `blocked:` line
   referencing the handoff-log entry — never silent retries.
 - Keep the file canonical (this exact layout): the orchestrator edits it via

@@ -10,6 +10,13 @@ and its tracker (intake): new tracker items import as `scope: triage` Backlog
 tasks blocked until a human scopes them; task status pushes out as tracker
 state + comment. Conflicts are reported, never auto-resolved.
 
+`## Done` in `tasks.md` is a transient holding area for ref'd tasks, not a
+permanent log — the orchestrator moves a completed task there only because a
+tracker item still needs the `done` push. Once that push lands (or the
+tracker was already `done`), this skill prunes the task's line from `tasks.md`
+in the same `--apply`; the handoff log's completion entry is the permanent
+record, not this line.
+
 ## Preconditions (DD-11 — one writer at a time)
 
 1. Target has an orchestration `tasks.md` that parses clean.
@@ -39,8 +46,8 @@ tooling is present; else shallow-clone the Agent Base repo (URL in
 node <agent-base>/scripts/tracker-sync.mjs --target /path/to/project
 ```
 
-Present the plan (imports / status updates / conflicts) to the user. Only
-after they confirm:
+Present the plan (imports / status updates / prunes / conflicts) to the user.
+Only after they confirm:
 
 ```
 node <agent-base>/scripts/tracker-sync.mjs --target /path/to/project --apply

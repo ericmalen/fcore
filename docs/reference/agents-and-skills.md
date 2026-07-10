@@ -33,6 +33,7 @@ Run from an open base checkout. Entry skill: `base-orchestrate`.
 | `base-refresh` | Baseline upgrade loop (sync-baseline → audit) |
 | `base-orchestrate` | Orchestration discovery + generation entry |
 | `validate-setup` | End-to-end setup qualification |
+| `validate-orchestration` | End-to-end orchestration behavior qualification (routing, completion protocol) — live sessions, not the unit test suite |
 
 ## Installed at setup (every target)
 

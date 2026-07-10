@@ -245,9 +245,9 @@ lifecycle for a new project is:
      file(s) and reports the count. A hand-edited orphan blocks first, as a
      USER-EDIT conflict, same as any other generated file.
    - **Untouched:** living state — `tasks.md`, `handoff-log.jsonl`,
-     `checklists/`, the `AGENTS.md` routing region — is never
-     manifest-tracked, so a re-run never touches it even when the agent that
-     owned a checklist is dropped.
+     `docs/orchestration/runs/`, `checklists/`, the `AGENTS.md` routing
+     region — is never manifest-tracked, so a re-run never touches it even
+     when the agent that owned a checklist is dropped.
 
 Before re-running, it's worth checking for drift first (`drift-checker` from
 the base checkout) so any TEMPLATE-DRIFT or USER-EDIT surfaces before you
@@ -265,7 +265,7 @@ once orchestration surfaces exist:
 | `retro` | Turn bugs/review findings into checklist items |
 | `log-report` | Summarize `handoff-log.jsonl` (failure rates, duration) |
 | `eval-runner` | Run golden evals for generated agents |
-| `tracker-sync` | Sync `tasks.md` with ADO work items / GitHub Issues (intake in, status out) |
+| `tracker-sync` | Sync `tasks.md` with ADO work items / GitHub Issues (intake in, status out); prunes synced `## Done` items |
 
 See [Lifecycle maintenance](#lifecycle-maintenance) below.
 
@@ -299,11 +299,18 @@ code-reviewer agent references this list on subsequent runs.
 
 **Log report (`log-report`):** parse `handoff-log.jsonl` for per-agent
 dispatch counts, failure rates, and duration. Flags agents with failure rate
-> 20% or high turn utilization.
+> 20% or high turn utilization. Completion entries (a task's permanent
+completion record, appended once `tasks.md` prunes its `## Done` line) are
+counted separately, not folded into per-agent stats.
 
 **Eval runner (`eval-runner`):** smoke tier (1×) after template edits; release
 tier (5×, pass ≥ 4/5) before Agent Base distribution. Goldens live in
-`docs/orchestration/evals/<agent>/`.
+`docs/orchestration/evals/<agent>/`, plus `evals/routing/` — main-loop
+routing-decision goldens (does a request get deferred to the fleet?),
+required whenever `routing_policy` is `always` or `threshold`. Agent Base
+maintainers qualifying a routing- or completion-protocol change end to end
+(not per-target) use `validate-orchestration` instead — it builds a fixture,
+runs these goldens as real sessions, and reports to `reports/`.
 
 **Triage:** route recurring issues per
 [`triage-rules`](../../templates/orchestration/docs/triage-rules.md) —

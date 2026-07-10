@@ -38,12 +38,48 @@ for (const a of [...bp.specialists, bp.orchestrator]) {
   if (n < a.evalRequirements.minGoldens) { bad = true; console.log(`BELOW-QUOTA ${a.name}: ${n}/${a.evalRequirements.minGoldens} goldens`); }
   else console.log(`ok ${a.name}: ${n}/${a.evalRequirements.minGoldens}`);
 }
+const policy = bp.dispatch_rules?.routing_policy;
+if (policy === "always" || policy === "threshold") {
+  const dir = "docs/orchestration/evals/routing";
+  const n = existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith(".json")).length : 0;
+  if (n < 2) { bad = true; console.log(`BELOW-QUOTA routing: ${n}/2 goldens`); }
+  else console.log(`ok routing: ${n}/2`);
+}
 process.exit(bad ? 1 : 0);
 '
 ```
 
 Flag every BELOW-QUOTA agent in the report. Quota gaps block the release
 tier; the smoke tier still runs whatever goldens exist.
+
+## Routing goldens (R-56)
+
+A separate golden class at `<target>/docs/orchestration/evals/routing/` —
+same `{task, expectedProperties}` shape, but the agent under test is the
+**main loop**, not a generated agent: does it defer to the fleet when the
+routing region says to? `"routing"` is a reserved agent name
+(`validateBlueprint` rejects it), so this dir never collides with a real
+agent's eval dir.
+
+Required whenever `docs/orchestration/blueprint.json`'s
+`dispatch_rules.routing_policy` is `always` or `threshold` — at least 2
+goldens: one request that should qualify (defer to `tasks.md` +
+`feature-orchestrator`) and one that should not (proceed inline). `manual`
+policy emits no routing region, so routing goldens are exempt.
+
+Run each golden from the scratch copy's root, same mutation-isolation rule
+as above, but invoke the MAIN LOOP, not a named agent — no `--agent` flag, so
+`AGENTS.md` (carrying the routing region) loads normally:
+
+```
+claude -p "<task from the golden>" --max-turns <small cap> --allowedTools <a conservative set — this must not actually execute the whole orchestration>
+```
+
+Judge from the transcript plus `git diff <base>`, same as agent goldens.
+Affected-set rule for the smoke tier: routing goldens are affected whenever
+`renderOrchestrationRouting` (`scripts/lib/orchestration/scaffold.mjs`), the
+orchestrator template's `description:`, or the rendered AGENTS.md region
+changes.
 
 ## Tiers
 
@@ -91,7 +127,7 @@ Judge only what the property states; never grade against a remembered
 
 ## Report
 
-One table per agent:
+One table per agent, plus one for `routing` when routing goldens ran:
 
 | golden | runs | passes | verdict |
 |---|---|---|---|

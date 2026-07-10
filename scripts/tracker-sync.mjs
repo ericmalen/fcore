@@ -36,7 +36,7 @@ import { parseTasksMd, renderTasksMd } from './lib/orchestration/parse-tasks.mjs
 import {
   validateSyncPlan, validateTaskBacklog, validateTrackerSyncConfig,
 } from './lib/orchestration/schemas.mjs';
-import { applyImports, computeSyncPlan, renderSyncReport } from './lib/orchestration/tracker-sync.mjs';
+import { applyImports, applyPrunes, computeSyncPlan, renderSyncReport } from './lib/orchestration/tracker-sync.mjs';
 import * as ado from './lib/orchestration/tracker-ado.mjs';
 import * as gh from './lib/orchestration/tracker-gh.mjs';
 
@@ -139,28 +139,37 @@ if (!opt.apply) {
   process.exit(plan.conflicts.length ? 1 : 0);
 }
 
-// Writes: imports into tasks.md (parse → mutate → render → validate → write),
-// then status pushes to the tracker. Offline mode writes tasks.md only.
-if (plan.imports.length) {
-  const next = applyImports(doc, plan.imports);
-  const backlogErrors = validateTaskBacklog(next);
-  if (backlogErrors.length) fail(`refusing to write tasks.md — result invalid:\n  ${backlogErrors.join('\n  ')}`);
-  writeFileSync(tasksPath, renderTasksMd(next));
-}
-
+// Push first, so a Done task needing a push to reach `done` is only pruned
+// once that push actually succeeds — plan.prunes alone (pre-push) covers just
+// the already-synced case, safe under offline mode too since no push was
+// needed there.
 let pushed = 0;
+const confirmedPrunes = [...plan.prunes];
 if (!offline) {
   for (const update of plan.statusUpdates) {
     if (platform === 'ado') await ado.pushUpdate(adoCtx, update);
     else gh.pushUpdate({ cwd: opt.target }, update);
     pushed += 1;
+    if (update.to === 'done') confirmedPrunes.push(update.taskId);
   }
 }
 
+// Writes: imports + confirmed prunes into tasks.md (parse → mutate → render
+// → validate → write). Done is a transient holding area for ref'd tasks
+// awaiting sync; the handoff log's completion entry is the permanent record.
+if (plan.imports.length || confirmedPrunes.length) {
+  let next = doc;
+  if (plan.imports.length) next = applyImports(next, plan.imports);
+  if (confirmedPrunes.length) next = applyPrunes(next, confirmedPrunes);
+  const backlogErrors = validateTaskBacklog(next);
+  if (backlogErrors.length) fail(`refusing to write tasks.md — result invalid:\n  ${backlogErrors.join('\n  ')}`);
+  writeFileSync(tasksPath, renderTasksMd(next));
+}
+
 if (opt.json) {
-  process.stdout.write(JSON.stringify({ ...plan, applied: true, pushed, offline }, null, 2) + '\n');
+  process.stdout.write(JSON.stringify({ ...plan, prunes: confirmedPrunes, applied: true, pushed, offline }, null, 2) + '\n');
 } else {
-  process.stdout.write(renderSyncReport(plan));
-  process.stdout.write(`applied: ${plan.imports.length} import(s) written to tasks.md, ${pushed} update(s) pushed${offline ? ' (offline — pushes skipped)' : ''}\n`);
+  process.stdout.write(renderSyncReport({ ...plan, prunes: confirmedPrunes }));
+  process.stdout.write(`applied: ${plan.imports.length} import(s), ${confirmedPrunes.length} prune(s) written to tasks.md, ${pushed} update(s) pushed${offline ? ' (offline — pushes skipped)' : ''}\n`);
 }
 process.exit(plan.conflicts.length ? 1 : 0);

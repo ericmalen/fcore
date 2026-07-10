@@ -16,9 +16,15 @@ targets; link from your team's internal docs if needed.
 | `decisions.json` + `decisions.md` | interview / renderer | team policy (the `.md` is rendered — never hand-edit) |
 | `blueprint.json` | synthesis | which agents exist, with what slots and limits |
 | `generation-manifest.json` | scaffolder | every generated file: template id, pinned version, content SHA |
-| `handoff-log.jsonl` | orchestrator (single writer) | one entry per dispatch/return |
+| `handoff-log.jsonl` | orchestrator (single writer) | one entry per dispatch/return, plus a permanent completion entry per finished task |
+| `runs/<task-id>/` | dispatched specialists | ephemeral per-task outputs (screenshots, transcripts); gitignored, deleted by the orchestrator at task completion |
 | `checklists/review-checklist.md` | retro flywheel | accumulated review checks |
 | `evals/<agent>/` | eval goldens | expected-properties checks per agent |
+| `evals/routing/` | eval goldens | main-loop routing-decision checks (does the fleet get dispatched?) |
+
+`tasks.md`'s `## Done` section is transient, not a permanent log: a completed
+task is pruned once its completion is logged here — see `tasks-format.md` and
+`handoff-logging.md`.
 
 ## Updating generated assets
 

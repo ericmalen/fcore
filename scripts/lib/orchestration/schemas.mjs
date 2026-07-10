@@ -188,6 +188,10 @@ function checkAgentConfig(agent, where, e) {
     return;
   }
   if (!isNonEmptyString(agent.name)) e(`${where}.name must be a non-empty string`);
+  // "routing" is reserved for the main-loop routing-decision eval dir
+  // (docs/orchestration/evals/routing/, R-56) — no generated agent may claim
+  // it, or its goldens would collide with an agent's own eval dir.
+  if (agent.name === 'routing') e(`${where}.name "routing" is reserved (docs/orchestration/evals/routing/)`);
   if (!isNonEmptyString(agent.templateId)) e(`${where}.templateId must be a non-empty string`);
   // Version pins live in the generation manifest, never in the blueprint —
   // deliberate tripwire, not generic unknown-key rejection (DD-13).
@@ -467,6 +471,38 @@ export function validateGenerationManifest(manifest) {
 // ── handoff-log (A5) ────────────────────────────────────────────────────────
 
 const HANDOFF_STATUSES = new Set(['success', 'failed', 'blocked']);
+const DISPATCH_ONLY_FIELDS = [
+  'to_agent', 'artifacts', 'decision_summary', 'duration_ms', 'status',
+  'retry_count', 'failure_reason', 'model', 'turns_used', 'turn_limit',
+];
+
+// A completion entry (R-56 area): the permanent record of a task's
+// completion, appended once — after the review gate and commit — right
+// before the orchestrator prunes the task's transient Done line from
+// tasks.md. Distinguished from a dispatch entry by `event: "completion"`;
+// dispatch entries omit `event` (back-compat with entries written before
+// this discriminator existed).
+function validateCompletionEntry(entry) {
+  const errors = [];
+  const e = (m) => errors.push(m);
+
+  if (!isNonEmptyString(entry.timestamp) || Number.isNaN(Date.parse(entry.timestamp))) {
+    e(`timestamp must be an ISO 8601 string (got ${entry.timestamp})`);
+  }
+  if (!isNonEmptyString(entry.from_agent)) e('from_agent must be a non-empty string');
+  if (typeof entry.task_id !== 'string' || !TASK_ID_RE.test(entry.task_id)) {
+    e(`task_id must match T-### (got ${entry.task_id})`);
+  }
+  if (!isNonEmptyString(entry.title)) e('title must be a non-empty string');
+  checkStringArray(entry.scope, 'scope', e);
+  if (Array.isArray(entry.scope) && entry.scope.length === 0) e('scope must be a non-empty array');
+  if (!isNonEmptyString(entry.commit)) e('commit must be a non-empty string');
+  for (const field of DISPATCH_ONLY_FIELDS) {
+    if (field in entry) e(`${field} is a dispatch-entry field and must not appear on a completion entry`);
+  }
+
+  return errors;
+}
 
 // Validates ONE handoff-log.jsonl entry (the orchestrator appends one entry
 // per dispatch/return, DD-11). `model`, `turns_used`, `turn_limit` stay
@@ -474,6 +510,12 @@ const HANDOFF_STATUSES = new Set(['success', 'failed', 'blocked']);
 // snake_case throughout, matching dispatch_rules (§9.3).
 export function validateHandoffLog(entry) {
   if (!isPlainObject(entry)) return ['handoff-log entry must be an object'];
+
+  if ('event' in entry && entry.event !== 'completion') {
+    return [`event must be "completion" when present (got ${entry.event}) — dispatch entries omit it`];
+  }
+  if (entry.event === 'completion') return validateCompletionEntry(entry);
+
   const errors = [];
   const e = (m) => errors.push(m);
 
@@ -581,6 +623,16 @@ export function validateSyncPlan(plan) {
         e(`${where}.kind must be one of ${[...SYNC_CONFLICT_KINDS].join(' | ')} (got ${c.kind})`);
       }
       if (!isNonEmptyString(c.detail)) e(`${where}.detail must be a non-empty string`);
+    });
+  }
+
+  if (!Array.isArray(plan.prunes)) {
+    e('prunes must be an array');
+  } else {
+    plan.prunes.forEach((id, i) => {
+      if (typeof id !== 'string' || !TASK_ID_RE.test(id)) {
+        e(`prunes[${i}] must match T-### (got ${id})`);
+      }
     });
   }
 
