@@ -48,5 +48,10 @@ finding); `.setup/report.md` is current.
    (tier, `.claude/docs-paths.json`, hooks) stays OFF until they run `docs
    setup` — point them there as the recommended next step (it needs human
    tier confirmation, so setup never runs it automatically).
+   And point them at the lifecycle beyond that: run `base-check` routinely;
+   orchestration is available later, once the repo has a code layer with
+   tests, via the marker-derived `npx …#<pin> orchestrate` — it is
+   deliberately not installed here. The in-project map is the installed
+   base-check skill's `references/lifecycle.md`.
 
 Abort at any point: `git checkout main && git branch -D agent-base-setup`.

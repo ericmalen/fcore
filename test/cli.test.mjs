@@ -22,6 +22,8 @@ test('cli: --help prints command surface, exit 0', () => {
   for (const cmd of ['setup', 'orchestrate', 'refresh', 'install', 'audit', 'sync', 'tracker-sync', 'starter', 'headless-guard', 'cache', 'skills']) {
     assert.match(r.stdout, new RegExp(`\\b${cmd}\\b`), `help mentions ${cmd}`);
   }
+  assert.match(r.stdout, /EXISTING repository/, 'setup is disambiguated from starter');
+  assert.match(r.stdout, /EMPTY dir/, 'starter is disambiguated from setup');
 });
 
 test('cli: no command prints help, exit 2', () => {

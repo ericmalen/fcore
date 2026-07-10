@@ -65,7 +65,7 @@ exit codes propagate.
 | `audit [--root --json --strict]` | `scripts/audit.mjs` | conformance audit (CI: `audit --root . --strict`) |
 | `sync [--check\|--report\|--upgrade ...]` | `scripts/sync-baseline.mjs` | baseline pin check/upgrade |
 | `tracker-sync [--target --apply ...]` | `scripts/tracker-sync.mjs` | tasks.md ⇄ tracker bridge |
-| `starter <dir> [--git]` | `scripts/build-starter.mjs` | emit a clean starter repo |
+| `starter <dir> [--git]` | `scripts/build-starter.mjs` | emit a clean starter repo — refuses a non-empty `<dir>`; prints next steps |
 | `headless-guard [--root --open-branches <json>]` | `scripts/headless-guard.mjs` | run/skip decision for scheduled orchestrator pipelines; prints `run=`/`reason=`/`task=` lines |
 
 ## Optional skills (`skills`)

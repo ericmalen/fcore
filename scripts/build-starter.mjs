@@ -65,11 +65,15 @@ const files = {
 Started from the agent-base starter — this repo is pre-wired for AI-assisted
 coding with Claude Code and GitHub Copilot (VS Code).
 
-Next steps: fill in AGENTS.md (keep it under two pages), then delete this
-section. If your team uses GitHub.com Copilot code review, set
-\`githubCodeReview: true\` in \`.claude/agent-base.json\` and add a short
-\`.github/copilot-instructions.md\` pointing at AGENTS.md.
-Run the \`base-check\` skill any time to verify conventions.
+Next steps (delete this section when done):
+
+1. Fill in \`AGENTS.md\` — keep it under two pages.
+2. Open Claude Code or Copilot (agent mode) here and run the \`base-check\`
+   skill: it audits the setup and maps the full lifecycle (deep sweeps,
+   optional orchestration, baseline refresh).
+3. If your team uses GitHub.com Copilot code review, set
+   \`githubCodeReview: true\` in \`.claude/agent-base.json\` and add a short
+   \`.github/copilot-instructions.md\` pointing at AGENTS.md.
 `,
 };
 
@@ -107,3 +111,9 @@ if (flags.includes('--git')) {
   g(['-c', 'user.email=starter@agent-base', '-c', 'user.name=agent-base', '-c', 'commit.gpgsign=false', 'commit', '-qm', `chore: agent-base starter (v${baseVersion})`]);
 }
 console.log(`starter → ${target} (v${baseVersion})`);
+console.log('');
+console.log('Next steps:');
+console.log('  1. Fill in AGENTS.md (keep it under two pages).');
+console.log('  2. Open Claude Code or Copilot (agent mode) in the project and run the');
+console.log('     base-check skill — it audits the setup and maps the full lifecycle');
+console.log('     (deep sweep, optional orchestration, baseline refresh).');

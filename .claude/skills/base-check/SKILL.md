@@ -1,6 +1,6 @@
 ---
 name: base-check
-description: Audits this repo's AI configuration against agent-base conventions and fixes findings. Use when checking for drift, when AI-config files changed, or when asked to verify or clean up the AI setup.
+description: Audits this repo's AI configuration against agent-base conventions and fixes findings. Use when checking for drift, when AI-config files changed, or when asked to verify or clean up the AI setup. Also answers "what next" after setup — the project lifecycle: deep sweeps, optional orchestration, baseline refresh.
 ---
 
 # base-check
@@ -47,8 +47,9 @@ hunting for AI instructions buried elsewhere. When asked for a deep check,
 re-run the inventory sweep:
 
 1. `node <scripts>/inventory-extract.mjs --root . --out <tmpdir> --json
-   --allow-dirty` (same location as the audit script; `--out` outside the
-   repo — this run is report-only, it must leave no `.setup/`).
+   --allow-dirty` (same location as the audit script; `--out` must point at a
+   new or empty directory outside the repo — this run is report-only and
+   leaves no `.setup/`; a populated non-`.setup`-shaped dir is refused).
 2. Triage `sweepCandidates`: judge each hit — is it an AI instruction the
    configured surface does not already route? Report findings to the user;
    remedies go through a `base-plan` delta, never ad-hoc moves.
@@ -67,6 +68,14 @@ check.
 When `pin` in the marker is behind the latest compatible release, run
 `sync-baseline --report` then `--upgrade` (documented in Agent Base
 `docs/how-to/baseline-sync.md`). Re-run this audit after syncing.
+
+## Lifecycle — what to do next
+
+Setup is the start, not the end. For the full journey — fill AGENTS.md →
+routine base-check → occasional deep sweep → optional orchestration once a
+code layer with tests exists → baseline refresh — see
+[the lifecycle map](references/lifecycle.md). Every Agent Base command in it
+derives from `toolRepo` + `pin` in `.claude/agent-base.json`.
 
 ## Judgment rules (required when instruction files changed)
 

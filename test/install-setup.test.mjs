@@ -29,14 +29,18 @@ test('install-setup ships base-check verbatim from .claude/skills', () => {
 
     const skill = '.claude/skills/base-check/SKILL.md';
     const rubric = '.claude/skills/base-check/references/rubric.md';
+    const lifecycle = '.claude/skills/base-check/references/lifecycle.md';
     assert.ok(existsSync(join(target, skill)), 'SKILL.md installed');
     assert.ok(existsSync(join(target, rubric)), 'rubric.md installed');
+    assert.ok(existsSync(join(target, lifecycle)), 'lifecycle.md installed');
 
     // byte-identical to the source of truth under Agent Base's .claude/skills
     assert.equal(readFileSync(join(target, skill), 'utf8'),
       readFileSync(join(BASE, skill), 'utf8'), 'SKILL.md matches Agent Base source');
     assert.equal(readFileSync(join(target, rubric), 'utf8'),
       readFileSync(join(BASE, rubric), 'utf8'), 'rubric.md matches Agent Base source');
+    assert.equal(readFileSync(join(target, lifecycle), 'utf8'),
+      readFileSync(join(BASE, lifecycle), 'utf8'), 'lifecycle.md matches Agent Base source');
   } finally {
     rmSync(target, { recursive: true, force: true });
   }

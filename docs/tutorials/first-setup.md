@@ -101,3 +101,5 @@ baseline release — see [baseline sync](../how-to/baseline-sync.md).
 - [CLI reference](../reference/agent-base-cli.md) — every `agent-base` command.
 - [Terminology](../reference/terminology.md) — canonical vocabulary.
 - [Workflow tips](../how-to/workflow-tips.md) — practical day-to-day guidance.
+- [Orchestration guide](../how-to/orchestration-guide.md) — optional, once
+  your repo has its first tested code layer.

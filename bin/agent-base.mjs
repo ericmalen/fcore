@@ -49,7 +49,8 @@ Usage: agent-base <command> [args]
 Bootstrap (stages this release, then launches \`claude\` in the project;
 without the Claude CLI it drops a one-shot /agent-base-bootstrap launcher
 skill into the project and prints the prompt to paste):
-  setup [path]            agent-base setup of a repository (base-setup)
+  setup [path]            agent-base setup of an EXISTING repository (base-setup)
+                          — for a brand-new empty repo, use starter instead
   orchestrate [path]      generate repo-specific orchestration (base-orchestrate)
   refresh [path]          upgrade a project's baseline pin (base-refresh)
   flags: --no-launch      never spawn claude (drop launcher + print)
@@ -60,7 +61,8 @@ Deterministic (delegates to the matching scripts/ entry point):
   audit [--root --json --strict]
   sync [--root --check|--report|--upgrade ...]   (sync-baseline.mjs)
   tracker-sync [--target --apply ...]
-  starter <dir> [--git]   emit a clean starter repo (build-starter.mjs)
+  starter <dir> [--git]   emit a clean starter repo into an EMPTY dir — the
+                          fresh-project path, no AI session needed (build-starter.mjs)
   headless-guard [--root --open-branches <json>]
 
 Optional skills (opt-in lifecycle skills, tracked in the project marker):

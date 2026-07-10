@@ -43,6 +43,7 @@ first-time setup or bringing existing AI config up to the team standard.
 
 ### Set up a project (recommended)
 
+**For an existing repository** — anything with files or history to route.
 From your project, no clone needed:
 
 ```sh
@@ -64,7 +65,8 @@ tool, and run `/base-setup /path/to/project`.
 
 ### Starter project
 
-For a brand-new repo, emit the clean standard layout directly:
+**For a brand-new, empty repo** — nothing to route, so skip setup's AI
+session entirely and emit the clean standard layout directly:
 
 ```sh
 npx github:ericmalen/agent-base#v1.2.1 starter /path/to/new-repo --git
@@ -72,7 +74,8 @@ npx github:ericmalen/agent-base#v1.2.1 starter /path/to/new-repo --git
 ```
 
 The starter includes the same permanent baseline (skills + docs-auditor agent)
-as a full setup.
+as a full setup. Either path ends the same way: run the installed
+`base-check` skill any time for drift checks and the full lifecycle map.
 
 ### Check for drift later
 

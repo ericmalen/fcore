@@ -24,10 +24,13 @@ test('starter build: empty dir → exit 0, files written, version printed', () =
     const r = run([target]);
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, new RegExp(`starter → .+ \\(v${BASE_VERSION.replaceAll('.', '\\.')}\\)`));
+    assert.match(r.stdout, /Next steps:/);
+    assert.match(r.stdout, /base-check/);
     for (const rel of [
       'AGENTS.md', 'CLAUDE.md', '.gitignore', 'README.md',
       '.claude/settings.json', '.vscode/settings.json',
       '.claude/skills/README.md', '.claude/skills/base-check/SKILL.md',
+      '.claude/skills/base-check/references/lifecycle.md',
       '.claude/agent-base.json',
     ]) {
       assert.ok(existsSync(join(target, rel)), `starter ships ${rel}`);
@@ -35,6 +38,9 @@ test('starter build: empty dir → exit 0, files written, version printed', () =
     const marker = JSON.parse(readFileSync(join(target, '.claude/agent-base.json'), 'utf8'));
     assert.equal(marker.standard, BASE_VERSION);
     assert.equal(marker.githubCodeReview, false);
+    const readme = readFileSync(join(target, 'README.md'), 'utf8');
+    assert.match(readme, /AGENTS\.md/);
+    assert.match(readme, /base-check/);
   } finally {
     rmSync(target, { recursive: true, force: true });
   }

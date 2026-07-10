@@ -3,14 +3,18 @@
 // Pure mechanics, no classification beyond the enumerated surface
 // list; everything else is sweep-candidate triage for the AI plan phase.
 //
-// Usage: node scripts/inventory-extract.mjs [--root <dir>] [--allow-dirty]
-//                                           [--include <paths>] [--json]
-// Output always lands in <root>/.setup/ — apply/check/report hardcode that
-// path, so it is not configurable here either.
+// Usage: node scripts/inventory-extract.mjs [--root <dir>] [--out <dir>]
+//                                           [--allow-dirty] [--include <paths>] [--json]
+// --out defaults to .setup (resolved against --root). apply/check/report
+// hardcode <root>/.setup/, so pointing --out elsewhere is only useful for
+// report-only runs (e.g. base-check's deep sweep) that must leave the repo
+// clean. An out-of-root dir is only accepted if it's new, empty, or looks
+// like a previous inventory-extract output — never an arbitrary populated
+// directory (it gets wiped).
 // Exit codes: 0 ok · 1 precondition failed · 2 internal error
 
 import { spawnSync } from 'node:child_process';
-import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync, readdirSync } from 'node:fs';
 import { join, resolve, sep, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { extractFile, extractImports, sweepFile, isBinary, classifySurface } from './lib/extract.mjs';
@@ -76,12 +80,25 @@ export function runInventory({ root, outDir, allowDirty = false, include = [] })
     }
   }
 
-  // The out dir is wiped wholesale below — refuse anything that is not a
-  // strict subdirectory of root (outDir "." would delete the repo, ".git"
-  // included; ".." or an absolute path, worse).
+  // The out dir is wiped wholesale below. A strict subdirectory of root
+  // (e.g. the default .setup) is always fine. root itself or an ancestor of
+  // root would take the repo (and .git) with it — always refused. An
+  // out-of-root dir (report-only runs, e.g. base-check's deep sweep) is
+  // refused unless it's new, empty, or looks like a previous
+  // inventory-extract output — so a rerun into the same scratch dir is
+  // idempotent, but an arbitrary populated directory is never wiped.
   const outAbs = resolve(root, outDir);
-  if (outAbs === root || !outAbs.startsWith(root + sep)) {
-    throw new Error(`outDir must resolve to a subdirectory of the repo root (got "${outDir}")`);
+  const isSubdirOfRoot = outAbs !== root && outAbs.startsWith(root + sep);
+  const isRootOrAncestor = outAbs === root || root.startsWith(outAbs + sep);
+  if (isRootOrAncestor) {
+    throw new Error(`outDir must not be the repo root or an ancestor of it (got "${outDir}")`);
+  }
+  if (!isSubdirOfRoot && existsSync(outAbs)) {
+    const entries = readdirSync(outAbs);
+    const looksLikePriorOutput = entries.includes('inventory.json') && entries.every((e) => e === 'inventory.json' || e === 'nodes');
+    if (entries.length > 0 && !looksLikePriorOutput) {
+      throw new Error(`refusing to wipe non-empty outDir that is not a previous inventory-extract output: ${outAbs}`);
+    }
   }
   rmSync(outAbs, { recursive: true, force: true });
   mkdirSync(join(outAbs, 'nodes'), { recursive: true });
@@ -218,6 +235,7 @@ if (isMain) {
   const opt = { root: process.cwd(), out: '.setup', allowDirty: false, json: false, include: [] };
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--root') opt.root = flagValue(args, i++, '--root', fail);
+    else if (args[i] === '--out') opt.out = flagValue(args, i++, '--out', fail);
     else if (args[i] === '--allow-dirty') opt.allowDirty = true;
     else if (args[i] === '--json') opt.json = true;
     else if (args[i] === '--include') opt.include.push(...(args[++i] ?? '').split(',').filter(Boolean));

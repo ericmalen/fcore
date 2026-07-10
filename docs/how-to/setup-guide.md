@@ -111,7 +111,15 @@ your repo is untouched until YOU merge.
 - `base-check` (installed skill) is your drift checker — run it any time.
   It stays after merge alongside the rest of the permanent baseline: the
   `docs`, `git-conventions`, `skill-creator`, and `agent-creator` skills and
-  the `docs-auditor` agent.
+  the `docs-auditor` agent. Its `references/lifecycle.md` is the full
+  in-project "what next" map (deep sweeps, orchestration, refresh).
+- Orchestration (a generated multi-agent team + `tasks.md` backlog) is
+  **optional and evidence-driven** — most projects never need it. Once the
+  repo has a code layer with a test command:
+  `npx github:ericmalen/agent-base#<pin> orchestrate` (pin from
+  `.claude/agent-base.json`). It runs Agent Base-side and is deliberately
+  not installed into the project. See
+  [orchestration-guide](./orchestration-guide.md).
 - The orchestration lifecycle skills `retro`, `log-report`, `eval-runner`,
   and `tracker-sync` are optional (R-55) — not installed by default. Add any
   with `agent-base skills add <name>` (list with `agent-base skills list`);

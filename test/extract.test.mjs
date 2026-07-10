@@ -289,17 +289,45 @@ test('integration: inventory over a small existing project repo', () => {
   }
 });
 
-test('runInventory: outDir outside (or equal to) root is refused before the wipe', () => {
+test('runInventory: outDir equal to or an ancestor of root is always refused', () => {
   const repo = makeRepo({ 'AGENTS.md': '# X\nrules\n' });
   try {
-    for (const outDir of ['.', '..', '/tmp/abs-out', 'a/../..']) {
+    for (const outDir of ['.', '..', 'a/../..']) {
       assert.throws(
         () => runInventory({ root: repo, outDir, allowDirty: true }),
-        /outDir must resolve to a subdirectory/);
+        /outDir must not be the repo root or an ancestor/);
     }
     assert.ok(runInventory({ root: repo, outDir: '.setup', allowDirty: true }));
   } finally {
     rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test('runInventory: out-of-root outDir is allowed when new/empty, refused when populated', () => {
+  const repo = makeRepo({ 'AGENTS.md': '# X\nrules\n' });
+  const scratchParent = mkdtempSync(join(tmpdir(), 'aikit-extract-out-'));
+  const freshOut = join(scratchParent, 'sweep-report');
+  try {
+    // new (nonexistent) out-of-root dir: succeeds, leaves no <root>/.setup
+    const inv = runInventory({ root: repo, outDir: freshOut, allowDirty: true });
+    assert.ok(inv.stats);
+    assert.equal(existsSync(join(repo, '.setup')), false);
+    assert.ok(existsSync(join(freshOut, 'inventory.json')));
+
+    // rerun into the same (now prior-output-shaped) dir: idempotent, not refused
+    assert.ok(runInventory({ root: repo, outDir: freshOut, allowDirty: true }));
+
+    // a populated dir that isn't a prior inventory-extract output: refused, never wiped
+    const populated = join(scratchParent, 'populated');
+    mkdirSync(populated, { recursive: true });
+    writeFileSync(join(populated, 'unrelated.txt'), 'do not delete me\n');
+    assert.throws(
+      () => runInventory({ root: repo, outDir: populated, allowDirty: true }),
+      /refusing to wipe non-empty outDir/);
+    assert.ok(existsSync(join(populated, 'unrelated.txt')), 'populated dir must survive the refused run');
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+    rmSync(scratchParent, { recursive: true, force: true });
   }
 });
 
@@ -321,6 +349,30 @@ test('integration: dirty tree fails precondition, --allow-dirty bypasses', () =>
     assert.ok(existsSync(join(repo, '.setup', 'inventory.json')));
   } finally {
     rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test('cli: --out writes report-only outside the repo, leaving no <root>/.setup', () => {
+  const repo = makeRepo({ 'AGENTS.md': '# X\nrules\n' });
+  const scratch = mkdtempSync(join(tmpdir(), 'aikit-extract-cli-out-'));
+  const reportDir = join(scratch, 'report');
+  try {
+    const r = spawnSync(process.execPath, [
+      join(process.cwd(), 'scripts', 'inventory-extract.mjs'),
+      '--root', repo, '--out', reportDir, '--allow-dirty',
+    ], { encoding: 'utf8' });
+    assert.equal(r.status, 0, r.stderr);
+    assert.ok(existsSync(join(reportDir, 'inventory.json')));
+    assert.equal(existsSync(join(repo, '.setup')), false);
+
+    const missingValue = spawnSync(process.execPath, [
+      join(process.cwd(), 'scripts', 'inventory-extract.mjs'), '--root', repo, '--out',
+    ], { encoding: 'utf8' });
+    assert.equal(missingValue.status, 1);
+    assert.match(missingValue.stderr, /--out requires a value/);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+    rmSync(scratch, { recursive: true, force: true });
   }
 });
 
