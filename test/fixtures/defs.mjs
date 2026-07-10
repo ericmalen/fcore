@@ -16,7 +16,7 @@
 //       excluded               — paths the git universe must NOT include (array)
 //       mustExtractVerbatim    — substring that must appear verbatim as node bytes
 //   • scripts/validate-assert.mjs (post-setup, run by the validate-setup matrix):
-//       optionalSkills         — R-55: the optional skills base-plan must select;
+//       optionalSkills         — R-55: the optional skills fcore-plan must select;
 //                                validate-assert checks the marker selected
 //                                exactly these and each is installed live.
 // Add a field here only alongside the harness code that reads it (see
@@ -249,7 +249,7 @@ ${S(32, 'fence-guard-tern')} — after the fence.
   },
 
   'optional-skills': {
-    // Exercises the R-55 optional-skill tier end-to-end: base-plan selects the
+    // Exercises the R-55 optional-skill tier end-to-end: fcore-plan selects the
     // skill in expect.optionalSkills, apply installs it, validate-assert checks
     // the marker ⇒ installed invariant and the expected set. Minimal content —
     // its job is the optional selection, not routing volume.
@@ -265,7 +265,7 @@ Unit tests run on every commit; integration tests gated behind a flag.
       'src/index.js': 'export const ok = 1;\n',
     },
     sentinels: [S(50, 'opt-tier-merlin')],
-    expect: { minSurfaces: 1, optionalSkills: ['retro'] },
+    expect: { minSurfaces: 1, optionalSkills: ['checklist-intake'] },
   },
 
   injection: {

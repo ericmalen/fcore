@@ -13,8 +13,8 @@
       "Edit(./.vscode/settings.json)",
       "Write(./.vscode/settings.json)",
       "Edit(./.claude/settings.json)",
-      "Edit(./.claude/agent-base.json)",
-      "Write(./.claude/agent-base.json)"
+      "Edit(./.claude/fcore.json)",
+      "Write(./.claude/fcore.json)"
     ],
     "ask": [],
     "deny": [
@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/skills/docs/scripts/docs-nudge.mjs session-start"
+            "command": "node .claude/skills/docs-manager/scripts/docs-nudge.mjs session-start"
           }
         ]
       }
@@ -38,7 +38,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/skills/docs/scripts/docs-nudge.mjs stop"
+            "command": "node .claude/skills/docs-manager/scripts/docs-nudge.mjs stop"
           }
         ]
       }

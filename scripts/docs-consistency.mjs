@@ -1,14 +1,14 @@
 #!/usr/bin/env node
-// docs-consistency.mjs — relative Markdown links in Agent Base docs must
-// resolve to existing files (Agent Base's own docs are not covered by the
+// docs-consistency.mjs — relative Markdown links in FleetCore docs must
+// resolve to existing files (FleetCore's own docs are not covered by the
 // R-07 audit, which checks set-up-repo surfaces). A link's `#fragment` is also
 // resolved: when the target is a Markdown file, the fragment must match a
 // heading slug (GitHub algorithm) or an explicit HTML `id`/`name` anchor in it.
 //
 // A banned-vocabulary check lived here until June 2026; it was removed after
 // review showed its only catch was a false positive (half the list was
-// rename-shadows of retired ai-kit terms that never existed under the
-// agent-base name).
+// rename-shadows of terms retired in an earlier rebrand that never existed
+// under this repo's current name).
 //
 // Usage: node scripts/docs-consistency.mjs [--root <dir>] [--json]
 // Exit: 0 = clean · 1 = findings · 2 = usage.

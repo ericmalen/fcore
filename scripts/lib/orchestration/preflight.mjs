@@ -1,4 +1,4 @@
-// preflight.mjs — readiness decision for base-orchestrate (fail fast on repos
+// preflight.mjs — readiness decision for fcore-fleet-config (fail fast on repos
 // with no detectable code layer, before discovery burns a phase on them).
 //
 // Cheap heuristic only: full authority for "what are the layers" stays with
@@ -10,8 +10,8 @@
 const NO_TEST_SPECIFIED_RE = /no test specified/i;
 
 const BLOCKED_MESSAGE = 'orchestration needs at least one code layer with a '
-  + 'test command; build your first layer with the agent-base baseline, then '
-  + 're-run /base-orchestrate';
+  + 'test command; build your first layer with the fcore baseline, then '
+  + 're-run /fcore-fleet-config';
 
 export function hasTestSignal(manifest) {
   const test = manifest?.scripts?.test;

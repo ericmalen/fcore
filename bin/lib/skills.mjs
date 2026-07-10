@@ -1,5 +1,5 @@
-// skills.mjs — optional-skill management for the `agent-base skills` command.
-// list / add / remove the opt-in lifecycle skills, copying from a base checkout
+// skills.mjs — optional-skill management for the `fcore skills` command.
+// list / add / remove the opt-in lifecycle skills, copying from a fcore checkout
 // and tracking the selection in the project marker's `optionalSkills`.
 //
 // CLI-only module: lives under bin/lib/, NOT scripts/lib/ (which ships wholesale
@@ -35,16 +35,16 @@ export function listSkills(projectRoot) {
 }
 
 /**
- * Install one optional skill: copy baseRoot/src → projectRoot/dst and record it
+ * Install one optional skill: copy fcoreRoot/src → projectRoot/dst and record it
  * in the marker. Idempotent — a re-add with the dir already present and tracked
  * is a no-op. Returns { name, action: 'added' | 'already' }.
  */
-export function addSkill({ name, projectRoot, baseRoot }) {
+export function addSkill({ name, projectRoot, fcoreRoot }) {
   const skill = optionalByName(name);
   if (!skill) throw new Error(`unknown optional skill: ${name} (valid: ${OPTIONAL_NAMES.join(', ')})`);
 
   const { marker, list } = selected(projectRoot);
-  if (!marker.present) throw new Error('no agent-base marker — set up the project before adding optional skills');
+  if (!marker.present) throw new Error('no fcore marker — set up the project before adding optional skills');
   const errors = validateMarker(marker);
   if (errors.length) throw new Error(`invalid marker: ${errors.join('; ')}`);
   const dstAbs = join(projectRoot, skill.dst);
@@ -52,8 +52,8 @@ export function addSkill({ name, projectRoot, baseRoot }) {
     return { name, action: 'already' };
   }
 
-  const from = join(baseRoot, skill.src);
-  if (!existsSync(from)) throw new Error(`missing in Agent Base checkout: ${skill.src}`);
+  const from = join(fcoreRoot, skill.src);
+  if (!existsSync(from)) throw new Error(`missing in FleetCore checkout: ${skill.src}`);
   assertNoSymlinkComponents(projectRoot, skill.dst);
   mkdirSync(dirname(dstAbs), { recursive: true });
   cpSync(from, dstAbs, { recursive: true });
@@ -73,7 +73,7 @@ export function removeSkill({ name, projectRoot }) {
   if (!skill) throw new Error(`unknown optional skill: ${name} (valid: ${OPTIONAL_NAMES.join(', ')})`);
 
   const { marker, list } = selected(projectRoot);
-  if (!marker.present) throw new Error('no agent-base marker — nothing to manage in this project');
+  if (!marker.present) throw new Error('no fcore marker — nothing to manage in this project');
   const dstAbs = join(projectRoot, skill.dst);
   if (!list.includes(name) && !existsSync(dstAbs)) {
     return { name, action: 'absent' };

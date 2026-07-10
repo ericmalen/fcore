@@ -1,6 +1,6 @@
 ---
 name: structure-detector
-description: Orchestration discovery step B1 — walks a project and identifies its layers/packages, the stack per layer, and test/build commands, producing the structural fields of repo-profile.json. Use when orchestration discovery of a project path begins (typically driven by the repo-analyst agent). Not for agent-base setup inventory and not general code search.
+description: Orchestration discovery step B1 — walks a project and identifies its layers/packages, the stack per layer, and test/build commands, producing the structural fields of repo-profile.json. Use when orchestration discovery of a project path begins (typically driven by the repo-analyst agent). Not for fcore setup inventory and not general code search.
 ---
 
 # structure-detector

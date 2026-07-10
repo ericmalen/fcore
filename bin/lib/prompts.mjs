@@ -6,9 +6,9 @@
 // staged release works the same as an open clone.
 
 const SKILLS = {
-  setup: 'base-setup',
-  orchestrate: 'base-orchestrate',
-  refresh: 'base-refresh',
+  onboard: 'fcore-onboard',
+  'fleet-config': 'fcore-fleet-config',
+  update: 'fcore-update',
 };
 
 export function bootstrapPrompt({ command, checkoutPath, targetPath = '.', dev = false }) {
@@ -16,11 +16,11 @@ export function bootstrapPrompt({ command, checkoutPath, targetPath = '.', dev =
   if (!skill) throw new Error(`no bootstrap prompt for command: ${command}`);
   const skillPath = `${checkoutPath}/.claude/skills/${skill}/SKILL.md`;
   const provenance = dev
-    ? `a local base clone — freshen it first if needed (git -C ${checkoutPath} pull --ff-only)`
+    ? `a local fcore clone — freshen it first if needed (git -C ${checkoutPath} pull --ff-only)`
     : 'an immutable staged release — never `git pull` it';
   return [
     `Read ${skillPath} and execute it for target ${targetPath}.`,
-    `The base checkout is ${checkoutPath} — ${provenance}.`,
+    `The fcore checkout is ${checkoutPath} — ${provenance}.`,
   ].join('\n');
 }
 
@@ -38,7 +38,7 @@ export function launchNotice({ targetPath }) {
   ].join('\n');
 }
 
-/** Fallback output when nothing was launched. `skillDropped` toggles the /agent-base-bootstrap path. */
+/** Fallback output when nothing was launched. `skillDropped` toggles the /fcore-bootstrap path. */
 export function fallbackInstructions({ command, checkoutPath, targetPath, dev, skillDropped }) {
   const lines = ['', 'Setup is staged and ready — it starts when you open it in an AI session.', ''];
   if (skillDropped) {
@@ -46,7 +46,7 @@ export function fallbackInstructions({ command, checkoutPath, targetPath, dev, s
       'Added a one-shot launcher skill to the project (untracked, deletes itself).',
       'Next: open Claude Code or Copilot (agent mode) IN THE PROJECT and type:',
       '',
-      '  /agent-base-bootstrap',
+      '  /fcore-bootstrap',
       '',
       'Or paste this prompt instead:',
       ''

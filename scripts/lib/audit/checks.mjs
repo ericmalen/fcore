@@ -61,7 +61,7 @@ export function checkRootInstructions(ctx) {
     }
   } else if (ciText != null) {
     out.push(F('R-09', 'info', '.github/copilot-instructions.md',
-      'Present, but no recorded code-review stance in the Agent Base marker — record githubCodeReview true/false.'));
+      'Present, but no recorded code-review stance in the FleetCore marker — record githubCodeReview true/false.'));
   }
 
   return out;
@@ -99,7 +99,7 @@ export function checkPathScoping(ctx) {
     : [];
   const nestedAgents = [...walk(root)]
     .filter((p) => basename(p) === 'AGENTS.md' && relative(root, p) !== 'AGENTS.md')
-    // Payload skeletons (agent-base slot/optional markers) are template payload, not
+    // Payload skeletons (fcore slot/optional markers) are template payload, not
     // live config — they neither trigger compat mode nor get audited as nested
     // instructions (spec/rules.md: Audit exemptions).
     .filter((p) => !isPayloadSkeleton(readSafe(p)));
@@ -591,35 +591,35 @@ export function checkHygiene(ctx) {
 
   // R-50 maintenance surface — marker present AND carrying its required fields.
   if (!marker.present) {
-    out.push(F('R-50', 'warning', '.claude/agent-base.json', 'Agent Base marker missing — record standard version, setupAt, githubCodeReview.'));
+    out.push(F('R-50', 'warning', '.claude/fcore.json', 'FleetCore marker missing — record standard version, setupAt, githubCodeReview.'));
   } else if (marker.invalid) {
-    out.push(F('R-50', 'warning', '.claude/agent-base.json', 'Agent Base marker is not valid JSON — re-record standard, setupAt, githubCodeReview.'));
+    out.push(F('R-50', 'warning', '.claude/fcore.json', 'FleetCore marker is not valid JSON — re-record standard, setupAt, githubCodeReview.'));
   } else {
     const missing = ['standard', 'toolRepo', 'setupAt', 'githubCodeReview'].filter((k) => marker[k] === undefined);
     if (missing.length > 0) {
-      out.push(F('R-50', 'warning', '.claude/agent-base.json', `Agent Base marker missing required field(s): ${missing.join(', ')}.`));
+      out.push(F('R-50', 'warning', '.claude/fcore.json', `FleetCore marker missing required field(s): ${missing.join(', ')}.`));
     }
     if (marker.standard != null && !/^\d+\.\d+\.\d+/.test(String(marker.standard))) {
-      out.push(F('R-50', 'warning', '.claude/agent-base.json', 'standard should be semver (e.g. 1.4.0), not a git sha.'));
+      out.push(F('R-50', 'warning', '.claude/fcore.json', 'standard should be semver (e.g. 1.4.0), not a git sha.'));
     }
     for (const k of ['pin', 'lastSyncedAt']) {
       if (marker[k] === undefined) {
-        out.push(F('R-50', 'info', '.claude/agent-base.json', `Release pin field "${k}" missing — add for baseline sync (sync-baseline).`));
+        out.push(F('R-50', 'info', '.claude/fcore.json', `Release pin field "${k}" missing — add for baseline sync (sync-baseline).`));
       }
     }
     // R-55: optional lifecycle skills listed in the marker must be installed.
     if (Array.isArray(marker.optionalSkills)) {
       for (const name of marker.optionalSkills) {
         if (!OPTIONAL_NAMES.includes(name)) {
-          out.push(F('R-55', 'info', '.claude/agent-base.json', `optionalSkills lists unknown skill "${name}" — must be one of: ${OPTIONAL_NAMES.join(', ')}.`));
+          out.push(F('R-55', 'info', '.claude/fcore.json', `optionalSkills lists unknown skill "${name}" — must be one of: ${OPTIONAL_NAMES.join(', ')}.`));
         } else if (!exists(join(root, '.claude', 'skills', name, 'SKILL.md'))) {
-          out.push(F('R-55', 'info', `.claude/skills/${name}`, `optionalSkills lists "${name}" but the skill is not installed — run \`agent-base skills add ${name}\` or remove it from the marker.`));
+          out.push(F('R-55', 'info', `.claude/skills/${name}`, `optionalSkills lists "${name}" but the skill is not installed — run \`fcore skills add ${name}\` or remove it from the marker.`));
         }
       }
     }
   }
-  if (!exists(join(root, '.claude', 'skills', 'base-check', 'SKILL.md'))) {
-    out.push(F('R-50', 'warning', '.claude/skills/base-check', 'Permanent base-check skill is not installed (after setup drift surface).'));
+  if (!exists(join(root, '.claude', 'skills', 'fcore-check', 'SKILL.md'))) {
+    out.push(F('R-50', 'warning', '.claude/skills/fcore-check', 'Permanent fcore-check skill is not installed (after setup drift surface).'));
   }
 
   return out;

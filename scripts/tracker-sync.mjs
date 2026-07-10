@@ -7,7 +7,7 @@
 // and left for a human. DRY-RUN IS THE DEFAULT — nothing is written without
 // --apply.
 //
-// Usage (from a base clone or installed scripts/):
+// Usage (from a fcore clone or installed scripts/):
 //   node tracker-sync.mjs --target /path/to/project            # dry-run plan
 //   node tracker-sync.mjs --target /path/to/project --apply    # write + push
 //

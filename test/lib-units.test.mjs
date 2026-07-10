@@ -18,13 +18,13 @@ test('validateShape: canonical manifest exercising every op validates clean', ()
       { file: 'KEEP.md', op: 'keep-file' },
       { node: 'n0003', op: 'drop', reason: 'duplicates AGENTS.md' },
       { node: 'n0004', op: 'merge', literal: 'merged text', target: 'CLAUDE.md' },
-      { node: 'n0005', op: 'supersede', catalogSkill: 'docs' },
+      { node: 'n0005', op: 'supersede', catalogSkill: 'docs-manager' },
       { file: 'NOTES.txt', op: 'out-of-scope', reason: 'human-only notes' },
     ],
     jsonMerges: [{ file: '.vscode/settings.json', base: 'templates/settings/vscode.json' }],
     installs: [
       { file: '.claude/settings.json', template: 'templates/settings/claude.json' },
-      { file: '.claude/agent-base.json', literal: '{}' },
+      { file: '.claude/fcore.json', literal: '{}' },
     ],
   };
   assert.deepEqual(validateShape(manifest), []);
@@ -106,7 +106,7 @@ test('validateShape: catalogSkill must be a bare skill name', () => {
       { node: 'n2', op: 'supersede', catalogSkill: 'a/b' },
       { node: 'n3', op: 'supersede', catalogSkill: 'a\\b' },
       { node: 'n4', op: 'supersede', catalogSkill: '..' },
-      { node: 'n5', op: 'supersede', catalogSkill: 'docs' }, // valid
+      { node: 'n5', op: 'supersede', catalogSkill: 'docs-manager' }, // valid
     ] }),
     [msg(0, '../escape'), msg(1, 'a/b'), msg(2, 'a\\b'), msg(3, '..')]);
 });
@@ -176,18 +176,18 @@ test('validateShape: jsonMerges and installs shapes', () => {
   };
   assert.deepEqual(validateShape(manifest), [
     'jsonMerges[0]: requires "file"',
-    'jsonMerges[0]: requires "base" (Agent Base template path)',
+    'jsonMerges[0]: requires "base" (FleetCore template path)',
     'installs[0]: requires "file"',
     'installs[0]: requires "template" or "literal"',
     'installs[1]: "template" and "literal" are mutually exclusive',
   ]);
 });
 
-test('isAllowedTarget: Agent Base-canonical and AI-surface targets pass, code paths do not', () => {
-  // Agent Base-canonical target patterns
+test('isAllowedTarget: FleetCore-canonical and AI-surface targets pass, code paths do not', () => {
+  // FleetCore-canonical target patterns
   assert.equal(isAllowedTarget('AGENTS.md'), true);
   assert.equal(isAllowedTarget('packages/api/AGENTS.md'), true); // nested compat
-  assert.equal(isAllowedTarget('.claude/skills/docs/SKILL.md'), true);
+  assert.equal(isAllowedTarget('.claude/skills/docs-manager/SKILL.md'), true);
   assert.equal(isAllowedTarget('docs/ai/overview.md'), true);
   // recognized AI-config surfaces (via classifySurface)
   assert.equal(isAllowedTarget('.cursorrules'), true);

@@ -1,6 +1,6 @@
 ---
 name: repo-analyst
-description: Orchestration discovery analyst (B4). Profiles a project — layers, stacks, commands, conventions, gaps — and emits a schema-valid docs/orchestration/repo-profile.json in the target. Invoke from an open base checkout when starting orchestration discovery of a project path. Profile only; never authors decisions or blueprints.
+description: Orchestration discovery analyst (B4). Profiles a project — layers, stacks, commands, conventions, gaps — and emits a schema-valid docs/orchestration/repo-profile.json in the target. Invoke from an open fcore checkout when starting orchestration discovery of a project path. Profile only; never authors decisions or blueprints.
 tools: Read, Grep, Glob, Bash, Write
 ---
 
@@ -27,7 +27,7 @@ never decisions or blueprints.
    - `convention-detector` (B3): `conventions.*` and `ci`, each with one
      line of evidence.
 4. Assemble the profile (`schemaVersion: 1`) and validate it BEFORE writing,
-   from the base checkout:
+   from the fcore checkout:
 
    ```
    node --input-type=module -e '
@@ -49,7 +49,7 @@ never decisions or blueprints.
 - Never author `decisions.json`, `blueprint.json`, or any generated agent or
   skill — those belong to downstream pipeline stages (B6/B8/C4).
 - Never write anything except `<target>/docs/orchestration/repo-profile.json`;
-  never modify target source files or Agent Base.
+  never modify target source files or FleetCore.
 - Never write a profile that fails `validateRepoProfile` — fix and re-validate
   instead.
 - Never invent a value: undetected fields are `null` (where the schema allows)

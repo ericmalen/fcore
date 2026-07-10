@@ -1,13 +1,13 @@
-# Agent Base (setup tool repo)
+# FleetCore (setup tool repo)
 
 This is the **setup tool, not your application repo**: the repo that builds and
 ships AI-config setups into other repositories. Nobody starts a project by
-cloning this repo — setup runs *from a project* against a base
-checkout (npx-staged release via the `agent-base` bin, or a shared clone).
+cloning this repo — setup runs *from a project* against a fcore
+checkout (npx-staged release via the `fcore` bin, or a shared clone).
 
 ## Overview
 
-Agent Base installs a conformant AI-coding setup — Claude Code + GitHub Copilot
+FleetCore installs a conformant AI-coding setup — Claude Code + GitHub Copilot
 (VS Code), one set of files — into projects via a four-phase setup pipeline
 (inventory → plan → apply → verify). Zero-dependency Node ≥ 20 (.mjs),
 unit-tested, shell-agnostic.
@@ -24,26 +24,26 @@ unit-tested, shell-agnostic.
 | Zone | Role |
 |---|---|
 | `templates/` | Payload copied into every project: `instructions/` (AGENTS.md/CLAUDE.md skeletons + slot bases), `settings/`, `readmes/`, `ci/`, `gitignore`. |
-| `scripts/` + `test/` | The engine. Dev tooling here; setup copies ONLY the five setup scripts (inventory-extract, apply, check, report, audit) + `scripts/lib/` + `templates/` into projects as `.claude/agent-base-setup/` — `test/` never ships. |
-| `.claude/` | This repo's live config AND the baseline shipped to every project. The allowlist in `scripts/lib/baseline.mjs` (consumed by `scripts/install-setup.mjs`) decides what ships, across three tiers: **setup-window** (`base-*` setup skills + `setup-verifier`, removed before merge), **baseline** (`base-check`, `docs`, `git-conventions`, `skill-creator`, `agent-creator` skills + `docs-auditor` agent — installed into every project), and **optional** (`OPTIONAL_SKILLS`: the `retro`, `log-report`, `eval-runner`, `tracker-sync` lifecycle skills — dual-role here but opt-in per project, R-55; staged into the setup window for selection, added via `agent-base skills add`, or installed by `base-orchestrate`). Orchestration discovery/generation meta-assets (`repo-analyst`, `scaffolder`, `evaluator`, and their paired skills) stay Agent Base-side — run from a base checkout (clone or staged release) against a project path, same pattern as `base-setup`. `base-setup` is the setup entry point — run from a checkout against a project path; deliberately NOT installed into projects. |
+| `scripts/` + `test/` | The engine. Dev tooling here; setup copies ONLY the five setup scripts (inventory-extract, apply, check, report, audit) + `scripts/lib/` + `templates/` into projects as `.claude/fcore-onboard/` — `test/` never ships. |
+| `.claude/` | This repo's live config AND the baseline shipped to every project. The allowlist in `scripts/lib/baseline.mjs` (consumed by `scripts/install-setup.mjs`) decides what ships, across three tiers: **setup-window** (`fcore-*` setup skills + `setup-verifier`, removed before merge), **baseline** (`fcore-check`, `docs-manager`, `git-conventions`, `skill-creator`, `agent-creator` skills + `docs-auditor` agent — installed into every project), and **optional** (`OPTIONAL_SKILLS`: the `checklist-intake`, `log-report`, `eval-runner`, `tracker-sync` lifecycle skills — dual-role here but opt-in per project, R-55; staged into the setup window for selection, added via `fcore skills add`, or installed by `fcore-fleet-config`). Orchestration discovery/generation meta-assets (`repo-analyst`, `scaffolder`, `evaluator`, and their paired skills) stay FleetCore-side — run from a fcore checkout (clone or staged release) against a project path, same pattern as `fcore-onboard`. `fcore-onboard` is the setup entry point — run from a checkout against a project path; deliberately NOT installed into projects. |
 | `docs/` | Consumer-facing guides. |
 | `reports/` | Generated outputs (validation/audit reports). Gitignored. |
 
 ## Conventions
 
 - Rule-ID indirection (R-51): docs and templates cite rules by R-ID only.
-- All scripts zero-dependency Node ≥ 20; Agent Base's own test suite (`npm test`) needs Node ≥ 22.
+- All scripts zero-dependency Node ≥ 20; FleetCore's own test suite (`npm test`) needs Node ≥ 22.
 - Self-audit: `node scripts/audit.mjs` (this repo is itself set up — marker in
-  `.claude/agent-base.json`).
+  `.claude/fcore.json`).
 - Generated reports go to `reports/`, never committed.
 - v1/v2 are internal generations; released artifacts version from 1.0.
-- Agent Base CI gates beyond tests: `docs-consistency` (doc link resolution),
+- FleetCore CI gates beyond tests: `docs-consistency` (doc link resolution),
   `rule-check-map` (spec-rule ⇄ audit-check coverage), self-audit `--strict`,
   and starter build + audit.
 
 ## Documentation
 
-Conventions: `.claude/skills/docs/SKILL.md` (standard, Diátaxis types, rules).
+Conventions: `.claude/skills/docs-manager/SKILL.md` (standard, Diátaxis types, rules).
 Tier T3 (`.claude/docs-paths.json`). Docs live in `docs/` (consumer-facing
 how-to/reference/explanation), `spec/` (source-of-truth rules + target layout),
 `README.md` (entry point), and `AGENTS.md`/`CLAUDE.md` (agent
@@ -56,14 +56,14 @@ notes.
 ## Do Not
 
 - Do not add payload to `.claude/` unless it is also wanted while developing
-  Agent Base — everything there auto-loads here (v1's mistake; see dropped rules
+  FleetCore — everything there auto-loads here (v1's mistake; see dropped rules
   in spec). The installer allowlist (`scripts/lib/baseline.mjs`, consumed by
   `scripts/install-setup.mjs`) decides
-  what ships to projects; `base-setup` stays Agent Base-side only.
-- Do not move `.claude/skills/base-setup/` or rename `scripts/`,
+  what ships to projects; `fcore-onboard` stays FleetCore-side only.
+- Do not move `.claude/skills/fcore-onboard/` or rename `scripts/`,
   `templates/`, or `bin/` — paths are load-bearing (one-prompt flow in
   `docs/how-to/setup-guide.md`, `apply.mjs`, `install-setup.mjs`, the
-  `agent-base` bin in `package.json`). `bin/` is the npx entry point and
+  `fcore` bin in `package.json`). `bin/` is the npx entry point and
   must never enter the installer allowlist — CLI-only helpers live in
   `bin/lib/`, not `scripts/lib/` (which ships wholesale into projects).
   Within `templates/`: `instructions/` is resolved by project path during

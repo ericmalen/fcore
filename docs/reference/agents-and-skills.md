@@ -1,11 +1,11 @@
 # Agents and skills — orchestration inventory
 
-What exists in the Agent Base repo, what setup installs into every target, and
+What exists in the FleetCore repo, what setup installs into every target, and
 what orchestration generation materializes per repo.
 
-## Agent Base-side only (never installed)
+## FleetCore-side only (never installed)
 
-Run from an open base checkout. Entry skill: `base-orchestrate`.
+Run from an open fcore checkout. Entry skill: `fcore-fleet-config`.
 
 ### Meta-agents
 
@@ -25,13 +25,13 @@ Run from an open base checkout. Entry skill: `base-orchestrate`.
 | Generation | `agent-instantiator`, `skill-instantiator` |
 | Quality | `drift-checker` (`eval-runner` is an optional lifecycle skill — see below) |
 
-### Entry skills (Agent Base-only)
+### Entry skills (FleetCore-only)
 
 | Skill | Role |
 | --- | --- |
-| `base-setup` | Setup pipeline entry |
-| `base-refresh` | Baseline upgrade loop (sync-baseline → audit) |
-| `base-orchestrate` | Orchestration discovery + generation entry |
+| `fcore-onboard` | Setup pipeline entry |
+| `fcore-update` | Baseline upgrade loop (sync-baseline → audit) |
+| `fcore-fleet-config` | Orchestration discovery + generation entry |
 | `validate-setup` | End-to-end setup qualification |
 | `validate-orchestration` | End-to-end orchestration behavior qualification (routing, completion protocol) — live sessions, not the unit test suite |
 
@@ -51,16 +51,16 @@ Shipped per the allowlist in `scripts/lib/baseline.mjs` (consumed by
 
 | Skill | Notes |
 | --- | --- |
-| `base-check` | Permanent maintenance |
-| `base-inventory`, `base-plan`, `base-apply`, `base-verify` | Setup window |
-| `docs`, `git-conventions`, `agent-creator`, `skill-creator` | Permanent baseline |
-| `retro`, `log-report`, `eval-runner`, `tracker-sync` | Optional lifecycle (R-55) — opt-in, not in the default baseline; selected at setup, added via `agent-base skills add`, or installed by `base-orchestrate`. Operate on orchestration surfaces. |
+| `fcore-check` | Permanent maintenance |
+| `fcore-inventory`, `fcore-plan`, `fcore-apply`, `fcore-verify` | Setup window |
+| `docs-manager`, `git-conventions`, `agent-creator`, `skill-creator` | Permanent baseline |
+| `checklist-intake`, `log-report`, `eval-runner`, `tracker-sync` | Optional lifecycle (R-55) — opt-in, not in the default baseline; selected at setup, added via `fcore skills add`, or installed by `fcore-fleet-config`. Operate on orchestration surfaces. |
 
 ## Generated per target (orchestration only)
 
 Present after `scaffolder` runs against an approved blueprint. Recorded in
 `docs/orchestration/generation-manifest.json`. Never hand-edit — fix the
-blueprint or Agent Base template and re-scaffold.
+blueprint or FleetCore template and re-scaffold.
 
 ### Agent templates
 
@@ -92,6 +92,6 @@ blueprint.
 ## Authoring new agents and skills
 
 Use `agent-creator` and `skill-creator` for **hand-authored** additions in any
-repo. Orchestration **generated** agents follow a separate path: edit Agent Base
+repo. Orchestration **generated** agents follow a separate path: edit FleetCore
 templates under `templates/orchestration/` or adjust the blueprint, then
 re-run `scaffolder`.

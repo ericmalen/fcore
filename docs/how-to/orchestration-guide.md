@@ -1,7 +1,7 @@
 # Orchestration in a repository
 
 How to generate and run a repo-specific multi-agent team — discovery,
-generation, and execution — from an open base checkout (clone or
+generation, and execution — from an open fcore checkout (clone or
 npx-staged release) against a project that has already completed
 [setup](./setup-guide.md).
 
@@ -26,49 +26,49 @@ optional.
 - Target in **git** with a **clean working tree**
 - **Node ≥ 20** on the machine (the AI runs scripts — you never will)
 - Claude Code or Copilot in **agent mode**
-- A **base checkout** (staged release or open clone — same pattern
-  as `/base-setup`)
+- A **fcore checkout** (staged release or open clone — same pattern
+  as `/fcore-onboard`)
 
-Orchestration discovery and generation meta-assets stay **Agent Base-side** — they
-run from the base checkout against a target path, not from inside the target.
+Orchestration discovery and generation meta-assets stay **FleetCore-side** — they
+run from the fcore checkout against a target path, not from inside the target.
 
 ### Pre-flight checklist
 
-Verify each before starting (these mirror the `/base-orchestrate` hard
+Verify each before starting (these mirror the `/fcore-fleet-config` hard
 preconditions — failing one stops the run):
 
 | Check | Verify with |
 |---|---|
-| Target is a git repo, not the base checkout | `git -C /path/to/project rev-parse` succeeds; path ≠ base checkout |
+| Target is a git repo, not the fcore checkout | `git -C /path/to/project rev-parse` succeeds; path ≠ fcore checkout |
 | Clean working tree | `git -C /path/to/project status --porcelain` prints nothing |
-| Baseline setup present | `.claude/agent-base.json` and `.claude/skills/base-check/` exist in the target |
+| Baseline setup present | `.claude/fcore.json` and `.claude/skills/fcore-check/` exist in the target |
 | Node ≥ 20 | `node --version` |
-| Checkout fresh | Clones: `git -C ~/tools/agent-base pull --ff-only`. staged releases are immutable at their tag — pick a newer tag instead |
-| Target has ≥ 1 code layer with a test signal | `node <agent-base>/scripts/orchestrate-preflight.mjs --root /path/to/project` exits 0 |
+| Checkout fresh | Clones: `git -C ~/tools/fcore pull --ff-only`. staged releases are immutable at their tag — pick a newer tag instead |
+| Target has ≥ 1 code layer with a test signal | `node <fcore>/scripts/orchestrate-preflight.mjs --root /path/to/project` exits 0 |
 
 ## Quick start
 
 From the project:
 
 ```sh
-npx github:ericmalen/agent-base#v1.2.1 orchestrate
+npx github:ericmalen/fcore#v1.2.1 orchestrate
 ```
 
 which launches Claude Code with the flow started (without the `claude`
-CLI: type `/agent-base-bootstrap` in your AI session, or paste the
+CLI: type `/fcore-bootstrap` in your AI session, or paste the
 printed prompt). Or, from a clone
-(one-time: `git clone <url> ~/tools/agent-base`), open the **base
+(one-time: `git clone <url> ~/tools/fcore`), open the **fcore
 clone** in Claude Code (or Copilot agent mode) and run:
 
 ```text
-/base-orchestrate /path/to/project
+/fcore-fleet-config /path/to/project
 ```
 
 The skill orchestrates discovery and generation in fresh contexts and stops at
 human gates. Details below.
 
 **Repeat users:** freshen the checkout (clones: `git pull --ff-only`; npx:
-re-run at the newer tag), then `/base-orchestrate /path/to/repo` again — see
+re-run at the newer tag), then `/fcore-fleet-config /path/to/repo` again — see
 [Re-orchestrating as the repo grows](#re-orchestrating-as-the-repo-grows) for
 what changes on a repeat run.
 
@@ -99,14 +99,14 @@ to the target as they land.
 Sessions can be days apart. Each step reads the previous step's committed
 artifacts.
 
-Time budgets below are measured on the Agent Base fixtures; a large real repo can
+Time budgets below are measured on the FleetCore fixtures; a large real repo can
 take 2–3× longer per session. A silent wait inside one budget is normal —
 past 2× the budget with no artifact, see the
 [troubleshooting guide](./orchestration-troubleshooting.md).
 
 ### Session 1 — Profile (`repo-analyst`)
 
-From the base checkout, dispatch the `repo-analyst` agent with the target path.
+From the fcore checkout, dispatch the `repo-analyst` agent with the target path.
 It runs `structure-detector`, `dependency-mapper`, and `convention-detector`
 skills and writes a schema-valid `repo-profile.json`.
 
@@ -181,7 +181,7 @@ docs under `docs/orchestration/`, and a `generation-manifest.json` entry
 (template id, version, SHA) for **every** generated file. Re-running
 immediately must be a no-op — any diff on a clean re-run is a bug.
 
-Re-run the scaffolder after Agent Base template updates; it refuses to overwrite
+Re-run the scaffolder after FleetCore template updates; it refuses to overwrite
 hand-edited generated files (conflict report instead — see troubleshooting).
 
 ### Session 5 — Execute (`feature-orchestrator`)
@@ -217,19 +217,19 @@ Nothing merges automatically: the orchestrator stops at PR / diff presentation.
 Orchestration is evidence-driven: discovery profiles what exists, it never
 interviews you about what you're planning to build. A repo with no code layer
 that has a test command has nothing for it to generate from — the preflight
-guard (see Pre-flight checklist above) stops `/base-orchestrate` before
+guard (see Pre-flight checklist above) stops `/fcore-fleet-config` before
 Phase 1 rather than failing deep in discovery or synthesis. So the intended
 lifecycle for a new project is:
 
-1. `/base-setup` — baseline AI config only, no orchestration.
+1. `/fcore-onboard` — baseline AI config only, no orchestration.
 2. Build the first layer, with tests. (Plain Claude/Copilot + the baseline
    skills is enough for this — you don't need orchestration to write the
    first layer that orchestration will later dispatch work to.)
-3. `/base-orchestrate /path/to/project` — first run (`mode=fresh`). Generates
+3. `/fcore-fleet-config /path/to/project` — first run (`mode=fresh`). Generates
    a small team: one specialist for that layer, plus `code-reviewer` and
    `feature-orchestrator`.
 4. A new layer ships (e.g. an API alongside the CLI).
-5. `/base-orchestrate /path/to/project` again — the preflight guard now
+5. `/fcore-fleet-config /path/to/project` again — the preflight guard now
    reports `mode=re-run` (it detects prior `decisions.json` or
    `generation-manifest.json`). The team grows to match:
 
@@ -251,19 +251,19 @@ lifecycle for a new project is:
      when the agent that owned a checklist is dropped.
 
 Before re-running, it's worth checking for drift first (`drift-checker` from
-the base checkout) so any TEMPLATE-DRIFT or USER-EDIT surfaces before you
+the fcore checkout) so any TEMPLATE-DRIFT or USER-EDIT surfaces before you
 spend three sessions getting back to the scaffolder step, which would refuse
 a USER-EDIT anyway.
 
 ## Lifecycle skills (installed at setup)
 
-These optional lifecycle skills (R-55) are installed by `base-orchestrate` as a
-generation prerequisite (or earlier via `agent-base skills add`); they activate
+These optional lifecycle skills (R-55) are installed by `fcore-fleet-config` as a
+generation prerequisite (or earlier via `fcore skills add`); they activate
 once orchestration surfaces exist:
 
 | Skill | Role |
 |---|---|
-| `retro` | Turn bugs/review findings into checklist items |
+| `checklist-intake` | Turn bugs/review findings into checklist items |
 | `log-report` | Summarize `handoff-log.jsonl` (failure rates, duration) |
 | `eval-runner` | Run golden evals for generated agents |
 | `tracker-sync` | Sync `tasks.md` with ADO work items / GitHub Issues (intake in, status out); prunes synced `## Done` items |
@@ -272,21 +272,21 @@ See [Lifecycle maintenance](#lifecycle-maintenance) below.
 
 ## Copilot users
 
-Allowlist Agent Base scripts when prompted (`node scripts/lib/orchestration/*`,
-read-only git). Subagent orchestration from `/base-orchestrate` should be
+Allowlist FleetCore scripts when prompted (`node scripts/lib/orchestration/*`,
+read-only git). Subagent orchestration from `/fcore-fleet-config` should be
 attempted first; if phases run inline, follow the step-by-step
 [inline fallback procedure](./orchestration-troubleshooting.md#copilot-inline-fallback)
 in the troubleshooting guide.
 
 ## After generation
 
-- **Drift:** run `drift-checker` from the base checkout when templates change.
-- **Health gate:** invoke `evaluator` before distributing Agent Base updates.
+- **Drift:** run `drift-checker` from the fcore checkout when templates change.
+- **Health gate:** invoke `evaluator` before distributing FleetCore updates.
 - **Regenerate:** re-run `scaffolder` against the stored blueprint — never
   hand-edit generated agent files. To grow the team as the repo grows, re-run
-  `/base-orchestrate` itself — see
+  `/fcore-fleet-config` itself — see
   [Re-orchestrating as the repo grows](#re-orchestrating-as-the-repo-grows).
-- **Update Agent Base:** re-run setup if the baseline skills need refreshing;
+- **Update FleetCore:** re-run setup if the baseline skills need refreshing;
   orchestration assets are independent of the setup branch machinery.
 - **Schedule it:** once execution works interactively, add the
   [headless pipeline](./headless-orchestration.md) to ship backlog items as
@@ -294,7 +294,7 @@ in the troubleshooting guide.
 
 ## Lifecycle maintenance
 
-**Retro (`retro`):** after a bug or substantive review finding, append a
+**Checklist intake (`checklist-intake`):** after a bug or substantive review finding, append a
 checklist item to `docs/orchestration/checklists/review-checklist.md`. The
 code-reviewer agent references this list on subsequent runs.
 
@@ -305,18 +305,18 @@ completion record, appended once `tasks.md` prunes its `## Done` line) are
 counted separately, not folded into per-agent stats.
 
 **Eval runner (`eval-runner`):** smoke tier (1×) after template edits; release
-tier (5×, pass ≥ 4/5) before Agent Base distribution. Goldens live in
+tier (5×, pass ≥ 4/5) before FleetCore distribution. Goldens live in
 `docs/orchestration/evals/<agent>/`, plus `evals/routing/` — main-loop
 routing-decision goldens (does a request get deferred to the fleet?),
-required whenever `routing_policy` is `always` or `threshold`. Agent Base
+required whenever `routing_policy` is `always` or `threshold`. FleetCore
 maintainers qualifying a routing- or completion-protocol change end to end
 (not per-target) use `validate-orchestration` instead — it builds a fixture,
 runs these goldens as real sessions, and reports to `reports/`.
 
 **Triage:** route recurring issues per
 [`triage-rules`](../../templates/orchestration/docs/triage-rules.md) —
-template defect → fix Agent Base template and re-scaffold; blueprint defect →
-re-synthesize; skill gap → edit skill; one-off → retro checklist item.
+template defect → fix FleetCore template and re-scaffold; blueprint defect →
+re-synthesize; skill gap → edit skill; one-off → checklist-intake checklist item.
 
 ## Further reading
 
@@ -324,11 +324,11 @@ re-synthesize; skill gap → edit skill; one-off → retro checklist item.
   modes and recoveries
 - [Orchestration concepts](../explanation/orchestration.md) — architecture and
   design choices
-- [Agents and skills reference](../reference/agents-and-skills.md) — Agent Base-side
+- [Agents and skills reference](../reference/agents-and-skills.md) — FleetCore-side
   vs shipped vs generated inventory
 - [Copilot parity](../reference/orchestration-copilot-parity.md) — tool
   limitations
 - [First run tutorial](../tutorials/orchestration-first-run.md) — walkthrough
-  on Agent Base fixtures
+  on FleetCore fixtures
 - [Build plan (engineering)](../../notes/agent-orchestration-plan.md) — phase
   history and acceptance criteria (not a how-to)

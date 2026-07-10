@@ -44,7 +44,7 @@ Use strict mode everywhere.
 `,
   'CLAUDE.md': '@AGENTS.md\n',
   '.gitignore': '.claude/settings.local.json\n',
-  '.claude/agent-base.json': '{ "standard": "1.0.0", "toolRepo": "https://github.com/ericmalen/agent-base", "pin": "v1.0.0", "lastSyncedAt": "2026-06-10", "setupAt": "2026-06-10", "githubCodeReview": false }\n',
+  '.claude/fcore.json': '{ "standard": "1.0.0", "toolRepo": "https://github.com/ericmalen/fcore", "pin": "v1.0.0", "lastSyncedAt": "2026-06-10", "setupAt": "2026-06-10", "githubCodeReview": false }\n',
   '.claude/settings.json': `{
   "permissions": {
     "deny": ["Read(./.env)", "Read(./.env.*)"]
@@ -52,12 +52,12 @@ Use strict mode everywhere.
 }
 `,
   '.claude/skills/README.md': '# Skills\nConventions for this folder.\n',
-  '.claude/skills/base-check/SKILL.md': `---
-name: base-check
-description: Audits this repo's AI setup against agent-base conventions. Use when checking for drift or when asked to fix AI-config findings.
+  '.claude/skills/fcore-check/SKILL.md': `---
+name: fcore-check
+description: Audits this repo's AI setup against fcore conventions. Use when checking for drift or when asked to fix AI-config findings.
 ---
 
-# base-check
+# fcore-check
 
 Run the bundled audit and fix findings by rule ID.
 `,
@@ -165,7 +165,7 @@ test('violations repo: expected rules fire', () => {
 test('R-09: codeReview=true requires copilot-instructions.md (short, pointing at AGENTS.md)', () => {
   const repo = makeRepo({
     ...CONFORMANT,
-    '.claude/agent-base.json': '{ "standard": "1.0.0", "toolRepo": "https://github.com/ericmalen/agent-base", "pin": "v1.0.0", "lastSyncedAt": "2026-06-10", "setupAt": "2026-06-10", "githubCodeReview": true }\n',
+    '.claude/fcore.json': '{ "standard": "1.0.0", "toolRepo": "https://github.com/ericmalen/fcore", "pin": "v1.0.0", "lastSyncedAt": "2026-06-10", "setupAt": "2026-06-10", "githubCodeReview": true }\n',
   });
   try {
     let report = audit({ root: repo });
@@ -201,7 +201,7 @@ test('R-09: codeReview=false flags a lingering copilot-instructions.md', () => {
 });
 
 test('R-09: no recorded stance → info', () => {
-  const { ['.claude/agent-base.json']: _omit, ...rest } = CONFORMANT;
+  const { ['.claude/fcore.json']: _omit, ...rest } = CONFORMANT;
   const repo = makeRepo({ ...rest, '.github/copilot-instructions.md': 'stuff\n' });
   try {
     const report = audit({ root: repo });
@@ -305,8 +305,8 @@ test('R-45: compat key without compat mechanism fires (reverse direction)', () =
   }
 });
 
-test('payload skeletons (agent-base:slot markers) do not trigger compat mode', () => {
-  const skeleton = '# <!-- agent-base:slot:intro -->\n\n<!-- agent-base:optional -->\n## Overview\n';
+test('payload skeletons (fcore:slot markers) do not trigger compat mode', () => {
+  const skeleton = '# <!-- fcore:slot:intro -->\n\n<!-- fcore:optional -->\n## Overview\n';
   const live = '# Sub scope\nShort and focused.\n';
   const skeletonRepo = makeRepo({ ...CONFORMANT, 'templates/instructions/AGENTS.md': skeleton });
   const liveRepo = makeRepo({ ...CONFORMANT, 'templates/instructions/AGENTS.md': live });
@@ -326,8 +326,8 @@ test('payload skeletons (agent-base:slot markers) do not trigger compat mode', (
 // ── R-50 marker content validation ──────────────────────────────────────────
 
 test('R-50: unparseable marker and missing fields fire', () => {
-  const badJson = makeRepo({ ...CONFORMANT, '.claude/agent-base.json': '{ not json\n' });
-  const missingFields = makeRepo({ ...CONFORMANT, '.claude/agent-base.json': '{ "standard": "abc" }\n' });
+  const badJson = makeRepo({ ...CONFORMANT, '.claude/fcore.json': '{ not json\n' });
+  const missingFields = makeRepo({ ...CONFORMANT, '.claude/fcore.json': '{ "standard": "abc" }\n' });
   try {
     const r1 = of(audit({ root: badJson }), 'R-50');
     assert.equal(r1.length, 1);

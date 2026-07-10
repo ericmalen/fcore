@@ -1,4 +1,4 @@
-// marker.mjs — Agent Base marker (.claude/agent-base.json) read/write/validate.
+// marker.mjs — FleetCore marker (.claude/fcore.json) read/write/validate.
 
 import { readFileSync, writeFileSync, existsSync, lstatSync } from 'node:fs';
 import { join } from 'node:path';
@@ -6,7 +6,7 @@ import { stripJsonComments } from './extract.mjs';
 import { parseSemver, tagToSemver } from './release.mjs';
 import { OPTIONAL_NAMES } from './baseline.mjs';
 
-export const MARKER_PATH = '.claude/agent-base.json';
+export const MARKER_PATH = '.claude/fcore.json';
 
 export const REQUIRED_MARKER_FIELDS = [
   'standard',
@@ -17,7 +17,7 @@ export const REQUIRED_MARKER_FIELDS = [
 
 export const PIN_FIELDS = ['pin', 'lastSyncedAt'];
 
-export const DEFAULT_TOOL_REPO = 'https://github.com/ericmalen/agent-base';
+export const DEFAULT_TOOL_REPO = 'https://github.com/ericmalen/fcore';
 
 export function readMarker(root) {
   const abs = join(root, MARKER_PATH);

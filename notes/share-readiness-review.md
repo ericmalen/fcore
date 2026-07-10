@@ -1,4 +1,4 @@
-# Agent Base — Share-Readiness Review
+# FleetCore — Share-Readiness Review
 
 _2026-06-15 · Scope: full current state, weighted toward the **adopter experience** — a colleague who will set up their own repo with it and form a first impression._
 
@@ -6,7 +6,7 @@ _Basis: ran `npm test` (446 pass / 4 todo / 0 fail, ~2.4s), the three CI gates (
 
 ## Verdict
 
-The **engine is ready; the wrapper isn't.** Correctness, tests, architecture, and conventions are in excellent shape — this is not a quality problem. What stands between you and sharing is (1) the working copy is mid-surgery right now, and (2) the on-ramp assumes the reader already speaks Agent Base's vocabulary. Both are fixable in roughly a focused day, most of it in docs and CLI messaging rather than core logic.
+The **engine is ready; the wrapper isn't.** Correctness, tests, architecture, and conventions are in excellent shape — this is not a quality problem. What stands between you and sharing is (1) the working copy is mid-surgery right now, and (2) the on-ramp assumes the reader already speaks FleetCore's vocabulary. Both are fixable in roughly a focused day, most of it in docs and CLI messaging rather than core logic.
 
 ## What's already strong (leave these alone)
 
@@ -45,30 +45,30 @@ The **engine is ready; the wrapper isn't.** Correctness, tests, architecture, an
 ## P0 — before you share at all
 
 **1. The working copy is mid-surgery.**
-On branch `erm/fix/starter-build-findings` with 3 uncommitted files (`base-setup/SKILL.md`, `bin/lib/bootstrap-skill.mjs`, `orchestration-first-run.md`), plus an **untracked full nested checkout** at `.claude/worktrees/erm+fix+setup-pipeline-r3/` (git itself reports it `prunable`). Anyone you hand the folder to sees in-progress work and a confusing repo-inside-a-repo; it also double-matches local greps.
+On branch `erm/fix/starter-build-findings` with 3 uncommitted files (`fcore-onboard/SKILL.md`, `bin/lib/bootstrap-skill.mjs`, `orchestration-first-run.md`), plus an **untracked full nested checkout** at `.claude/worktrees/erm+fix+setup-pipeline-r3/` (git itself reports it `prunable`). Anyone you hand the folder to sees in-progress work and a confusing repo-inside-a-repo; it also double-matches local greps.
 *Fix:* commit or stash the 3 files, `git worktree prune` (or `git worktree remove`) the nested checkout, then share from a clean `main` or a tagged release — not this branch. (Pairs with #12.)
 
 **2. The README first screen doesn't land the pitch — and contradicts itself.**
 "What this is" (`README.md:5–13`) is a ~110-word block mixing rule catalog + four-phase pipeline + baseline skills + optional orchestration before the reader knows what the tool *is*. Meanwhile `docs/explanation/why-this-way.md:45` declares the "headline feature… **skills-as-tooling**" — a different answer to "what is this." A colleague deciding whether to adopt bounces off the density and gets two mental models.
-*Fix:* open with one plain sentence (e.g. *"Agent Base scaffolds and maintains a shared Claude Code + Copilot config in any repo, from one set of files"*), then 3–4 short bullets. Demote orchestration to a single "Advanced" line. Make `why-this-way.md` echo the README lead rather than introduce a competing headline.
+*Fix:* open with one plain sentence (e.g. *"FleetCore scaffolds and maintains a shared Claude Code + Copilot config in any repo, from one set of files"*), then 3–4 short bullets. Demote orchestration to a single "Advanced" line. Make `why-this-way.md` echo the README lead rather than introduce a competing headline.
 
 **3. There is no getting-started tutorial for the main action.**
 `docs/tutorials/` contains exactly one file — `orchestration-first-run.md`, the *optional/advanced* feature on test fixtures. The thing 100% of colleagues will do (set up their own repo) has only how-to/reference prose. This is the single highest-leverage missing doc for an adoption audience.
 *Fix:* add `docs/tutorials/first-setup.md` — a linear walkthrough on a throwaway repo showing the actual terminal output, the two questions, and both approval gates. Link it as the first README "Next steps" item and from Quick start.
 
 **4. "adopt/adoption" breaks the project's own vocabulary rule, and key terms are undefined.**
-`docs/reference/terminology.md:41` flags "adopt/adoption (as pipeline nouns)" as retired vocabulary — yet the most-read guide's H1 is **"# Adopting agent-base in a repository"** (`docs/how-to/setup-guide.md:1`), and the term recurs in `orchestration-first-run.md`, `orchestration-copilot-parity.md`, and `spec/rules.md`. Separately, load-bearing jargon — **slot, payload, drift, marker** — appears in README/AGENTS but has no row in `terminology.md`. A tool whose whole pitch is *enforced conventions* visibly breaking its own vocabulary rule is exactly what a careful adopter notices.
-*Fix:* retitle the guide ("Setting up agent-base in a repository"), sweep remaining `adopt → set up`, add `terminology.md` rows for slot/payload/drift/marker, and link terminology.md near the top of the README. (Also sweep prose that writes the slug `agent-base` where the style guide mandates the display name "Agent Base.")
+`docs/reference/terminology.md:41` flags "adopt/adoption (as pipeline nouns)" as retired vocabulary — yet the most-read guide's H1 is **"# Adopting fcore in a repository"** (`docs/how-to/setup-guide.md:1`), and the term recurs in `orchestration-first-run.md`, `orchestration-copilot-parity.md`, and `spec/rules.md`. Separately, load-bearing jargon — **slot, payload, drift, marker** — appears in README/AGENTS but has no row in `terminology.md`. A tool whose whole pitch is *enforced conventions* visibly breaking its own vocabulary rule is exactly what a careful adopter notices.
+*Fix:* retitle the guide ("Setting up fcore in a repository"), sweep remaining `adopt → set up`, add `terminology.md` rows for slot/payload/drift/marker, and link terminology.md near the top of the README. (Also sweep prose that writes the slug `fcore` where the style guide mandates the display name "FleetCore.")
 
 ## P1 — before sharing broadly
 
 **5. The CLI fails late and deep — add pre-flight checks.** *(borderline P0)*
-`bin/agent-base.mjs:89–124` validates only the target path. Node ≥20, "is this a git repo," and "is the tree clean" are enforced much later, *inside* `base-inventory` — after Claude Code has already launched. A colleague on older Node, or in a non-git/dirty dir, runs the headline command, watches an agent boot, and only then gets stopped.
+`bin/fcore.mjs:89–124` validates only the target path. Node ≥20, "is this a git repo," and "is the tree clean" are enforced much later, *inside* `fcore-inventory` — after Claude Code has already launched. A colleague on older Node, or in a non-git/dirty dir, runs the headline command, watches an agent boot, and only then gets stopped.
 *Fix:* a cheap pre-flight in the LLM-entry branch (`process.versions.node`, `git rev-parse`, `git status --porcelain`) that exits 2 with a plain message *before* staging/launch. Promote this to P0 if your colleagues' environments vary.
 
 **6. Auto-launch drops a newcomer into an agent session with almost no framing.**
-`launchNotice` is one line; then the screen clears and an agent starts creating branches/commits from a `~/.agent-base/versions/…` path the user has never heard of. `fallbackInstructions` opens with *"Nothing in your repo runs until an AI session picks this up"* (`bin/lib/prompts.mjs:38`) — which reads like something broke. The staged-release dir appears in `$HOME` with no "safe to delete" note, and Windows always silently takes the fallback path while the README presents auto-launch as the default.
-*Fix:* expand `launchNotice` to 2–3 lines of expectations (works on a branch — nothing merges; ~2 questions, 2 approval gates; Ctrl-C aborts); reword the fallback to lead with the action (*"Setup is staged. To start: open your AI tool in this repo and type `/agent-base-bootstrap`"*); append "(cached build; safe to delete)" to the staged notice; add a one-line Windows note.
+`launchNotice` is one line; then the screen clears and an agent starts creating branches/commits from a `~/.fcore/versions/…` path the user has never heard of. `fallbackInstructions` opens with *"Nothing in your repo runs until an AI session picks this up"* (`bin/lib/prompts.mjs:38`) — which reads like something broke. The staged-release dir appears in `$HOME` with no "safe to delete" note, and Windows always silently takes the fallback path while the README presents auto-launch as the default.
+*Fix:* expand `launchNotice` to 2–3 lines of expectations (works on a branch — nothing merges; ~2 questions, 2 approval gates; Ctrl-C aborts); reword the fallback to lead with the action (*"Setup is staged. To start: open your AI tool in this repo and type `/fcore-bootstrap`"*); append "(cached build; safe to delete)" to the staged notice; add a one-line Windows note.
 
 **7. The exit-code contract is violated by three scripts.**
 The bin header promises "2 = usage error" and most scripts honor it, but usage/precondition failures exit `1` in `scripts/install-setup.mjs`, `scripts/build-starter.mjs`, and `scripts/build-fixture.mjs`. `install` and `starter` are advertised commands, so a script can't distinguish a usage mistake from a real failure.

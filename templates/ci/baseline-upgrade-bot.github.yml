@@ -11,7 +11,7 @@
 # Setup:
 #   - Repo setting "Allow GitHub Actions to create and approve pull requests"
 #     must be enabled (Settings → Actions → General).
-#   - Private Agent Base repo? Route git credentials via insteadOf — see commented line below.
+#   - Private FleetCore repo? Route git credentials via insteadOf — see commented line below.
 name: baseline-upgrade-bot
 on:
   schedule:
@@ -32,10 +32,10 @@ jobs:
         id: plan
         run: |
           set -euo pipefail
-          test -f .claude/agent-base.json
-          NPX_SPEC="$(node -e 'const m=require("./.claude/agent-base.json");const pin=m.pin||("v"+m.standard);const url=String(m.toolRepo).trim().replace(/\/+$/,"");const gh=url.match(/^(?:git\+)?https:\/\/github\.com\/([^\/]+)\/([^\/]+?)(?:\.git)?$/);process.stdout.write((gh?"github:"+gh[1]+"/"+gh[2]:url.startsWith("git+")?url:url.startsWith("git@")?"git+ssh://"+url.replace(":","/"):"git+"+url)+"#"+pin)')"
+          test -f .claude/fcore.json
+          NPX_SPEC="$(node -e 'const m=require("./.claude/fcore.json");const pin=m.pin||("v"+m.standard);const url=String(m.toolRepo).trim().replace(/\/+$/,"");const gh=url.match(/^(?:git\+)?https:\/\/github\.com\/([^\/]+)\/([^\/]+?)(?:\.git)?$/);process.stdout.write((gh?"github:"+gh[1]+"/"+gh[2]:url.startsWith("git+")?url:url.startsWith("git@")?"git+ssh://"+url.replace(":","/"):"git+"+url)+"#"+pin)')"
           echo "NPX_SPEC=$NPX_SPEC" >> "$GITHUB_ENV"
-          # Private Agent Base repo? npm fetches git deps through git — route credentials, e.g.:
+          # Private FleetCore repo? npm fetches git deps through git — route credentials, e.g.:
           # git config --global url."https://x-token:${{ secrets.KIT_TOKEN }}@github.com/".insteadOf "https://github.com/"
           # --report exits 1 when conflicts block an upgrade — the JSON still has the plan.
           npx --yes "$NPX_SPEC" sync --report --json \
@@ -57,7 +57,7 @@ jobs:
       - name: Conflicts need a human
         if: steps.plan.outputs.behind == 'true' && steps.plan.outputs.conflicts != '0'
         run: |
-          echo "::error title=Baseline upgrade blocked::${{ steps.plan.outputs.conflicts }} local-edit conflict(s) — run sync-baseline --report locally (or base-refresh) and resolve, then re-run."
+          echo "::error title=Baseline upgrade blocked::${{ steps.plan.outputs.conflicts }} local-edit conflict(s) — run sync-baseline --report locally (or fcore-update) and resolve, then re-run."
           exit 1
       - name: Apply upgrade (--upgrade)
         if: steps.plan.outputs.ready == 'true'
@@ -68,12 +68,12 @@ jobs:
         if: steps.plan.outputs.ready == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
-          branch: chore/agent-base-baseline-${{ steps.plan.outputs.to }}
+          branch: chore/fcore-baseline-${{ steps.plan.outputs.to }}
           delete-branch: true
-          commit-message: 'chore(agent-base): baseline ${{ steps.plan.outputs.from }} -> ${{ steps.plan.outputs.to }}'
-          title: 'chore(agent-base): baseline ${{ steps.plan.outputs.from }} → ${{ steps.plan.outputs.to }}'
+          commit-message: 'chore(fcore): baseline ${{ steps.plan.outputs.from }} -> ${{ steps.plan.outputs.to }}'
+          title: 'chore(fcore): baseline ${{ steps.plan.outputs.from }} → ${{ steps.plan.outputs.to }}'
           body: |
-            Automated Agent Base baseline upgrade: **${{ steps.plan.outputs.from }} → ${{ steps.plan.outputs.to }}**, ${{ steps.plan.outputs.files }} file(s), 0 conflicts.
+            Automated FleetCore baseline upgrade: **${{ steps.plan.outputs.from }} → ${{ steps.plan.outputs.to }}**, ${{ steps.plan.outputs.files }} file(s), 0 conflicts.
 
-            Applied by `sync-baseline --upgrade` (marker pin bumped in `.claude/agent-base.json`).
+            Applied by `sync-baseline --upgrade` (marker pin bumped in `.claude/fcore.json`).
             Review the diff and merge manually — this bot never auto-merges and never crosses a major version.

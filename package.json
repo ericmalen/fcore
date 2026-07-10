@@ -1,10 +1,10 @@
 {
-  "name": "agent-base",
+  "name": "fcore",
   "version": "1.3.0",
   "private": true,
   "type": "module",
   "bin": {
-    "agent-base": "bin/agent-base.mjs"
+    "fcore": "bin/fcore.mjs"
   },
   "files": [
     "bin",

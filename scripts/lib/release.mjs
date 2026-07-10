@@ -14,13 +14,13 @@ const TOOL_REPO_URL_FORMS = [
 
 /**
  * Validate a marker toolRepo before it reaches git. The value comes from the
- * target repo's user-editable .claude/agent-base.json, so reject anything that
+ * target repo's user-editable .claude/fcore.json, so reject anything that
  * git could interpret as an option (leading '-') or a transport helper
  * (`ext::sh -c ...` and friends), plus control characters.
  */
 export function validateToolRepo(url) {
   const fail = (why) => {
-    throw new Error(`invalid "toolRepo" in .claude/agent-base.json: ${why}`);
+    throw new Error(`invalid "toolRepo" in .claude/fcore.json: ${why}`);
   };
   if (typeof url !== 'string' || !url.trim()) fail('must be a non-empty string URL');
   const repo = url.trim();

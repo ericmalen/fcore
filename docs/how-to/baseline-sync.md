@@ -1,17 +1,17 @@
 # Baseline sync (release pins)
 
-Enterprise-style baseline management: projects **pin** an Agent Base release,
+Enterprise-style baseline management: projects **pin** an FleetCore release,
 pull upgrades deterministically, and optionally let CI or a bot nudge when the
 pin is stale.
 
 ## Marker
 
-Every set-up project records releases in [`.claude/agent-base.json`](../../spec/target-layout.md):
+Every set-up project records releases in [`.claude/fcore.json`](../../spec/target-layout.md):
 
 ```json
 {
   "standard": "1.0.0",
-  "toolRepo": "https://github.com/ericmalen/agent-base",
+  "toolRepo": "https://github.com/ericmalen/fcore",
   "pin": "v1.0.0",
   "lastSyncedAt": "2026-06-11",
   "setupAt": "2026-03-01",
@@ -21,14 +21,14 @@ Every set-up project records releases in [`.claude/agent-base.json`](../../spec/
 
 | Field | Role |
 | --- | --- |
-| `standard` | Semver of the Agent Base standard at setup/last sync |
-| `toolRepo` | Agent Base repo URL (GitHub or Azure DevOps) — clone target and npx spec source |
+| `standard` | Semver of the FleetCore standard at setup/last sync |
+| `toolRepo` | FleetCore repo URL (GitHub or Azure DevOps) — clone target and npx spec source |
 | `pin` | Git tag resolved for audit CI (npx) and baseline sync |
 | `lastSyncedAt` | Date baseline files were last synced from `pin` |
 | `setupAt` | Date setup completed (immutable) |
 | `githubCodeReview` | Setup policy flag (R-09/R-49) |
 
-Agent Base tags releases (`v1.0.0`, `v1.4.0`, …). Patch/minor upgrades within
+FleetCore tags releases (`v1.0.0`, `v1.4.0`, …). Patch/minor upgrades within
 the same major are **compatible** by default.
 
 ## Commands
@@ -37,42 +37,42 @@ From a project root (or pass `--root`), via npx at your pin — no clone needed:
 
 ```sh
 # CI / weekly nudge — exit 1 when pin is behind
-npx github:ericmalen/agent-base#v1.2.1 sync --check
+npx github:ericmalen/fcore#v1.2.1 sync --check
 
 # Bot-friendly JSON plan (files to update, conflicts, removed)
-npx github:ericmalen/agent-base#v1.2.1 sync --report --json
+npx github:ericmalen/fcore#v1.2.1 sync --report --json
 
 # Apply updates — any local edit vs the old release blocks the whole upgrade.
 # Also works at a current pin: restores missing baseline files (repair).
-npx github:ericmalen/agent-base#v1.2.1 sync --upgrade
+npx github:ericmalen/fcore#v1.2.1 sync --upgrade
 
 # Preview only
-npx github:ericmalen/agent-base#v1.2.1 sync --upgrade --dry-run
+npx github:ericmalen/fcore#v1.2.1 sync --upgrade --dry-run
 ```
 
 The same commands work from a clone
-(`node /path/to/agent-base/scripts/sync-baseline.mjs --check` …).
+(`node /path/to/fcore/scripts/sync-baseline.mjs --check` …).
 Use `--allow-major` to consider the latest tag across major versions.
 
 During development, point at a local clone:
 
 ```sh
-node ~/tools/agent-base/scripts/sync-baseline.mjs --check --base-root ~/tools/agent-base
+node ~/tools/fcore/scripts/sync-baseline.mjs --check --fcore-root ~/tools/fcore
 ```
 
 ## What gets synced
 
 **Permanent baseline** assets (same set as post-merge install):
 
-- `base-check`, `docs`, `git-conventions`, `skill-creator`, `agent-creator`
+- `fcore-check`, `docs-manager`, `git-conventions`, `skill-creator`, `agent-creator`
 - `docs-auditor`
 
-Plus any **optional lifecycle skills** the project selected — `retro`,
+Plus any **optional lifecycle skills** the project selected — `checklist-intake`,
 `log-report`, `eval-runner`, `tracker-sync` — but only those listed in the
 marker's `optionalSkills` (R-55). Unselected optionals are never synced and
 never reported as removed.
 
-Setup-window skills (`.claude/agent-base-setup/`, `base-inventory` …) are
+Setup-window skills (`.claude/fcore-onboard/`, `fcore-inventory` …) are
 never touched.
 
 ## Conflict model
@@ -96,14 +96,14 @@ restored (starters built since the full baseline shipped are born complete, so
 repair mainly serves older starters and deletions), and locally edited files
 are left untouched and reported as drift —
 they never block, and `--upgrade` exits 0 (policing content drift is
-`base-check`'s job, not sync's). A pin **ahead** of the target — stale
-`--base-root` checkout, deleted remote tags — is refused by
+`fcore-check`'s job, not sync's). A pin **ahead** of the target — stale
+`--fcore-root` checkout, deleted remote tags — is refused by
 `--report`/`--upgrade` with exit 2, never a silent downgrade (`--check` only
 detects *behind*, so an ahead pin still reads as "current" there).
 
 ## CI templates
 
-Copy from a base checkout when the project has CI:
+Copy from a fcore checkout when the project has CI:
 
 | Template | Purpose |
 | --- | --- |
@@ -117,7 +117,7 @@ git credentials with an `insteadOf` rewrite (`secrets.KIT_TOKEN` on GitHub, a
 secret pipeline variable on ADO — see comments in each template).
 
 Note: workflow copies in your repo are **not** owned by `sync-baseline` (it
-syncs only baseline skills/agents). When the templates change in Agent Base,
+syncs only baseline skills/agents). When the templates change in FleetCore,
 re-copy them from a checkout yourself — `--report` will never list them.
 
 ## Bot PR (optional)
@@ -126,11 +126,11 @@ re-copy them from a checkout yourself — `--report` will never list them.
 does the upgrade for you: weekly (or on manual dispatch) it runs
 `sync-baseline --report --json`, and when the pin is behind with **zero
 conflicts** it applies `--upgrade` and opens a PR titled
-**"chore(agent-base): baseline v1.3.0 → v1.4.0"** with the real file diff.
+**"chore(fcore): baseline v1.3.0 → v1.4.0"** with the real file diff.
 
 Install: copy the template to `.github/workflows/`, enable the repo setting
 *Allow GitHub Actions to create and approve pull requests*, and (private
-Agent Base repo only) add a `KIT_TOKEN` secret — see comments in the template.
+FleetCore repo only) add a `KIT_TOKEN` secret — see comments in the template.
 
 Safety rules, encoded in the workflow:
 
@@ -140,7 +140,7 @@ Safety rules, encoded in the workflow:
 - Never auto-merge; rollback is closing the PR (branch auto-deletes).
 
 No ADO equivalent ships yet — on Azure DevOps use the scheduled
-`baseline-pin-check.ado.yml` nudge plus a manual `base-refresh` run.
+`baseline-pin-check.ado.yml` nudge plus a manual `fcore-update` run.
 
 ### Renovate (supplement, not replacement)
 
@@ -151,7 +151,7 @@ Renovate. Otherwise the bot workflow alone is the simpler path.
 
 ## Migrating projects set up before v1.0.0
 
-Pick your case from the marker (`.claude/agent-base.json`):
+Pick your case from the marker (`.claude/fcore.json`):
 
 - **`standard` is semver, `pin` missing** → nothing to fix; sync derives the
   pin as `v<standard>`, and the first `--upgrade` writes the full marker
@@ -159,11 +159,11 @@ Pick your case from the marker (`.claude/agent-base.json`):
 - **`standard` is not semver (e.g. a sha)** → the marker fails validation.
   Edit the marker once by hand: set `standard` to the release you are
   effectively on (e.g. `1.0.0`), add `"pin": "v1.0.0"`, and check that
-  `toolRepo` points at the current Agent Base repo URL (pre-rename projects
+  `toolRepo` points at the current FleetCore repo URL (pre-rename projects
   may still point at the repo's retired v1 name). Then run `--upgrade`
   normally.
 - **Pre-rename marker or layout** (marker file or paths from before the
-  Agent Base rename) → run the full setup flow again
+  FleetCore rename) → run the full setup flow again
   ([setup guide](./setup-guide.md)); your current state is existing-project
   input, protected by the normal gates. Don't hand-migrate.
 
@@ -177,4 +177,4 @@ via npx at the pin and fail loudly. See the note under
 
 - [Setup guide](./setup-guide.md) — initial install
 - [Terminology](../reference/terminology.md) — vocabulary
-- `base-check` skill — post-sync audit loop
+- `fcore-check` skill — post-sync audit loop

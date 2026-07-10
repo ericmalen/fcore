@@ -4,7 +4,7 @@ import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import { checkLinks } from '../.claude/skills/docs/scripts/check-links.mjs';
+import { checkLinks } from '../.claude/skills/docs-manager/scripts/check-links.mjs';
 
 function makeRepo(files) {
   const dir = mkdtempSync(join(tmpdir(), 'aikit-links-'));

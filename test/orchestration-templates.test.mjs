@@ -47,7 +47,7 @@ for (const fixture of BLUEPRINTS) {
       assert.ok(existsSync(path), `template ${agent.templateId}.template.md missing`);
       const { content, errors } = instantiateTemplate(readFileSync(path, 'utf8'), slotMapFor(agent, bp));
       assert.deepEqual(errors, []);
-      assert.ok(!content.includes('agent-base:slot'), 'no marker text survives');
+      assert.ok(!content.includes('fcore:slot'), 'no marker text survives');
       assert.match(content, new RegExp(`^name: ${agent.name}$`, 'm'));
     });
   }
@@ -67,11 +67,11 @@ for (const [skillId] of Object.entries(registry.skills)) {
     assert.ok(specialist, `no maxi specialist lists pairedSkills "${skillId}"`);
     const tpl = readFileSync(join(SKILL_TEMPLATES, `${skillId}.template.md`), 'utf8');
     // C2 invariant stated directly, not via the fixture: exactly these 5 slots
-    const markers = new Set([...tpl.matchAll(/<!--\s*agent-base:slot:([a-z0-9-]+)\s*-->/g)].map((m) => m[1]));
+    const markers = new Set([...tpl.matchAll(/<!--\s*fcore:slot:([a-z0-9-]+)\s*-->/g)].map((m) => m[1]));
     assert.deepEqual([...markers].sort(), ['conventions', 'layer-path', 'manifest-path', 'stack', 'test-cmd']);
     const { content, errors } = instantiateTemplate(tpl, specialist.slots);
     assert.deepEqual(errors, []);
-    assert.ok(!content.includes('agent-base:slot'));
+    assert.ok(!content.includes('fcore:slot'));
     assert.match(content, new RegExp(`^name: ${skillId}$`, 'm'));
   });
 }

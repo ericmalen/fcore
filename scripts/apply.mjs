@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // apply — deterministically assemble the project tree from
-// nodes + manifest + Agent Base templates + literals.
+// nodes + manifest + FleetCore templates + literals.
 //
 // Conservation by construction: node bytes are copied verbatim from
 // .setup/nodes/, never re-typed. The only non-node bytes in generated
@@ -8,8 +8,8 @@
 // (inserted only when a chunk does not end with a newline).
 //
 // Assembly semantics (owner decision):
-// - Structured targets = targets with an Agent Base template containing
-//   `<!-- agent-base:slot:NAME -->` markers. Entries attach content to a slot;
+// - Structured targets = targets with an FleetCore template containing
+//   `<!-- fcore:slot:NAME -->` markers. Entries attach content to a slot;
 //   slot content is concatenated in MANIFEST ORDER and replaces the marker.
 //   Unused markers are removed (the template's surrounding text stays).
 // - Free-form targets (no template) = pure manifest-order concatenation.
@@ -247,13 +247,13 @@ export function apply({ root, templatesDir, outRoot = null }) {
         throw new Error(`existing ${jm.file} is not valid JSON(C): ${e.message} — fix the file or route it through the manifest`);
       }
     }
-    // source keys preserved; Agent Base template wins on its own keys
+    // source keys preserved; FleetCore template wins on its own keys
     const merged = deepMerge(srcObj, baseObj);
     outputs.set(jm.file, JSON.stringify(merged, null, 2) + '\n');
   }
 
   // ── 3b. Guarantee R-47: .gitignore excludes personal settings ─────────────
-  // Idempotent, and deliberately NOT recorded in `generated`: Agent Base owns only
+  // Idempotent, and deliberately NOT recorded in `generated`: FleetCore owns only
   // this one line, not the whole file, so the reproducibility gate must never
   // sha-compare a existing project .gitignore it does not fully own. Coverage test
   // mirrors the R-47 audit check so apply and audit agree exactly.

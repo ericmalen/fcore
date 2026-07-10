@@ -1,23 +1,23 @@
 ---
 name: api-testing
-description: Procedure for testing API endpoint changes in the <!-- agent-base:slot:stack --> layer at <!-- agent-base:slot:layer-path -->. Use when an endpoint, handler, or route in that layer is added or modified and its behavior must be proven with tests. Not for UI testing, schema migrations, or layers outside <!-- agent-base:slot:layer-path -->.
+description: Procedure for testing API endpoint changes in the <!-- fcore:slot:stack --> layer at <!-- fcore:slot:layer-path -->. Use when an endpoint, handler, or route in that layer is added or modified and its behavior must be proven with tests. Not for UI testing, schema migrations, or layers outside <!-- fcore:slot:layer-path -->.
 ---
 
 How the layer specialist tests endpoint changes in
-`<!-- agent-base:slot:layer-path -->` (<!-- agent-base:slot:stack -->).
+`<!-- fcore:slot:layer-path -->` (<!-- fcore:slot:stack -->).
 
 ## Procedure
 
 1. Locate the existing test patterns. Find tests under
-   `<!-- agent-base:slot:layer-path -->` that exercise endpoints similar to the
+   `<!-- fcore:slot:layer-path -->` that exercise endpoints similar to the
    one you changed — same router, same handler style. Read at least one
    end-to-end before writing anything: its setup, fixtures, assertion style,
    and file placement are your pattern. The layer manifest
-   (`<!-- agent-base:slot:manifest-path -->`) names the test framework and
+   (`<!-- fcore:slot:manifest-path -->`) names the test framework and
    HTTP tooling in play — match them.
 2. Write or extend tests beside the ones you found, in the same directory
    and naming style. Follow the layer conventions:
-   <!-- agent-base:slot:conventions -->.
+   <!-- fcore:slot:conventions -->.
 3. Cover the change, not just the happy path:
    - **Request validation** — malformed bodies, missing required fields,
      wrong types; assert the rejection status and error shape.
@@ -27,7 +27,7 @@ How the layer specialist tests endpoint changes in
      response types come from a shared schema or types package, assert
      against those definitions rather than re-declaring shapes inline, so
      contract drift fails the test.
-4. Run `<!-- agent-base:slot:test-cmd -->`. Fix failures before reporting.
+4. Run `<!-- fcore:slot:test-cmd -->`. Fix failures before reporting.
 5. Quote the test command output verbatim in your report — pass/fail counts
    at minimum. Never summarize it away.
 

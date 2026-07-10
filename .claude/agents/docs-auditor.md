@@ -49,7 +49,7 @@ everything, changes nothing.
 
 ## Documents
 
-.claude/skills/docs/references/diataxis.md
-.claude/skills/docs/references/decisions.md
-.claude/skills/docs/references/changelog.md
-.claude/skills/docs/references/proportionality.md
+.claude/skills/docs-manager/references/diataxis.md
+.claude/skills/docs-manager/references/decisions.md
+.claude/skills/docs-manager/references/changelog.md
+.claude/skills/docs-manager/references/proportionality.md

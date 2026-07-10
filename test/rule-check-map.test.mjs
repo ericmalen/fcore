@@ -8,7 +8,7 @@ import { run, parseRules, parseEmitted, parseEscalation } from '../scripts/rule-
 
 const BASE_ROOT = fileURLToPath(new URL('..', import.meta.url));
 
-test('Agent Base rule↔check map is intact (no orphan rules, no stale emissions)', () => {
+test('FleetCore rule↔check map is intact (no orphan rules, no stale emissions)', () => {
   assert.deepEqual(run(BASE_ROOT), []);
 });
 
@@ -35,11 +35,11 @@ test('live strict-escalation arrows match audit.mjs (11 arrows, in sync)', () =>
   assert.deepEqual([...strictArrows.entries()].sort(), [...escalation.entries()].sort());
 });
 
-test('parser ignores judgment-only rules and Agent Base-CI rules for the audit requirement', () => {
+test('parser ignores judgment-only rules and FleetCore-CI rules for the audit requirement', () => {
   const rules = parseRules([
     '**R-90 · A mechanical audit rule** · mechanical · audit, warning',
     '**R-91 · A judgment rule** · judgment · rubric',
-    '**R-92 · An Agent Base-CI rule** · mechanical · Agent Base CI',
+    '**R-92 · An FleetCore-CI rule** · mechanical · FleetCore CI',
     '**R-93 · A *(compat)* rule** · mechanical · audit, warning',
   ].join('\n'));
   assert.deepEqual([...rules.mechanicalAudit].sort(), ['R-90', 'R-93']);
@@ -51,7 +51,7 @@ test('parseEmitted finds F() rule emissions in either quote style', () => {
   assert.deepEqual([...emitted].sort(), ['R-01', 'R-44']);
 });
 
-// Build a minimal Agent Base-shaped tree so run() can read the files.
+// Build a minimal FleetCore-shaped tree so run() can read the files.
 // audit.mjs (the STRICT_ESCALATION carrier) is optional — absent means
 // an empty escalation map.
 function seedKit(rules, checks, auditSrc) {

@@ -1,8 +1,8 @@
 // staging.mjs — copy-once-immutable release staging for the bootstrap commands.
 // npx delivers the package into a prunable cache (~/.npm/_npx); the AI-tool
-// sessions that base-setup/base-orchestrate dispatch need the checkout at a
+// sessions that fcore-onboard/fcore-fleet-config dispatch need the checkout at a
 // stable path across sessions. So the CLI copies the whole package to
-// ~/.agent-base/versions/<tag>/ exactly once per tag (staged into a temp
+// ~/.fcore/versions/<tag>/ exactly once per tag (staged into a temp
 // sibling, sentinel included, then renamed into place atomically; a partial
 // stage without the sentinel is wiped and re-copied). Staged releases are
 // immutable — never `git pull`ed (npm strips .git anyway).
@@ -19,19 +19,19 @@ import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { compareSemver, tagToSemver } from '../../scripts/lib/release.mjs';
 
-export const SENTINEL = '.agent-base-staged';
+export const SENTINEL = '.fcore-staged';
 
 export function pkgRootFromHere() {
   return resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 }
 
-// AGENT_BASE_HOME relocates the release store root (tests, sandboxed CI).
+// FCORE_HOME relocates the release store root (tests, sandboxed CI).
 function defaultHome() {
-  return process.env.AGENT_BASE_HOME || homedir();
+  return process.env.FCORE_HOME || homedir();
 }
 
 export function versionsDir(home = defaultHome()) {
-  return join(home, '.agent-base', 'versions');
+  return join(home, '.fcore', 'versions');
 }
 
 /**

@@ -29,7 +29,7 @@ the Markdown companion is rendered, never written by hand.
    NOT re-asked — this overrides step 3's "always asked" fields; a re-run is
    not a policy reset. Only fields in `ask` go through step 3.
 3. Load the question bank: `.claude/skills/interview-guide/SKILL.md` in the
-   base checkout. For each field still in `ask` (all seven on a fresh run),
+   fcore checkout. For each field still in `ask` (all seven on a fresh run),
    decide ask vs confirm per its "Ask when" column, using the profile's
    `gaps[]` and conventions as evidence.
 4. Collect answers. Interactive session: ask the human, one question at a
@@ -41,7 +41,7 @@ the Markdown companion is rendered, never written by hand.
    they came from `kept`.
 6. Assemble `decisions.json` (`schemaVersion: 1` + the seven fields, kept
    values merged with newly answered ones) and validate BEFORE writing, from
-   the base checkout:
+   the fcore checkout:
 
    ```
    node --input-type=module -e '
@@ -78,7 +78,7 @@ the Markdown companion is rendered, never written by hand.
 - Never write a `decisions.json` that fails `validateDecisionsDoc`.
 - Never proceed to blueprint synthesis or generation — that is the
   plan-synthesizer's job (B8).
-- Never modify the profile, the target's source, or Agent Base.
+- Never modify the profile, the target's source, or FleetCore.
 
 ## Documents
 

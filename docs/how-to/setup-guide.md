@@ -1,4 +1,4 @@
-# Setting up a repository with Agent Base
+# Setting up a repository with FleetCore
 
 How to set up a repo (new or existing) for AI-assisted coding with both
 Claude Code and GitHub Copilot (VS Code), using the setup tooling.
@@ -15,7 +15,7 @@ zero-dependency Node invoked as `node <script>.mjs` (shell-agnostic, no
 bash required); the only external command it spawns is `git`. The CI
 templates run on hosted Ubuntu runners, not your machine.
 
-At most you type one `npx` command. The AI resolves Agent Base, installs the
+At most you type one `npx` command. The AI resolves FleetCore, installs the
 tooling, and runs every script itself.
 
 ## Starting a NEW project (starter)
@@ -23,14 +23,14 @@ tooling, and runs every script itself.
 Emit the clean target state directly:
 
 ```sh
-npx github:ericmalen/agent-base#v1.2.1 starter /path/to/new-repo --git
+npx github:ericmalen/fcore#v1.2.1 starter /path/to/new-repo --git
 # or, from a clone:
-node ~/tools/agent-base/scripts/build-starter.mjs /path/to/new-repo --git
+node ~/tools/fcore/scripts/build-starter.mjs /path/to/new-repo --git
 ```
 
 Fill in AGENTS.md and you're done. No AI session required. The starter ships
 the same permanent baseline as a full setup — all baseline skills plus the
-docs-auditor agent — so it is born current for `sync-baseline`. (Agent Base's
+docs-auditor agent — so it is born current for `sync-baseline`. (FleetCore's
 CI publishes the same output as a build artifact named `starter`, if you'd
 rather download than run the script.)
 
@@ -39,7 +39,7 @@ rather download than run the script.)
 From your repo root:
 
 ```sh
-npx github:ericmalen/agent-base#v1.2.1 setup
+npx github:ericmalen/fcore#v1.2.1 setup
 ```
 
 This stages the release at a stable path, then hands off down a chain:
@@ -48,36 +48,36 @@ This stages the release at a stable path, then hands off down a chain:
    script) → it launches `claude` right in your repo with setup already
    started. Answer its questions; that's it.
 2. **No `claude` (Copilot users, Windows)** → it drops a one-shot
-   `/agent-base-bootstrap` launcher skill into the repo (untracked, deletes
+   `/fcore-bootstrap` launcher skill into the repo (untracked, deletes
    itself on use). Open Claude Code or Copilot (agent mode) in the repo and
-   type `/agent-base-bootstrap`.
+   type `/fcore-bootstrap`.
 3. **Fallback** → it prints the exact prompt to paste into your AI session.
 
 `--no-launch` skips step 1; `--print` skips 1 and 2 (never writes to the
 repo — the release is still staged).
 Non-GitHub hosting uses the `git+<https-url>#<tag>` spec form — see the
-[CLI reference](../reference/agent-base-cli.md).
+[CLI reference](../reference/fcore-cli.md).
 
 Prefer zero terminal? Paste ONE prompt instead:
 
-> Clone https://github.com/ericmalen/agent-base into a temp folder
-> and follow its .claude/skills/base-setup/SKILL.md to set up this repository.
+> Clone https://github.com/ericmalen/fcore into a temp folder
+> and follow its .claude/skills/fcore-onboard/SKILL.md to set up this repository.
 
 Either way that's the whole setup. The AI installs the tooling, commits it,
 and starts the four-phase flow below. The setup-time tooling is removed again
-before merge; what stays is the permanent baseline — the `base-check`, `docs`,
+before merge; what stays is the permanent baseline — the `fcore-check`, `docs-manager`,
 `git-conventions`, `skill-creator`, and `agent-creator` skills; the
-orchestration lifecycle skills `retro`, `log-report`, `eval-runner`, and
+orchestration lifecycle skills `checklist-intake`, `log-report`, `eval-runner`, and
 `tracker-sync` (dormant until orchestration generation creates their
 surfaces); and the `docs-auditor` agent.
 
-**Working from a clone (Agent Base development, or fallback):** keep a clone
-(`git clone <url> ~/tools/agent-base`), open it in your tool, and say
-`/base-setup /path/to/repo`. The skill freshens the clone, installs the
+**Working from a clone (FleetCore development, or fallback):** keep a clone
+(`git clone <url> ~/tools/fcore`), open it in your tool, and say
+`/fcore-onboard /path/to/repo`. The skill freshens the clone, installs the
 tooling into the target, and orchestrates all four phases from there.
 
 **Copilot users:** Copilot will ask approval when the AI runs git/node — to
-reduce prompts, allowlist `node .claude/agent-base-setup/scripts/*` and
+reduce prompts, allowlist `node .claude/fcore-onboard/scripts/*` and
 read-only git verbs in `chat.tools.terminal.autoApprove`. Review the list
 yourself — that is the point of it.
 
@@ -85,13 +85,13 @@ yourself — that is the point of it.
 
 | Session | Invoke | What happens | You decide |
 |---|---|---|---|
-| 1 | `base-inventory` | mechanical extraction of every AI surface + a sweep for buried AI instructions; setup branch created | — |
-| 2 | `base-plan` | AI routes every piece of content (manifest); setup questions (Copilot review, path-scoping, optional lifecycle skills — default none) | **Gate 1:** approve the plan + risk report |
-| 3 | `base-apply` | deterministic assembly; mechanical gates converge (check + audit) | — |
-| 4 | `base-verify` | independent fresh-context verification (rubric + loss-hunt) | **Gate 2:** review report + diff, merge |
+| 1 | `fcore-inventory` | mechanical extraction of every AI surface + a sweep for buried AI instructions; setup branch created | — |
+| 2 | `fcore-plan` | AI routes every piece of content (manifest); setup questions (Copilot review, path-scoping, optional lifecycle skills — default none) | **Gate 1:** approve the plan + risk report |
+| 3 | `fcore-apply` | deterministic assembly; mechanical gates converge (check + audit) | — |
+| 4 | `fcore-verify` | independent fresh-context verification (rubric + loss-hunt) | **Gate 2:** review report + diff, merge |
 
 Each phase validates the previous one's committed artifacts, so sessions can
-be days apart. Abort at any point by deleting the `agent-base-setup` branch —
+be days apart. Abort at any point by deleting the `fcore-onboard` branch —
 your repo is untouched until YOU merge.
 
 ## What the gates guarantee (honestly)
@@ -108,30 +108,30 @@ your repo is untouched until YOU merge.
 
 ## After setup
 
-- `base-check` (installed skill) is your drift checker — run it any time.
+- `fcore-check` (installed skill) is your drift checker — run it any time.
   It stays after merge alongside the rest of the permanent baseline: the
-  `docs`, `git-conventions`, `skill-creator`, and `agent-creator` skills and
+  `docs-manager`, `git-conventions`, `skill-creator`, and `agent-creator` skills and
   the `docs-auditor` agent. Its `references/lifecycle.md` is the full
   in-project "what next" map (deep sweeps, orchestration, refresh).
 - Orchestration (a generated multi-agent team + `tasks.md` backlog) is
   **optional and evidence-driven** — most projects never need it. Once the
   repo has a code layer with a test command:
-  `npx github:ericmalen/agent-base#<pin> orchestrate` (pin from
-  `.claude/agent-base.json`). It runs Agent Base-side and is deliberately
+  `npx github:ericmalen/fcore#<pin> orchestrate` (pin from
+  `.claude/fcore.json`). It runs FleetCore-side and is deliberately
   not installed into the project. See
   [orchestration-guide](./orchestration-guide.md).
-- The orchestration lifecycle skills `retro`, `log-report`, `eval-runner`,
+- The orchestration lifecycle skills `checklist-intake`, `log-report`, `eval-runner`,
   and `tracker-sync` are optional (R-55) — not installed by default. Add any
-  with `agent-base skills add <name>` (list with `agent-base skills list`);
-  `base-orchestrate` installs all four automatically when you generate
+  with `fcore skills add <name>` (list with `fcore skills list`);
+  `fcore-fleet-config` installs all four automatically when you generate
   orchestration.
-- Updating to a newer Agent Base release: use baseline sync, not a re-setup.
+- Updating to a newer FleetCore release: use baseline sync, not a re-setup.
   `sync-baseline --check` flags a stale pin; `--report` shows the plan;
   `--upgrade` applies it — see [baseline-sync](./baseline-sync.md). The
-  `base-refresh` skill (run from a base checkout, like `base-setup` —
-  `npx github:ericmalen/agent-base#<new-tag> refresh` starts it)
+  `fcore-update` skill (run from a fcore checkout, like `fcore-onboard` —
+  `npx github:ericmalen/fcore#<new-tag> refresh` starts it)
   walks the full loop for you. Re-run the full setup flow only for
   major/breaking changes to routing or layout; your current state is just
   new existing-project input, protected by the same machinery.
 - Review the diff with move-detection on:
-  `git diff main...agent-base-setup --color-moved=zebra --find-copies-harder`
+  `git diff main...fcore-onboard --color-moved=zebra --find-copies-harder`

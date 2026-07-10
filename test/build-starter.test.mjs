@@ -25,22 +25,22 @@ test('starter build: empty dir → exit 0, files written, version printed', () =
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, new RegExp(`starter → .+ \\(v${BASE_VERSION.replaceAll('.', '\\.')}\\)`));
     assert.match(r.stdout, /Next steps:/);
-    assert.match(r.stdout, /base-check/);
+    assert.match(r.stdout, /fcore-check/);
     for (const rel of [
       'AGENTS.md', 'CLAUDE.md', '.gitignore', 'README.md',
       '.claude/settings.json', '.vscode/settings.json',
-      '.claude/skills/README.md', '.claude/skills/base-check/SKILL.md',
-      '.claude/skills/base-check/references/lifecycle.md',
-      '.claude/agent-base.json',
+      '.claude/skills/README.md', '.claude/skills/fcore-check/SKILL.md',
+      '.claude/skills/fcore-check/references/lifecycle.md',
+      '.claude/fcore.json',
     ]) {
       assert.ok(existsSync(join(target, rel)), `starter ships ${rel}`);
     }
-    const marker = JSON.parse(readFileSync(join(target, '.claude/agent-base.json'), 'utf8'));
+    const marker = JSON.parse(readFileSync(join(target, '.claude/fcore.json'), 'utf8'));
     assert.equal(marker.standard, BASE_VERSION);
     assert.equal(marker.githubCodeReview, false);
     const readme = readFileSync(join(target, 'README.md'), 'utf8');
     assert.match(readme, /AGENTS\.md/);
-    assert.match(readme, /base-check/);
+    assert.match(readme, /fcore-check/);
   } finally {
     rmSync(target, { recursive: true, force: true });
   }
@@ -119,7 +119,7 @@ test('starter build: ships the full permanent baseline, byte-identical to source
     const want = baselineFileHashes(join(import.meta.dirname, '..'));
     const got = baselineFileHashes(target);
     assert.deepEqual([...got.entries()].sort(), [...want.entries()].sort(),
-      'baseline trees byte-identical to Agent Base source');
+      'baseline trees byte-identical to FleetCore source');
     assert.ok(want.size > 0, 'parity oracle is non-empty');
   } finally {
     rmSync(target, { recursive: true, force: true });
@@ -132,7 +132,7 @@ test('starter build: fresh starter is repair-complete (sync-baseline no-op)', ()
     const r = run([target]);
     assert.equal(r.status, 0, r.stderr);
     const res = runSyncBaseline({
-      root: target, baseRoot: join(import.meta.dirname, '..'), upgrade: true, json: true,
+      root: target, fcoreRoot: join(import.meta.dirname, '..'), upgrade: true, json: true,
     });
     assert.equal(res.exitCode, 0);
     assert.equal(res.payload.applied, false);
@@ -142,7 +142,7 @@ test('starter build: fresh starter is repair-complete (sync-baseline no-op)', ()
   }
 });
 
-// Minimal fake Agent Base root: enough for build-starter to run (its baseRoot
+// Minimal fake FleetCore root: enough for build-starter to run (its fcoreRoot
 // is derived from its own file location, so the script must be copied too).
 function seedFakeBase(version, { git = false } = {}) {
   const base = mkdtempSync(join(tmpdir(), 'ab-fakebase-'));
@@ -189,7 +189,7 @@ test('starter build: --git → repo on main, one commit, clean tree', () => {
     assert.equal(git(['branch', '--show-current']).stdout.trim(), 'main');
     assert.equal(git(['rev-list', '--count', 'HEAD']).stdout.trim(), '1');
     assert.equal(git(['status', '--porcelain']).stdout.trim(), '', 'working tree clean');
-    assert.match(git(['log', '-1', '--format=%s']).stdout, /agent-base starter/);
+    assert.match(git(['log', '-1', '--format=%s']).stdout, /fcore starter/);
   } finally {
     rmSync(target, { recursive: true, force: true });
   }

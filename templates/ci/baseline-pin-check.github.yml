@@ -1,11 +1,11 @@
 # baseline-pin-check — warn/fail when the project's baseline pin is behind the
-# latest compatible Agent Base release. Optional companion to audit-strict.
+# latest compatible FleetCore release. Optional companion to audit-strict.
 # Installed by setup for repos with GitHub CI when teams want Renovate-style nudges.
 #
-# npx spec and pin come from .claude/agent-base.json (toolRepo, pin).
-# Resolves Agent Base via npx at the pin for sync-baseline; a failed resolution
+# npx spec and pin come from .claude/fcore.json (toolRepo, pin).
+# Resolves FleetCore via npx at the pin for sync-baseline; a failed resolution
 # fails the build (never falls back to an unpinned ref).
-# Private Agent Base repo? Route git credentials via insteadOf — see commented line below.
+# Private FleetCore repo? Route git credentials via insteadOf — see commented line below.
 # Default is fail-when-behind; for a warn-only nudge, drop the final `exit 1`.
 name: baseline-pin-check
 on:
@@ -26,11 +26,11 @@ jobs:
       - name: Check baseline pin (--check)
         run: |
           set -euo pipefail
-          test -f .claude/agent-base.json
-          NPX_SPEC="$(node -e 'const m=require("./.claude/agent-base.json");const pin=m.pin||("v"+m.standard);const url=String(m.toolRepo).trim().replace(/\/+$/,"");const gh=url.match(/^(?:git\+)?https:\/\/github\.com\/([^\/]+)\/([^\/]+?)(?:\.git)?$/);process.stdout.write((gh?"github:"+gh[1]+"/"+gh[2]:url.startsWith("git+")?url:url.startsWith("git@")?"git+ssh://"+url.replace(":","/"):"git+"+url)+"#"+pin)')"
-          # Private Agent Base repo? npm fetches git deps through git — route credentials, e.g.:
+          test -f .claude/fcore.json
+          NPX_SPEC="$(node -e 'const m=require("./.claude/fcore.json");const pin=m.pin||("v"+m.standard);const url=String(m.toolRepo).trim().replace(/\/+$/,"");const gh=url.match(/^(?:git\+)?https:\/\/github\.com\/([^\/]+)\/([^\/]+?)(?:\.git)?$/);process.stdout.write((gh?"github:"+gh[1]+"/"+gh[2]:url.startsWith("git+")?url:url.startsWith("git@")?"git+ssh://"+url.replace(":","/"):"git+"+url)+"#"+pin)')"
+          # Private FleetCore repo? npm fetches git deps through git — route credentials, e.g.:
           # git config --global url."https://x-token:${{ secrets.KIT_TOKEN }}@github.com/".insteadOf "https://github.com/"
           npx --yes "$NPX_SPEC" sync --check --json || {
-            echo "::warning title=Agent Base baseline behind::Run sync-baseline --report locally or open a bot PR."
+            echo "::warning title=FleetCore baseline behind::Run sync-baseline --report locally or open a bot PR."
             exit 1
           }

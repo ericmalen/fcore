@@ -41,7 +41,7 @@ function hashTree(root, rel) {
 }
 
 /**
- * Expand baseline copy pairs into per-file hashes for an Agent Base/project root.
+ * Expand baseline copy pairs into per-file hashes for an FleetCore/project root.
  * `optionalSkills` (the project's selected set) extends the baseline with the
  * matching optional-skill trees so sync upgrades only what the project opted
  * into — unselected optionals are absent from every root and never surface.
@@ -88,10 +88,10 @@ function pathObstruction(projectRoot, rel) {
  * - unchanged: already match newBase
  * - removed: still in the project but no longer shipped by newBase (never auto-deleted)
  */
-export function planBaselineSync(projectRoot, oldBaseRoot, newBaseRoot, { optionalSkills = [] } = {}) {
+export function planBaselineSync(projectRoot, oldFcoreRoot, newFcoreRoot, { optionalSkills = [] } = {}) {
   const project = baselineFileHashes(projectRoot, { optionalSkills });
-  const oldBase = baselineFileHashes(oldBaseRoot, { optionalSkills });
-  const newBase = baselineFileHashes(newBaseRoot, { optionalSkills });
+  const oldBase = baselineFileHashes(oldFcoreRoot, { optionalSkills });
+  const newBase = baselineFileHashes(newFcoreRoot, { optionalSkills });
 
   const allPaths = new Set([...project.keys(), ...oldBase.keys(), ...newBase.keys()]);
   const updates = [];
@@ -119,7 +119,7 @@ export function planBaselineSync(projectRoot, oldBaseRoot, newBaseRoot, { option
       else updates.push(path);
       continue;
     }
-    conflicts.push({ path, reason: 'local edit differs from Agent Base baseline' });
+    conflicts.push({ path, reason: 'local edit differs from FleetCore baseline' });
   }
 
   return {

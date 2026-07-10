@@ -80,7 +80,7 @@ to the tracker on the next sync.
 - A task that fails twice returns to Backlog with a `blocked:` line
   referencing the handoff-log entry — never silent retries.
 - Keep the file canonical (this exact layout): the orchestrator edits it via
-  Agent Base's parser/renderer, which accepts only this shape.
+  FleetCore's parser/renderer, which accepts only this shape.
 
 ## Bootstrapping tasks.md
 
@@ -111,4 +111,4 @@ Rules for the first item:
   report in their final message.
 
 Canonical examples also live in `test/fixtures/orchestration/tasks-canonical.md`
-in the Agent Base repo.
+in the FleetCore repo.

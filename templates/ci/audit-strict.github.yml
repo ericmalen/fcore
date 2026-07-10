@@ -1,10 +1,10 @@
-# audit-strict — set-up projects must stay conformant to the Agent Base standard layout.
+# audit-strict — set-up projects must stay conformant to the FleetCore standard layout.
 # Installed by setup for repos with GitHub CI (alongside docs-impact).
-# Runs the Agent Base audit at the pinned release (--strict).
+# Runs the FleetCore audit at the pinned release (--strict).
 #
-# Resolves Agent Base via npx at marker.pin (fallback: v{standard}); a failed
+# Resolves FleetCore via npx at marker.pin (fallback: v{standard}); a failed
 # resolution fails the build — never fall back to an unpinned ref. Private
-# Agent Base repo? Route git credentials via insteadOf — see commented line below.
+# FleetCore repo? Route git credentials via insteadOf — see commented line below.
 name: audit-strict
 on:
   pull_request:
@@ -21,14 +21,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Resolve Agent Base npx spec and audit (--strict)
+      - name: Resolve FleetCore npx spec and audit (--strict)
         run: |
           set -euo pipefail
-          test -f .claude/agent-base.json
-          NPX_SPEC="$(node -e 'const m=require("./.claude/agent-base.json");const pin=m.pin||("v"+m.standard);const url=String(m.toolRepo).trim().replace(/\/+$/,"");const gh=url.match(/^(?:git\+)?https:\/\/github\.com\/([^\/]+)\/([^\/]+?)(?:\.git)?$/);process.stdout.write((gh?"github:"+gh[1]+"/"+gh[2]:url.startsWith("git+")?url:url.startsWith("git@")?"git+ssh://"+url.replace(":","/"):"git+"+url)+"#"+pin)')"
-          # Private Agent Base repo? npm fetches git deps through git — route credentials, e.g.:
+          test -f .claude/fcore.json
+          NPX_SPEC="$(node -e 'const m=require("./.claude/fcore.json");const pin=m.pin||("v"+m.standard);const url=String(m.toolRepo).trim().replace(/\/+$/,"");const gh=url.match(/^(?:git\+)?https:\/\/github\.com\/([^\/]+)\/([^\/]+?)(?:\.git)?$/);process.stdout.write((gh?"github:"+gh[1]+"/"+gh[2]:url.startsWith("git+")?url:url.startsWith("git@")?"git+ssh://"+url.replace(":","/"):"git+"+url)+"#"+pin)')"
+          # Private FleetCore repo? npm fetches git deps through git — route credentials, e.g.:
           # git config --global url."https://x-token:${{ secrets.KIT_TOKEN }}@github.com/".insteadOf "https://github.com/"
           npx --yes "$NPX_SPEC" audit --root . --strict || {
-            echo "::error title=Agent Base audit failed::Audit findings, or $NPX_SPEC could not be resolved (check the tag exists and the runner can reach the repo; never fall back to an unpinned ref)."
+            echo "::error title=FleetCore audit failed::Audit findings, or $NPX_SPEC could not be resolved (check the tag exists and the runner can reach the repo; never fall back to an unpinned ref)."
             exit 1
           }

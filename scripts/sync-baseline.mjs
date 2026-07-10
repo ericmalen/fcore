@@ -11,11 +11,11 @@
 //
 // Options:
 //   --root <dir>           project root (default cwd)
-//   --base-root <dir>      local base checkout as the NEW (target) version.
+//   --fcore-root <dir>      local fcore checkout as the NEW (target) version.
 //                          NOTE: --report/--upgrade still shallow-clone the
-//                          CURRENT pin unless --old-base-root is also given;
+//                          CURRENT pin unless --old-fcore-root is also given;
 //                          pass both to run fully offline.
-//   --old-base-root <dir>  local checkout of the CURRENT pin (with --base-root)
+//   --old-fcore-root <dir>  local checkout of the CURRENT pin (with --fcore-root)
 //   --allow-major          consider latest tag across major versions
 //   --json                 machine-readable stdout
 //
@@ -32,9 +32,9 @@ import {
 } from './lib/release.mjs';
 import { planBaselineSync } from './lib/sync-plan.mjs';
 
-function readBaseVersion(baseRoot) {
+function readBaseVersion(fcoreRoot) {
   try {
-    const pkg = JSON.parse(readFileSync(join(baseRoot, 'package.json'), 'utf8'));
+    const pkg = JSON.parse(readFileSync(join(fcoreRoot, 'package.json'), 'utf8'));
     return pkg.version ?? '0.0.0';
   } catch {
     return '0.0.0';
@@ -44,8 +44,8 @@ function readBaseVersion(baseRoot) {
 function parseArgs(argv) {
   const opt = {
     root: process.cwd(),
-    baseRoot: null,
-    oldBaseRoot: null,
+    fcoreRoot: null,
+    oldFcoreRoot: null,
     check: false,
     report: false,
     upgrade: false,
@@ -56,8 +56,8 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--root') opt.root = resolve(argv[++i]);
-    else if (a === '--base-root' || a === '--kit-root') opt.baseRoot = resolve(argv[++i]); // --kit-root: legacy alias
-    else if (a === '--old-base-root' || a === '--old-kit-root') opt.oldBaseRoot = resolve(argv[++i]);
+    else if (a === '--fcore-root') opt.fcoreRoot = resolve(argv[++i]);
+    else if (a === '--old-fcore-root') opt.oldFcoreRoot = resolve(argv[++i]);
     else if (a === '--check') opt.check = true;
     else if (a === '--report') opt.report = true;
     else if (a === '--upgrade') opt.upgrade = true;
@@ -72,9 +72,9 @@ function parseArgs(argv) {
   return opt;
 }
 
-function checkoutBase(toolRepo, pin, baseRootOverride) {
-  if (baseRootOverride) return { path: baseRootOverride, cleanup: null };
-  const tmp = mkdtempSync(join(tmpdir(), 'agent-base-sync-'));
+function checkoutBase(toolRepo, pin, fcoreRootOverride) {
+  if (fcoreRootOverride) return { path: fcoreRootOverride, cleanup: null };
+  const tmp = mkdtempSync(join(tmpdir(), 'fcore-sync-'));
   try {
     shallowCloneAt(toolRepo, pin, tmp);
   } catch (e) {
@@ -101,12 +101,12 @@ function assertNoSymlinkComponents(projectRoot, relPaths) {
   }
 }
 
-function applyFileUpdates(projectRoot, baseRoot, relPaths) {
+function applyFileUpdates(projectRoot, fcoreRoot, relPaths) {
   assertNoSymlinkComponents(projectRoot, relPaths);
   for (const rel of relPaths) {
-    const from = join(baseRoot, rel);
+    const from = join(fcoreRoot, rel);
     const to = join(projectRoot, rel);
-    if (!existsSync(from)) throw new Error(`missing in Agent Base: ${rel}`);
+    if (!existsSync(from)) throw new Error(`missing in FleetCore: ${rel}`);
     mkdirSync(dirname(to), { recursive: true });
     cpSync(from, to);
   }
@@ -124,8 +124,8 @@ export function runSyncBaseline(opt) {
   const pinSem = tagToSemver(pin);
 
   let latest;
-  if (opt.baseRoot) {
-    latest = `v${readBaseVersion(opt.baseRoot)}`;
+  if (opt.fcoreRoot) {
+    latest = `v${readBaseVersion(opt.fcoreRoot)}`;
   } else {
     try {
       const tags = listRemoteTags(marker.toolRepo);
@@ -152,13 +152,13 @@ export function runSyncBaseline(opt) {
 
   const targetPin = latest;
 
-  // Pin ahead of target (stale --base-root checkout, deleted remote tags):
+  // Pin ahead of target (stale --fcore-root checkout, deleted remote tags):
   // proceeding would silently downgrade files and the marker.
   if (!behind && pinSem && latestSem && compareSemver(pinSem, latestSem) > 0) {
     return {
       ok: false,
       exitCode: 2,
-      error: `baseline pin ${pin} is ahead of target ${targetPin} — stale --base-root checkout or missing remote tags; refusing to sync`,
+      error: `baseline pin ${pin} is ahead of target ${targetPin} — stale --fcore-root checkout or missing remote tags; refusing to sync`,
     };
   }
 
@@ -166,17 +166,17 @@ export function runSyncBaseline(opt) {
   let newCo = null;
   try {
     try {
-      if (opt.oldBaseRoot && opt.baseRoot) {
-        oldCo = { path: opt.oldBaseRoot, cleanup: null };
-        newCo = { path: opt.baseRoot, cleanup: null };
+      if (opt.oldFcoreRoot && opt.fcoreRoot) {
+        oldCo = { path: opt.oldFcoreRoot, cleanup: null };
+        newCo = { path: opt.fcoreRoot, cleanup: null };
       } else if (!behind) {
         // Pin current: old and new baselines are identical, so one checkout
         // serves both sides and the plan reduces to missing-file repair.
-        newCo = checkoutBase(marker.toolRepo, targetPin, opt.baseRoot);
+        newCo = checkoutBase(marker.toolRepo, targetPin, opt.fcoreRoot);
         oldCo = newCo;
       } else {
         oldCo = checkoutBase(marker.toolRepo, pin, null);
-        newCo = checkoutBase(marker.toolRepo, targetPin, opt.baseRoot);
+        newCo = checkoutBase(marker.toolRepo, targetPin, opt.fcoreRoot);
       }
     } catch (e) {
       return { ok: false, exitCode: 2, error: `baseline checkout failed: ${e.message}` };
@@ -199,7 +199,7 @@ export function runSyncBaseline(opt) {
     // Local edits only block an upgrade (the old → new delta could overwrite
     // them). At a current pin there is no delta: repair restores missing
     // files, leaves edited files untouched, and reports them as drift —
-    // policing content drift is base-check's job, not sync's.
+    // policing content drift is fcore-check's job, not sync's.
     const blocked = behind && plan.conflicts.length > 0;
     const drift = !behind && plan.conflicts.length
       ? ` (${plan.conflicts.length} locally edited file(s) left untouched)`

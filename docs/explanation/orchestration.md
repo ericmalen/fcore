@@ -1,6 +1,6 @@
 # Orchestration — concepts and trade-offs
 
-Why agent-base offers optional multi-agent orchestration, how the pieces fit
+Why fcore offers optional multi-agent orchestration, how the pieces fit
 together, and when plain setup is enough.
 
 ## The problem it solves
@@ -18,12 +18,12 @@ with shared dispatch rules and a handoff log.
 
 | Layer | Where it runs | Semantic? | Output |
 | --- | --- | --- | --- |
-| Discovery | base checkout → target `docs/orchestration/` | Yes — profiling, interview, synthesis | `repo-profile.json`, `decisions.json`, `blueprint.json` |
-| Generation | base checkout → target `.claude/` + docs | No — pure template slot fill | Generated agents, paired skills, payload docs, `generation-manifest.json` |
+| Discovery | fcore checkout → target `docs/orchestration/` | Yes — profiling, interview, synthesis | `repo-profile.json`, `decisions.json`, `blueprint.json` |
+| Generation | fcore checkout → target `.claude/` + docs | No — pure template slot fill | Generated agents, paired skills, payload docs, `generation-manifest.json` |
 | Execution | Project | Yes — orchestrator dispatches specialists | Commits, handoff log entries, PR at human gate |
 
-Discovery and generation meta-assets stay **Agent Base-side** (same pattern as
-`base-setup`). Only the generated agents and orchestration docs land in the
+Discovery and generation meta-assets stay **FleetCore-side** (same pattern as
+`fcore-onboard`). Only the generated agents and orchestration docs land in the
 target. See [`target-layout.md`](../../spec/target-layout.md#orchestration-layer-conditional).
 
 ## Flat orchestration
@@ -66,11 +66,11 @@ unreachable from an ad-hoc request — the trigger nothing fires.
 
 There is also a *timing* dimension: orchestration is evidence-driven, so a
 repo with no code layer that has a test command has nothing for discovery to
-profile — a preflight guard stops `/base-orchestrate` before it burns a
+profile — a preflight guard stops `/fcore-fleet-config` before it burns a
 discovery phase on an empty repo, rather than asking you to describe the
 project you're planning to build. The team grows with the repo instead: set
 up baseline config, build the first layer with tests, generate a small team,
-then re-run `/base-orchestrate` each time a new layer ships. Re-runs are
+then re-run `/fcore-fleet-config` each time a new layer ships. Re-runs are
 cheap — the profile and blueprint always re-derive from current evidence, but
 policy decisions from the prior run carry forward unchanged (a re-run is not
 a policy reset), and generation stays deterministic, so growing the team
@@ -79,10 +79,10 @@ costs one more gate approval, not a fresh interview. See
 
 ## Quality flywheel
 
-The optional lifecycle skills `retro`, `log-report`, and `eval-runner` (R-55)
+The optional lifecycle skills `checklist-intake`, `log-report`, and `eval-runner` (R-55)
 activate once orchestration surfaces exist. They are opt-in — not in the
-default baseline — and `base-orchestrate` installs them as a generation
-prerequisite (or add them earlier with `agent-base skills add`). Bugs and
+default baseline — and `fcore-fleet-config` installs them as a generation
+prerequisite (or add them earlier with `fcore skills add`). Bugs and
 review findings become checklist items; handoff logs surface failing agents;
 golden evals gate template changes.
 
@@ -90,7 +90,7 @@ golden evals gate template changes.
 
 - [Orchestration how-to](../how-to/orchestration-guide.md) — five-session flow
   and gates.
-- [Agents and skills reference](../reference/agents-and-skills.md) — Agent Base-side
+- [Agents and skills reference](../reference/agents-and-skills.md) — FleetCore-side
   vs shipped vs generated inventory.
 - [First-run tutorial](../tutorials/orchestration-first-run.md) — walkthrough
-  on Agent Base fixtures.
+  on FleetCore fixtures.

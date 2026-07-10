@@ -27,7 +27,7 @@ manifest.
    `test/fixtures.test.mjs`; this row is the agent-judgment half.
 
 Verifier subagent prompt per run (defects 1–3): read-only; read the rubric at
-<fixture>/.claude/skills/base-check/references/rubric.md and the report at
+<fixture>/.claude/skills/fcore-check/references/rubric.md and the report at
 <fixture>/.setup/report.md; adversarial loss-hunt; one verdict row per
 drop/merge/out-of-scope entry. Do NOT tell it a defect was seeded.
 

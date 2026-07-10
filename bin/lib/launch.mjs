@@ -2,9 +2,9 @@
 // Best case for the bootstrap commands: spawn `claude` interactively in the
 // TARGET with the prompt as the initial message, so the user runs one npx
 // command and the flow simply starts. Detection is a PATH probe (the TTY
-// gate lives in agent-base.mjs); anything else (no CLI, Copilot-only,
+// gate lives in fcore.mjs); anything else (no CLI, Copilot-only,
 // Windows, piped stdio, --no-launch) falls back to the bootstrap-skill
-// drop + printed prompt in agent-base.mjs.
+// drop + printed prompt in fcore.mjs.
 //
 // Windows is excluded deliberately: `claude` installs as a .cmd shim there,
 // which Node refuses to spawn without shell:true, and shell:true cannot
@@ -27,7 +27,7 @@ export function findClaude({ cmd = 'claude', platform = process.platform } = {})
 export function launchClaude({ cmd = 'claude', prompt, cwd }) {
   const r = spawnSync(cmd, [prompt], { stdio: 'inherit', cwd });
   if (r.error) {
-    console.error(`agent-base: failed to launch ${cmd}: ${r.error.message}`);
+    console.error(`fcore: failed to launch ${cmd}: ${r.error.message}`);
     return null;
   }
   return r.status ?? 1;

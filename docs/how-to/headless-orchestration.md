@@ -11,7 +11,7 @@ unit-tested guard logic; a run always ends at PR creation, **never a merge**.
   (`docs/orchestration/generation-manifest.json` exists — see the
   [orchestration guide](./orchestration-guide.md))
 - A seeded `tasks.md` with at least one unblocked, non-`triage` Backlog item
-- The matching CI template copied from a base checkout:
+- The matching CI template copied from a fcore checkout:
   - `templates/ci/orchestrator-run.github.yml` → `.github/workflows/`
   - `templates/ci/orchestrator-run.ado.yml` → `.azuredevops/` (point a
     pipeline at it)
@@ -20,8 +20,8 @@ unit-tested guard logic; a run always ends at PR creation, **never a merge**.
 
 | Platform | Required | Optional |
 |---|---|---|
-| GitHub | `ANTHROPIC_API_KEY` secret; repo setting "Allow GitHub Actions to create and approve pull requests" | `KIT_TOKEN` (private Agent Base repo); `AZURE_DEVOPS_PAT` (tracker sync against ADO) |
-| ADO | `ANTHROPIC_API_KEY` secret variable; build service identity granted "Contribute" + "Create pull request" on the repo | `AGENT_BASE_TOKEN` (private Agent Base repo); `AZURE_DEVOPS_PAT` (tracker sync) |
+| GitHub | `ANTHROPIC_API_KEY` secret; repo setting "Allow GitHub Actions to create and approve pull requests" | `KIT_TOKEN` (private FleetCore repo); `AZURE_DEVOPS_PAT` (tracker sync against ADO) |
+| ADO | `ANTHROPIC_API_KEY` secret variable; build service identity granted "Contribute" + "Create pull request" on the repo | `FCORE_TOKEN` (private FleetCore repo); `AZURE_DEVOPS_PAT` (tracker sync) |
 
 No other credentials: PR creation uses the platform's own token
 (`github.token` / `System.AccessToken`), and the agent itself is told never
@@ -29,8 +29,8 @@ to push — the pipeline pushes.
 
 ## What a run does
 
-1. **Resolve Agent Base at pin** — computes the npx spec from the marker
-   (`toolRepo` + `pin`) and runs every Agent Base command via
+1. **Resolve FleetCore at pin** — computes the npx spec from the marker
+   (`toolRepo` + `pin`) and runs every FleetCore command via
    `npx --yes <spec>`; a failed resolution fails the run, never an unpinned
    fallback.
 2. **Guard** — the `headless-guard` command (a thin CLI over
@@ -74,7 +74,7 @@ skill over the handoff log for per-agent health.
 | `claude` exits non-zero after max turns | The task was too big for the cap — split it in `tasks.md` or raise `--max-turns` in the template |
 | Task bounced to Backlog with `blocked:` | Working as designed (failure protocol, one retry) — read the referenced handoff-log entry |
 | PR creation fails on ADO | Build service identity lacks "Create pull request" — Project Settings → Repositories → Security |
-| Pin resolution fails | The marker's `pin` tag is missing or unreachable via npx — fix `.claude/agent-base.json` (and git credentials for a private repo), never fall back unpinned |
+| Pin resolution fails | The marker's `pin` tag is missing or unreachable via npx — fix `.claude/fcore.json` (and git credentials for a private repo), never fall back unpinned |
 
 ## Further reading
 

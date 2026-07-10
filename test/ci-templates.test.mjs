@@ -9,8 +9,8 @@ import { npxSpecFromToolRepo } from '../scripts/lib/release.mjs';
 
 const CI = join(import.meta.dirname, '..', 'templates', 'ci');
 
-// Every pinned template (resolves Agent Base at marker.pin). docs-impact.* are
-// not pinned — they never fetch Agent Base.
+// Every pinned template (resolves FleetCore at marker.pin). docs-impact.* are
+// not pinned — they never fetch FleetCore.
 const PINNED_TEMPLATES = [
   'audit-strict.github.yml',
   'audit-strict.ado.yml',
@@ -41,17 +41,17 @@ test('all pinned templates carry the identical canonical NPX_SPEC snippet', () =
 test('the snippet agrees with npxSpecFromToolRepo on sample markers', () => {
   const program = load(PINNED_TEMPLATES[0]).match(SNIPPET_RE)[1];
   const cases = [
-    { toolRepo: 'https://github.com/ericmalen/agent-base', pin: 'v1.4.0' },
-    { toolRepo: 'https://github.com/ericmalen/agent-base.git', pin: 'v2.0.0' },
-    { toolRepo: 'https://dev.azure.com/org/proj/_git/agent-base', pin: 'v1.4.0' },
-    { toolRepo: 'git@github.com:ericmalen/agent-base.git', pin: 'v1.4.0' }, // scp-style ssh
-    { toolRepo: 'https://github.com/ericmalen/agent-base', standard: '1.2.3' }, // pin fallback
+    { toolRepo: 'https://github.com/ericmalen/fcore', pin: 'v1.4.0' },
+    { toolRepo: 'https://github.com/ericmalen/fcore.git', pin: 'v2.0.0' },
+    { toolRepo: 'https://dev.azure.com/org/proj/_git/fcore', pin: 'v1.4.0' },
+    { toolRepo: 'git@github.com:ericmalen/fcore.git', pin: 'v1.4.0' }, // scp-style ssh
+    { toolRepo: 'https://github.com/ericmalen/fcore', standard: '1.2.3' }, // pin fallback
   ];
   for (const c of cases) {
     const root = mkdtempSync(join(tmpdir(), 'ab-ci-'));
     try {
       mkdirSync(join(root, '.claude'), { recursive: true });
-      writeFileSync(join(root, '.claude', 'agent-base.json'),
+      writeFileSync(join(root, '.claude', 'fcore.json'),
         JSON.stringify({ standard: c.standard ?? '1.0.0', toolRepo: c.toolRepo, pin: c.pin }));
       const r = spawnSync(process.execPath, ['-e', program], { cwd: root, encoding: 'utf8' });
       assert.equal(r.status, 0, r.stderr);

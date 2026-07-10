@@ -1,4 +1,4 @@
-# Agent Base
+# FleetCore
 
 **Set up any repo for AI-assisted coding with Claude Code and GitHub Copilot —
 one shared set of config files, kept to a common standard.**
@@ -9,7 +9,7 @@ one shared set of config files, kept to a common standard.**
 
 ## What this is
 
-Agent Base brings any repo — brand-new or existing — to a consistent AI-coding
+FleetCore brings any repo — brand-new or existing — to a consistent AI-coding
 layout and keeps it there:
 
 - **One config, both tools.** Claude Code and Copilot read the same `AGENTS.md`,
@@ -18,11 +18,11 @@ layout and keeps it there:
   existing AI config into the [standard layout](./spec/target-layout.md) against a
   shared [rule catalog](./spec/rules.md), with two human approval gates.
 - **A permanent baseline** of skills plus a docs agent installed into every
-  project — including `base-check`, a drift auditor you can run any time.
+  project — including `fcore-check`, a drift auditor you can run any time.
 - **No stack- or domain-specific content** — you add that on top.
 
 > **This repo is the setup tool, not your application repo.** Nobody starts a
-> project by cloning Agent Base. Setup runs *from your project* against a base
+> project by cloning FleetCore. Setup runs *from your project* against a base
 > checkout — resolved via `npx`, or a shared clone — and installs only what
 > belongs in your project (see
 > [`spec/target-layout.md`](./spec/target-layout.md) for what you end up with).
@@ -47,21 +47,21 @@ first-time setup or bringing existing AI config up to the team standard.
 From your project, no clone needed:
 
 ```sh
-npx github:ericmalen/agent-base#v1.2.1 setup
+npx github:ericmalen/fcore#v1.2.1 setup
 ```
 
 This stages the release, then launches Claude Code in your project with
 setup already started (without the `claude` CLI it drops a one-shot
-`/agent-base-bootstrap` launcher skill and prints the prompt to paste —
+`/fcore-bootstrap` launcher skill and prints the prompt to paste —
 Copilot agent mode works through that path). Setup asks two questions
 (GitHub code review? path-scoping mechanism?), runs the four phases in fresh
 contexts, and stops at two human approval gates. Details:
 [`docs/how-to/setup-guide.md`](./docs/how-to/setup-guide.md);
-command surface: [`docs/reference/agent-base-cli.md`](./docs/reference/agent-base-cli.md).
+command surface: [`docs/reference/fcore-cli.md`](./docs/reference/fcore-cli.md).
 
-**Working from a clone (Agent Base development, or fallback):** clone once
-(`git clone <this-repo-url> ~/tools/agent-base`), open the clone in your AI
-tool, and run `/base-setup /path/to/project`.
+**Working from a clone (FleetCore development, or fallback):** clone once
+(`git clone <this-repo-url> ~/tools/fcore`), open the clone in your AI
+tool, and run `/fcore-onboard /path/to/project`.
 
 ### Starter project
 
@@ -69,20 +69,20 @@ tool, and run `/base-setup /path/to/project`.
 session entirely and emit the clean standard layout directly:
 
 ```sh
-npx github:ericmalen/agent-base#v1.2.1 starter /path/to/new-repo --git
-# or from a clone: node ~/tools/agent-base/scripts/build-starter.mjs /path/to/new-repo --git
+npx github:ericmalen/fcore#v1.2.1 starter /path/to/new-repo --git
+# or from a clone: node ~/tools/fcore/scripts/build-starter.mjs /path/to/new-repo --git
 ```
 
 The starter includes the same permanent baseline (skills + docs-auditor agent)
 as a full setup. Either path ends the same way: run the installed
-`base-check` skill any time for drift checks and the full lifecycle map.
+`fcore-check` skill any time for drift checks and the full lifecycle map.
 
 ### Check for drift later
 
-Set-up projects get a permanent `base-check` skill — run it any time to audit
+Set-up projects get a permanent `fcore-check` skill — run it any time to audit
 against the conventions and fix findings by rule ID. To pull a newer baseline
-release, run `npx github:ericmalen/agent-base#<new-tag> refresh` (or
-`base-refresh` from a clone, or `sync-baseline` directly) — see
+release, run `npx github:ericmalen/fcore#<new-tag> refresh` (or
+`fcore-update` from a clone, or `sync-baseline` directly) — see
 [`docs/how-to/baseline-sync.md`](./docs/how-to/baseline-sync.md).
 
 ### Generate orchestration (optional)
@@ -91,13 +91,13 @@ For repos with multiple layers or packages that need a generated multi-agent
 team and a `tasks.md` backlog:
 
 ```sh
-npx github:ericmalen/agent-base#v1.2.1 orchestrate
+npx github:ericmalen/fcore#v1.2.1 orchestrate
 ```
 
 which launches Claude Code with the flow started — without the `claude`
-CLI, type `/agent-base-bootstrap` in your AI session. (Clone path: open the
-base checkout in Claude Code or Copilot agent mode and run
-`/base-orchestrate /path/to/project`.) The project must already be set up and
+CLI, type `/fcore-bootstrap` in your AI session. (Clone path: open the
+fcore checkout in Claude Code or Copilot agent mode and run
+`/fcore-fleet-config /path/to/project`.) The project must already be set up and
 have a clean git working tree. Discovery and generation run in fresh contexts
 with two human policy gates; execution (`feature-orchestrator`) happens in the
 project after merge.
@@ -113,34 +113,34 @@ templates/       payload copied into every project: instructions/
                  readmes/ (R-48 stubs), ci/, gitignore
 scripts/ test/   the engine (zero-dep Node ≥ 20). Setup copies only the
                  five setup scripts + scripts/lib/ + templates/ into
-                 projects as .claude/agent-base-setup/ (test/ never ships)
-bin/             the agent-base npx entry point (never ships into projects;
-                 see docs/reference/agent-base-cli.md)
-.claude/         this repo's own live config; the base-* setup skills, baseline
-                 skills (base-check, docs, git-conventions, skill-creator,
+                 projects as .claude/fcore-onboard/ (test/ never ships)
+bin/             the fcore npx entry point (never ships into projects;
+                 see docs/reference/fcore-cli.md)
+.claude/         this repo's own live config; the fcore-* setup skills, baseline
+                 skills (fcore-check, docs, git-conventions, skill-creator,
                  agent-creator) and docs-auditor agent are dual-role (used here
-                 AND installed into every project). The lifecycle skills (retro,
+                 AND installed into every project). The lifecycle skills (checklist-intake,
                  log-report, eval-runner, tracker-sync) are optional (R-55):
-                 opt-in via `agent-base skills add` or base-orchestrate. See the
+                 opt-in via `fcore skills add` or fcore-fleet-config. See the
                  allowlist in scripts/lib/baseline.mjs, consumed by
                  scripts/install-setup.mjs. Orchestration
-                 discovery/generation meta-assets stay Agent Base-side only.
-                 base-setup is the setup entry point: run from a
+                 discovery/generation meta-assets stay FleetCore-side only.
+                 fcore-onboard is the setup entry point: run from a
                  checkout (clone or npx-staged release, or followed directly
                  by the one-prompt flow), never shipped (path is load-bearing:
-                 <checkout>/.claude/skills/base-setup/SKILL.md)
+                 <checkout>/.claude/skills/fcore-onboard/SKILL.md)
 docs/            consumer-facing guides
 reports/         generated outputs (gitignored)
 ```
 
 Why `templates/` is *not* under `.claude/`: anything in `.claude/` auto-loads
-while working on Agent Base itself. Payload is cargo, not config. Rationale:
+while working on FleetCore itself. Payload is cargo, not config. Rationale:
 [`docs/explanation/why-this-way.md`](./docs/explanation/why-this-way.md).
 
 ## Next steps
 
 - [`docs/how-to/setup-guide.md`](./docs/how-to/setup-guide.md) — setting up a project.
-- [`docs/reference/agent-base-cli.md`](./docs/reference/agent-base-cli.md) — the npx command surface.
+- [`docs/reference/fcore-cli.md`](./docs/reference/fcore-cli.md) — the npx command surface.
 - [`docs/how-to/baseline-sync.md`](./docs/how-to/baseline-sync.md) — release pins and baseline upgrades.
 - [`docs/how-to/release-baseline.md`](./docs/how-to/release-baseline.md) — cutting a tagged release (maintainers).
 - [`docs/how-to/orchestration-guide.md`](./docs/how-to/orchestration-guide.md) — optional multi-agent team generation.
@@ -156,7 +156,7 @@ while working on Agent Base itself. Payload is cargo, not config. Rationale:
 - [`docs/explanation/why-this-way.md`](./docs/explanation/why-this-way.md) — design rationale.
 - [`spec/target-layout.md`](./spec/target-layout.md#orchestration-layer-conditional) — optional orchestration layer (generated per project).
 
-## Developing Agent Base
+## Developing FleetCore
 
 Index READMEs for the live `.claude/` config:
 
@@ -164,8 +164,8 @@ Index READMEs for the live `.claude/` config:
 - [`.claude/skills/README.md`](./.claude/skills/README.md) — setup, baseline, and orchestration meta-skills.
 
 Orchestration assets: `templates/orchestration/` (agent/skill/doc templates),
-`scripts/lib/orchestration/` (validators and scaffold), Agent Base-side entry skill
-[`base-orchestrate`](./.claude/skills/base-orchestrate/SKILL.md). Build-plan
+`scripts/lib/orchestration/` (validators and scaffold), FleetCore-side entry skill
+[`fcore-fleet-config`](./.claude/skills/fcore-fleet-config/SKILL.md). Build-plan
 history: [`notes/agent-orchestration-plan.md`](./notes/agent-orchestration-plan.md).
 
 ## License

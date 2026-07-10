@@ -139,7 +139,7 @@ test('slot assembly: nodes land under template headings, markers vanish, source 
     apply({ root: repo, templatesDir: KIT_TEMPLATES });
 
     const agents = readFileSync(join(repo, 'AGENTS.md'), 'utf8');
-    assert.ok(!agents.includes('agent-base:slot'), 'slot markers must be gone');
+    assert.ok(!agents.includes('fcore:slot'), 'slot markers must be gone');
     // both Conventions-slot nodes present, in manifest order, under the heading
     const conv = agents.indexOf('## Conventions');
     const t1 = agents.indexOf('SENTINEL-002-cobalt-otter'); // Testing section
@@ -220,7 +220,7 @@ test('starter end-to-end: installs + jsonMerges ⇒ gates pass AND audit clean',
   try {
     mkdirSync(join(repo, '.setup', 'literals'), { recursive: true });
     writeFileSync(join(repo, '.setup', 'literals', 'marker.json'),
-      '{ "standard": "1.0.0", "toolRepo": "https://github.com/ericmalen/agent-base", "pin": "v1.0.0", "lastSyncedAt": "2026-06-10", "setupAt": "2026-06-10", "githubCodeReview": false }\n');
+      '{ "standard": "1.0.0", "toolRepo": "https://github.com/ericmalen/fcore", "pin": "v1.0.0", "lastSyncedAt": "2026-06-10", "setupAt": "2026-06-10", "githubCodeReview": false }\n');
     writeManifest(repo, {
       entries: [],
       installs: [
@@ -229,20 +229,20 @@ test('starter end-to-end: installs + jsonMerges ⇒ gates pass AND audit clean',
         { file: '.gitignore', template: 'gitignore' },
         { file: '.claude/settings.json', template: 'settings/claude/settings.json' },
         { file: '.claude/skills/README.md', template: 'readmes/skills/README.md' },
-        { file: '.claude/agent-base.json', literal: 'literals/marker.json' },
+        { file: '.claude/fcore.json', literal: 'literals/marker.json' },
       ],
       jsonMerges: [{ file: '.vscode/settings.json', base: 'settings/vscode/settings.json' }],
     });
     apply({ root: repo, templatesDir: KIT_TEMPLATES });
 
-    // base-check is a permanent baseline skill shipped verbatim from
+    // fcore-check is a permanent baseline skill shipped verbatim from
     // .claude/skills/ (by install-setup / build-starter), not the manifest.
     // Mirror that here so the R-50 presence check stays satisfied.
-    cpSync(join(process.cwd(), '.claude/skills/base-check'),
-      join(repo, '.claude/skills/base-check'), { recursive: true });
+    cpSync(join(process.cwd(), '.claude/skills/fcore-check'),
+      join(repo, '.claude/skills/fcore-check'), { recursive: true });
 
     const agents = readFileSync(join(repo, 'AGENTS.md'), 'utf8');
-    assert.ok(!agents.includes('agent-base:slot'), 'install strips slot markers');
+    assert.ok(!agents.includes('fcore:slot'), 'install strips slot markers');
     assert.ok(agents.includes('## Do Not'));
 
     assert.deepEqual(check({ root: repo, templatesDir: KIT_TEMPLATES }).violations, []);
@@ -259,9 +259,9 @@ test('starter end-to-end + optional skill (R-55) ⇒ installed; gates incl. repr
   const { repo } = setup('starter-empty');
   try {
     mkdirSync(join(repo, '.setup', 'literals'), { recursive: true });
-    // Marker literal selects an optional skill (what base-plan authors).
+    // Marker literal selects an optional skill (what fcore-plan authors).
     writeFileSync(join(repo, '.setup', 'literals', 'marker.json'),
-      '{ "standard": "1.0.0", "toolRepo": "https://github.com/ericmalen/agent-base", "pin": "v1.0.0", "lastSyncedAt": "2026-06-10", "setupAt": "2026-06-10", "githubCodeReview": false, "optionalSkills": ["retro"] }\n');
+      '{ "standard": "1.0.0", "toolRepo": "https://github.com/ericmalen/fcore", "pin": "v1.0.0", "lastSyncedAt": "2026-06-10", "setupAt": "2026-06-10", "githubCodeReview": false, "optionalSkills": ["checklist-intake"] }\n');
     writeManifest(repo, {
       entries: [],
       installs: [
@@ -270,25 +270,25 @@ test('starter end-to-end + optional skill (R-55) ⇒ installed; gates incl. repr
         { file: '.gitignore', template: 'gitignore' },
         { file: '.claude/settings.json', template: 'settings/claude/settings.json' },
         { file: '.claude/skills/README.md', template: 'readmes/skills/README.md' },
-        { file: '.claude/agent-base.json', literal: 'literals/marker.json' },
+        { file: '.claude/fcore.json', literal: 'literals/marker.json' },
       ],
       jsonMerges: [{ file: '.vscode/settings.json', base: 'settings/vscode/settings.json' }],
     });
     // Stage the optional skill into the setup window, as install-setup does.
-    cpSync(join(process.cwd(), '.claude/skills/retro'),
-      join(repo, '.claude/agent-base-setup/optional-skills/retro'), { recursive: true });
+    cpSync(join(process.cwd(), '.claude/skills/checklist-intake'),
+      join(repo, '.claude/fcore-onboard/optional-skills/checklist-intake'), { recursive: true });
 
     const res = apply({ root: repo, templatesDir: KIT_TEMPLATES });
 
-    // base-check mirrored in (baseline skill, not manifest) so R-50 is satisfied.
-    cpSync(join(process.cwd(), '.claude/skills/base-check'),
-      join(repo, '.claude/skills/base-check'), { recursive: true });
+    // fcore-check mirrored in (baseline skill, not manifest) so R-50 is satisfied.
+    cpSync(join(process.cwd(), '.claude/skills/fcore-check'),
+      join(repo, '.claude/skills/fcore-check'), { recursive: true });
 
     // Selected optional materialized live, verbatim, and NOT recorded as generated.
     assert.equal(
-      readFileSync(join(repo, '.claude/skills/retro/SKILL.md'), 'utf8'),
-      readFileSync(join(process.cwd(), '.claude/skills/retro/SKILL.md'), 'utf8'));
-    assert.ok(!Object.keys(res.generated).some((p) => p.startsWith('.claude/skills/retro')),
+      readFileSync(join(repo, '.claude/skills/checklist-intake/SKILL.md'), 'utf8'),
+      readFileSync(join(process.cwd(), '.claude/skills/checklist-intake/SKILL.md'), 'utf8'));
+    assert.ok(!Object.keys(res.generated).some((p) => p.startsWith('.claude/skills/checklist-intake')),
       'optional skill is installed payload, absent from generated.json');
 
     // Reproducibility gate (check() defaults skipRepro=false) passes WITH the
@@ -307,23 +307,23 @@ test('apply (R-55): marker optionalSkills installs the selected skill from the s
     mkdirSync(join(repo, '.setup', 'literals'), { recursive: true });
     // Marker literal carries the selection authored during planning.
     writeFileSync(join(repo, '.setup', 'literals', 'marker.json'),
-      '{ "standard": "1.0.0", "toolRepo": "https://github.com/ericmalen/agent-base", "pin": "v1.0.0", "lastSyncedAt": "2026-06-10", "setupAt": "2026-06-10", "githubCodeReview": false, "optionalSkills": ["retro"] }\n');
+      '{ "standard": "1.0.0", "toolRepo": "https://github.com/ericmalen/fcore", "pin": "v1.0.0", "lastSyncedAt": "2026-06-10", "setupAt": "2026-06-10", "githubCodeReview": false, "optionalSkills": ["checklist-intake"] }\n');
     // Optional skill staged into the setup window (install-setup does this).
-    cpSync(join(process.cwd(), '.claude/skills/retro'),
-      join(repo, '.claude/agent-base-setup/optional-skills/retro'), { recursive: true });
+    cpSync(join(process.cwd(), '.claude/skills/checklist-intake'),
+      join(repo, '.claude/fcore-onboard/optional-skills/checklist-intake'), { recursive: true });
     writeManifest(repo, {
       entries: [],
-      installs: [{ file: '.claude/agent-base.json', literal: 'literals/marker.json' }],
+      installs: [{ file: '.claude/fcore.json', literal: 'literals/marker.json' }],
       jsonMerges: [],
     });
 
     const res = apply({ root: repo, templatesDir: KIT_TEMPLATES });
     // Selected skill landed at its live path, copied verbatim from staging.
     assert.equal(
-      readFileSync(join(repo, '.claude/skills/retro/SKILL.md'), 'utf8'),
-      readFileSync(join(process.cwd(), '.claude/skills/retro/SKILL.md'), 'utf8'));
+      readFileSync(join(repo, '.claude/skills/checklist-intake/SKILL.md'), 'utf8'),
+      readFileSync(join(process.cwd(), '.claude/skills/checklist-intake/SKILL.md'), 'utf8'));
     // Installed payload, not generated output — absent from generated.json.
-    assert.ok(!Object.keys(res.generated).some((p) => p.startsWith('.claude/skills/retro')));
+    assert.ok(!Object.keys(res.generated).some((p) => p.startsWith('.claude/skills/checklist-intake')));
     // An unselected optional is never installed.
     assert.ok(!existsSync(join(repo, '.claude/skills/tracker-sync')));
   } finally {

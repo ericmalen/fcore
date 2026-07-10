@@ -8,7 +8,7 @@ import { run } from "../scripts/docs-consistency.mjs";
 
 const BASE_ROOT = fileURLToPath(new URL("..", import.meta.url));
 
-test("Agent Base docs are consistent (no broken links)", () => {
+test("FleetCore docs are consistent (no broken links)", () => {
   const findings = run(BASE_ROOT);
   assert.deepEqual(findings, []);
 });

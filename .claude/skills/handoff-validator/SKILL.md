@@ -7,7 +7,7 @@ description: Orchestration discovery gate B7 — checks an orchestration bluepri
 
 The gate between Discovery and Generation: a blueprint passes only if
 generation can run it deterministically with zero manual edits. Both checks
-run from the base checkout.
+run from the fcore checkout.
 
 ## Checks
 
@@ -25,7 +25,7 @@ run from the base checkout.
 
 2. **Generation dry-run** — run the real generation planner
    (`planGeneration`, the same code the scaffolder executes) against the
-   Agent Base's registry and templates, discarding the planned files:
+   FleetCore's registry and templates, discarding the planned files:
 
    ```
    node --input-type=module -e '
@@ -69,8 +69,8 @@ error class:
 - slot errors, `not in registry`, duplicate generated path — blueprint
   defects: the caller fixes the blueprint (or the upstream
   profile/decisions) and re-runs.
-- `missing from Agent Base`, `drifted from registry pin` — Agent Base defects: author the
-  missing template or bump the version and re-pin in Agent Base; the blueprint
+- `missing from FleetCore`, `drifted from registry pin` — FleetCore defects: author the
+  missing template or bump the version and re-pin in FleetCore; the blueprint
   is innocent.
 
 Never hand-edit generated downstream files to compensate.

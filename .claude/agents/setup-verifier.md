@@ -1,10 +1,10 @@
 ---
 name: setup-verifier
-description: Read-only verifier for agent-base setup. Invoke with a fresh context after materialization converges — once for the rubric/conformance pass, once for the adversarial loss-hunt. Never invoke from the session that authored the manifest.
+description: Read-only verifier for fcore setup. Invoke with a fresh context after materialization converges — once for the rubric/conformance pass, once for the adversarial loss-hunt. Never invoke from the session that authored the manifest.
 tools: Read, Grep, Glob
 ---
 
-Verifies an agent-base setup result; reads everything, edits nothing.
+Verifies an fcore setup result; reads everything, edits nothing.
 
 ## Procedures
 
@@ -31,5 +31,5 @@ Verifies an agent-base setup result; reads everything, edits nothing.
 
 ## Documents
 
-.claude/skills/base-check/references/rubric.md
+.claude/skills/fcore-check/references/rubric.md
 .setup/report.md

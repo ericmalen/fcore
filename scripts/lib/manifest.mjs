@@ -12,11 +12,11 @@
 //   { node, op: "supersede", catalogSkill, note? }
 //   { file, op: "out-of-scope", reason }            — sweep candidate ruled non-instructional
 // Plus:
-//   jsonMerges: [ { file, base } ]                  — key-level merge against Agent Base template
+//   jsonMerges: [ { file, base } ]                  — key-level merge against FleetCore template
 //   installs:   [ { file, template } | { file, literal } ]
 //     — static file instantiation (starter template install: shim, settings, marker,
 //       READMEs). Template slot markers are stripped. Output-side only.
-//       (base-check is NOT installed here — it ships via install-setup.)
+//       (fcore-check is NOT installed here — it ships via install-setup.)
 //
 // Future maintainers: dispositions only. NEVER add input-classification ops.
 
@@ -53,7 +53,7 @@ export function isSafeRelPath(path) {
 
 export function isAllowedTarget(path, inventoriedPaths = null) {
   if (!isSafeRelPath(path)) return false;
-  // Any Agent Base-canonical target location, or any recognized AI-config surface
+  // Any FleetCore-canonical target location, or any recognized AI-config surface
   // (the scope invariant is "no writes outside AI-config surfaces" — whether a
   // given surface SHOULD exist after setup is the audit's layer, not check's).
   // Inventoried source files are also valid targets: forced-include MIXED files
@@ -147,7 +147,7 @@ export function validateShape(manifest) {
 
   for (const [i, jm] of (manifest.jsonMerges ?? []).entries()) {
     if (!jm.file) errors.push(`jsonMerges[${i}]: requires "file"`);
-    if (!jm.base) errors.push(`jsonMerges[${i}]: requires "base" (Agent Base template path)`);
+    if (!jm.base) errors.push(`jsonMerges[${i}]: requires "base" (FleetCore template path)`);
     ePath(`jsonMerges[${i}]`, 'file', jm.file);
     ePath(`jsonMerges[${i}]`, 'base', jm.base);
   }

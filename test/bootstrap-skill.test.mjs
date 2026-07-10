@@ -10,7 +10,7 @@ import { findClaude, launchClaude } from '../bin/lib/launch.mjs';
 test('writeBootstrapSkill drops a self-deleting launcher pointing at the staged skill', () => {
   const target = mkdtempSync(join(tmpdir(), 'ab-target-'));
   const file = writeBootstrapSkill({
-    command: 'setup',
+    command: 'onboard',
     checkoutPath: '/stage/v1.2.3',
     targetPath: target,
   });
@@ -18,23 +18,23 @@ test('writeBootstrapSkill drops a self-deleting launcher pointing at the staged 
   assert.equal(file, join(target, BOOTSTRAP_SKILL_DIR, 'SKILL.md'));
   assert.ok(existsSync(file));
   const body = readFileSync(file, 'utf8');
-  assert.match(body, /^name: agent-base-bootstrap$/m);
+  assert.match(body, /^name: fcore-bootstrap$/m);
   assert.match(body, /Delete this skill's directory NOW/);
-  assert.match(body, /\/stage\/v1\.2\.3\/\.claude\/skills\/base-setup\/SKILL\.md/);
-  assert.match(body, /re-run their `npx … setup` command/);
+  assert.match(body, /\/stage\/v1\.2\.3\/\.claude\/skills\/fcore-onboard\/SKILL\.md/);
+  assert.match(body, /re-run their `npx … onboard` command/);
   assert.match(body, /never `git pull`/); // staged-release provenance, not dev
 });
 
 test('writeBootstrapSkill carries the command through (refresh, dev clone)', () => {
   const target = mkdtempSync(join(tmpdir(), 'ab-target-'));
   const file = writeBootstrapSkill({
-    command: 'refresh',
+    command: 'update',
     checkoutPath: '/clone',
     targetPath: target,
     dev: true,
   });
   const body = readFileSync(file, 'utf8');
-  assert.match(body, /base-refresh\/SKILL\.md/);
+  assert.match(body, /fcore-update\/SKILL\.md/);
   assert.match(body, /pull --ff-only/); // dev provenance line
 });
 

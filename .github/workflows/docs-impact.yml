@@ -19,4 +19,4 @@ jobs:
         with:
           node-version: '20'
       - name: docs-impact check
-        run: node .claude/skills/docs/scripts/docs-impact.mjs --base "origin/${{ github.base_ref }}"
+        run: node .claude/skills/docs-manager/scripts/docs-impact.mjs --base "origin/${{ github.base_ref }}"

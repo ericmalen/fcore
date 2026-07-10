@@ -3,7 +3,7 @@
 Practices for getting the most out of a customized Copilot system. This is the
 opinionated companion to [`built-in-reference.md`](../reference/built-in-reference.md):
 that doc describes what exists, this one recommends how to use it. Not a
-general prompt engineering guide — scoped to working with agent-base's
+general prompt engineering guide — scoped to working with fcore's
 conventions.
 
 ---
@@ -115,7 +115,7 @@ conventions.
 
 ---
 
-## Using the meta-skills in agent-base
+## Using the meta-skills in fcore
 
 - **Start with `/skill-creator` and `/agent-creator`.** The meta-skills
   encode the conventions operationally; using them gives you a correct
@@ -131,11 +131,11 @@ conventions.
 
 ## Keeping the config conformant
 
-- **Run the `base-check` skill at any time** to audit the repo's AI
+- **Run the `fcore-check` skill at any time** to audit the repo's AI
   configuration against the conventions ([`conventions.md`](../reference/conventions.md))
   and fix findings by rule ID. Ask for a **deep check** to also re-sweep the
   repo for AI instructions buried outside the configured surface (new docs,
-  READMEs) — findings route back through a `base-plan` delta.
+  READMEs) — findings route back through a `fcore-plan` delta.
 - **If a file is doing two jobs, split it.** One role per agent, one workflow
   per skill, one scope per rules file — apply it as maintenance, not just at
   creation time.
@@ -148,4 +148,4 @@ conventions.
 - [VS Code Agent Planning](https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode#_plan-and-iterate)
 - [`built-in-reference.md`](../reference/built-in-reference.md) — what ships for free
 - [`copilot-customization-reference.md`](../reference/copilot-customization-reference.md) — how to customize
-- [`conventions.md`](../reference/conventions.md) — agent-base's do-and-don't sheet
+- [`conventions.md`](../reference/conventions.md) — fcore's do-and-don't sheet

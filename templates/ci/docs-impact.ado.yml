@@ -20,5 +20,5 @@ steps:
       TARGET="$(System.PullRequest.TargetBranch)"
       TARGET="${TARGET#refs/heads/}"
       git fetch origin "$TARGET" --quiet
-      node .claude/skills/docs/scripts/docs-impact.mjs --base "origin/$TARGET"
+      node .claude/skills/docs-manager/scripts/docs-impact.mjs --base "origin/$TARGET"
     displayName: docs-impact check

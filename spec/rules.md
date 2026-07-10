@@ -1,4 +1,4 @@
-# Agent Base rule catalog
+# FleetCore rule catalog
 
 **This file is the single source of truth for the target state.** The audit enforces
 every `mechanical` rule; the verifier rubric applies every `judgment` rule; docs
@@ -18,7 +18,7 @@ retained; decisions D-1..D-5 resolved)
 - *(compat)* rules apply only when the repo uses the nested-AGENTS.md compat option
   (see R-53).
 - *(conditional: code-review)* rules branch on the setup answer recorded in the
-  Agent Base marker (`.claude/agent-base.json`, field `githubCodeReview: true|false`).
+  FleetCore marker (`.claude/fcore.json`, field `githubCodeReview: true|false`).
 
 ---
 
@@ -272,8 +272,8 @@ AI configuration lives under `.claude/`. Under `.github/`, only
 findings (migration sources in existing project).
 
 **R-50 · Maintenance surface installed** · mechanical · audit, warning
-Set-up projects contain the `base-check` skill and the Agent Base marker
-(`.claude/agent-base.json`). Required marker fields (warning when missing):
+Set-up projects contain the `fcore-check` skill and the FleetCore marker
+(`.claude/fcore.json`). Required marker fields (warning when missing):
 `standard` (semver), `toolRepo`, `setupAt`, `githubCodeReview`. Recommended
 release-pin fields (info when missing): `pin`, `lastSyncedAt` — used by
 baseline sync and the pin-resolved CI templates (npx at pin; clone fallback).
@@ -281,13 +281,13 @@ Optional marker field `optionalSkills` (R-55). Candidate for promotion to
 warning once tagged pins are the norm across set-up projects.
 
 **R-55 · Optional skill tier** · mechanical · audit, info → warning
-The opt-in lifecycle skills `retro`, `log-report`, `eval-runner`,
+The opt-in lifecycle skills `checklist-intake`, `log-report`, `eval-runner`,
 `tracker-sync` are not installed by default (they are dormant until
 orchestration is generated). A project records its chosen set in the marker's
 `optionalSkills` array; every listed name must be present at
 `.claude/skills/<name>/` (finding when listed-but-missing). Optionals are added
-at setup (base-plan selection, materialized by apply), by `agent-base skills
-add`, or by base-orchestrate; sync-baseline upgrades only the selected set and
+at setup (fcore-plan selection, materialized by apply), by `fcore skills
+add`, or by fcore-fleet-config; sync-baseline upgrades only the selected set and
 never reports an unselected optional as removed.
 
 **R-56 · Orchestration routing trigger** · mechanical · audit, warning
@@ -315,8 +315,8 @@ specialists may write during a task. The orchestrator deletes a task's run
 directory at completion; never committed, never manifest-tracked (same class
 as `tasks.md`).
 
-**R-51 · Rule-ID indirection** · mechanical · Agent Base CI
-Agent Base docs, templates, and check metadata reference rules by R-ID only — never by
+**R-51 · Rule-ID indirection** · mechanical · FleetCore CI
+FleetCore docs, templates, and check metadata reference rules by R-ID only — never by
 file line numbers. Thresholds are never restated without the R-ID alongside
 (shipped templates may carry the operative value, since consumer repos have no
 `spec/rules.md`, but must cite the R-ID). CI mechanically enforces the doc-link
@@ -331,13 +331,13 @@ review-enforced. Not enforced in consumer repos.
 Besides the vendored-UPSTREAM exemption above, the audit implementation carries
 three narrow exemptions the rules would otherwise flag:
 
-- **Setup-window tooling.** `.claude/agent-base-setup/`,
+- **Setup-window tooling.** `.claude/fcore-onboard/`,
   `.claude/skills/base-{inventory,plan,apply,verify}/`, and
   `.claude/agents/setup-verifier.md` are skipped by the skills/agents/
-  reference checks: they exist only between install and the base-verify
+  reference checks: they exist only between install and the fcore-verify
   teardown, and transient references (e.g. `.setup/report.md`) are legal
   there.
-- **Payload skeletons.** Files containing `<!-- agent-base:slot:` markers are
+- **Payload skeletons.** Files containing `<!-- fcore:slot:` markers are
   template payload, not live configuration, and are excluded from live-config
   checks.
 - **Session worktrees.** `.claude/worktrees/` (Claude Code's transient session
@@ -358,7 +358,7 @@ manifest-role exemptions, migrate-specific permission allow-list entries,
 hash-manifest update flow. (Two narrow exemptions DID survive into v2 — see
 "Audit exemptions (implementation)" above.)
 
-## Setup-flow inputs (not rules, recorded in the Agent Base marker)
+## Setup-flow inputs (not rules, recorded in the FleetCore marker)
 
 - `githubCodeReview: true|false` — asked during setup (D-3); drives R-09/R-49.
 - Path-scoping choice: rules (default) or nested-compat — drives R-52/R-53 vs

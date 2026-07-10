@@ -6,7 +6,7 @@
 // calls, the same golden blueprint always yields the same tree (git metadata
 // aside) — drives the exact same primitives the scaffolder agent does
 // (scripts/lib/orchestration/scaffold.mjs), so a fixture built here is
-// indistinguishable from one a real /base-orchestrate run would produce.
+// indistinguishable from one a real /fcore-fleet-config run would produce.
 //
 // Usage:
 //   node scripts/build-orchestrated-fixture.mjs <dir> [--blueprint <path>]
@@ -84,7 +84,7 @@ writeFileSync(join(target, 'AGENTS.md'), [
 writeFileSync(join(target, 'CLAUDE.md'), '@AGENTS.md\n');
 
 // Baseline .claude/.vscode settings (payload templates verbatim) — a real
-// /base-orchestrate run assumes base-setup already ran; without these,
+// /fcore-fleet-config run assumes fcore-onboard already ran; without these,
 // audit fires R-44/R-45 errors unrelated to anything under test here.
 mkdirSync(join(target, '.claude', 'agents'), { recursive: true });
 mkdirSync(join(target, '.claude', 'skills'), { recursive: true });
@@ -200,7 +200,7 @@ const g = (gitArgs) => {
   if (r.status !== 0) fail(`git ${gitArgs.join(' ')} failed: ${r.stderr}`);
 };
 g(['init', '-q', '-b', 'main']);
-g(['config', 'user.email', 'orchestration-fixture@agent-base']);
+g(['config', 'user.email', 'orchestration-fixture@fcore']);
 g(['config', 'user.name', 'orchestration-fixture']);
 g(['add', '-A']);
 g(['commit', '-qm', 'fixture: generated orchestration fleet on maxi-repo']);

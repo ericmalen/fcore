@@ -97,7 +97,7 @@ test('orchestrator-run templates: step sequences are structurally paired', () =>
   const ghSteps = [...gh.matchAll(/^ {6}- name: (.+)$/gm)].map((m) => m[1]);
   const adoSteps = [...ado.matchAll(/^ {4}displayName: (.+)$/gm)].map((m) => m[1]);
   assert.deepEqual(ghSteps, [
-    'Resolve Agent Base npx spec',
+    'Resolve FleetCore npx spec',
     'Guard - decide whether to run',
     'Tracker sync (optional)',
     'Run feature-orchestrator headless',

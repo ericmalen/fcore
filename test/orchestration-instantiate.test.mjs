@@ -24,7 +24,7 @@ function slotMapFor(agent) {
 
 test('instantiateTemplate: mid-line slot substitutes inside a sentence', () => {
   const { content, errors } = instantiateTemplate(
-    'Run `<!-- agent-base:slot:test-cmd -->` before reporting.',
+    'Run `<!-- fcore:slot:test-cmd -->` before reporting.',
     { 'test-cmd': 'npm test --workspace api' },
   );
   assert.deepEqual(errors, []);
@@ -33,7 +33,7 @@ test('instantiateTemplate: mid-line slot substitutes inside a sentence', () => {
 
 test('instantiateTemplate: repeated marker fills every occurrence', () => {
   const { content, errors } = instantiateTemplate(
-    '<!-- agent-base:slot:layer-path -->: edits stay under <!-- agent-base:slot:layer-path -->.',
+    '<!-- fcore:slot:layer-path -->: edits stay under <!-- fcore:slot:layer-path -->.',
     { 'layer-path': 'apps/api' },
   );
   assert.deepEqual(errors, []);
@@ -42,7 +42,7 @@ test('instantiateTemplate: repeated marker fills every occurrence', () => {
 
 test('instantiateTemplate: marker whitespace variants all match', () => {
   const { content, errors } = instantiateTemplate(
-    '<!--agent-base:slot:a--> <!--  agent-base:slot:a  -->',
+    '<!--fcore:slot:a--> <!--  fcore:slot:a  -->',
     { a: 'x' },
   );
   assert.deepEqual(errors, []);
@@ -53,7 +53,7 @@ test('instantiateTemplate: marker whitespace variants all match', () => {
 
 test('instantiateTemplate: unfilled slot fails with name and line, content null', () => {
   const { content, errors } = instantiateTemplate(
-    'line one\nuses <!-- agent-base:slot:stack --> here',
+    'line one\nuses <!-- fcore:slot:stack --> here',
     {},
   );
   assert.equal(content, null);
@@ -62,7 +62,7 @@ test('instantiateTemplate: unfilled slot fails with name and line, content null'
 
 test('instantiateTemplate: every unfilled occurrence reports its own line', () => {
   const { errors } = instantiateTemplate(
-    '<!-- agent-base:slot:a -->\n<!-- agent-base:slot:b -->\n<!-- agent-base:slot:a -->',
+    '<!-- fcore:slot:a -->\n<!-- fcore:slot:b -->\n<!-- fcore:slot:a -->',
     {},
   );
   assert.deepEqual(errors, [
@@ -83,7 +83,7 @@ test('instantiateTemplate: unused slot value is an error', () => {
 
 test('instantiateTemplate: invalid value reports once, not also as unfilled', () => {
   const { content, errors } = instantiateTemplate(
-    'uses <!-- agent-base:slot:stack -->',
+    'uses <!-- fcore:slot:stack -->',
     { stack: '  ' },
   );
   assert.equal(content, null);
@@ -92,7 +92,7 @@ test('instantiateTemplate: invalid value reports once, not also as unfilled', ()
 
 test('instantiateTemplate: non-string value rejected', () => {
   const { errors } = instantiateTemplate(
-    'limit: <!-- agent-base:slot:turn-limit -->',
+    'limit: <!-- fcore:slot:turn-limit -->',
     { 'turn-limit': 30 },
   );
   assert.deepEqual(errors, ['slots["turn-limit"] must be a non-empty string']);
@@ -100,12 +100,12 @@ test('instantiateTemplate: non-string value rejected', () => {
 
 test('instantiateTemplate: malformed marker is a template defect', () => {
   const { content, errors } = instantiateTemplate(
-    'ok <!-- agent-base:slot:good -->\nbad <!-- agent-base:slot:BadName -->',
+    'ok <!-- fcore:slot:good -->\nbad <!-- fcore:slot:BadName -->',
     { good: 'x' },
   );
   assert.equal(content, null);
   assert.deepEqual(errors, [
-    'malformed slot marker <!-- agent-base:slot:BadName --> (line 2) — slot names must be kebab-case',
+    'malformed slot marker <!-- fcore:slot:BadName --> (line 2) — slot names must be kebab-case',
   ]);
 });
 
@@ -129,7 +129,7 @@ test('generic-specialist template: blueprint fixture entry instantiates clean', 
   assert.match(content, /^model: sonnet$/m);
   assert.match(content, /`npm test --workspace api`/);
   assert.match(content, /^apps\/api\/package\.json$/m);
-  assert.ok(!content.includes('agent-base:slot'), 'no marker text survives instantiation');
+  assert.ok(!content.includes('fcore:slot'), 'no marker text survives instantiation');
 });
 
 test('generic-specialist template: repeat run is byte-identical', () => {

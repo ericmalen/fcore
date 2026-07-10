@@ -24,40 +24,40 @@ test('compareSemver orders releases', () => {
 
 test('npxSpecFromToolRepo maps toolRepo URLs to npm package specs', () => {
   assert.equal(
-    npxSpecFromToolRepo('https://github.com/ericmalen/agent-base', 'v1.4.0'),
-    'github:ericmalen/agent-base#v1.4.0',
+    npxSpecFromToolRepo('https://github.com/ericmalen/fcore', 'v1.4.0'),
+    'github:ericmalen/fcore#v1.4.0',
   );
   assert.equal(
-    npxSpecFromToolRepo('https://github.com/ericmalen/agent-base.git', 'v1.4.0'),
-    'github:ericmalen/agent-base#v1.4.0',
+    npxSpecFromToolRepo('https://github.com/ericmalen/fcore.git', 'v1.4.0'),
+    'github:ericmalen/fcore#v1.4.0',
   );
   assert.equal(
-    npxSpecFromToolRepo('git+https://github.com/ericmalen/agent-base', 'v1.4.0'),
-    'github:ericmalen/agent-base#v1.4.0',
+    npxSpecFromToolRepo('git+https://github.com/ericmalen/fcore', 'v1.4.0'),
+    'github:ericmalen/fcore#v1.4.0',
   );
   assert.equal(
-    npxSpecFromToolRepo('https://dev.azure.com/org/proj/_git/agent-base', 'v1.4.0'),
-    'git+https://dev.azure.com/org/proj/_git/agent-base#v1.4.0',
+    npxSpecFromToolRepo('https://dev.azure.com/org/proj/_git/fcore', 'v1.4.0'),
+    'git+https://dev.azure.com/org/proj/_git/fcore#v1.4.0',
   );
   assert.equal(
-    npxSpecFromToolRepo('git@github.com:ericmalen/agent-base.git', 'v1.4.0'),
-    'git+ssh://git@github.com/ericmalen/agent-base.git#v1.4.0',
+    npxSpecFromToolRepo('git@github.com:ericmalen/fcore.git', 'v1.4.0'),
+    'git+ssh://git@github.com/ericmalen/fcore.git#v1.4.0',
   );
   assert.equal(
-    npxSpecFromToolRepo('https://github.com/ericmalen/agent-base/', null),
-    'github:ericmalen/agent-base',
+    npxSpecFromToolRepo('https://github.com/ericmalen/fcore/', null),
+    'github:ericmalen/fcore',
   );
 });
 
 test('validateToolRepo accepts the supported transport forms', () => {
   const ok = [
-    'https://github.com/ericmalen/agent-base',
-    'git+https://github.com/ericmalen/agent-base.git',
-    'ssh://git@github.com/ericmalen/agent-base.git',
-    'git+ssh://git@github.com/ericmalen/agent-base.git',
-    'git@github.com:ericmalen/agent-base.git',
-    'file:///tmp/agent-base',
-    '/tmp/agent-base', // absolute path (tests/dev flows)
+    'https://github.com/ericmalen/fcore',
+    'git+https://github.com/ericmalen/fcore.git',
+    'ssh://git@github.com/ericmalen/fcore.git',
+    'git+ssh://git@github.com/ericmalen/fcore.git',
+    'git@github.com:ericmalen/fcore.git',
+    'file:///tmp/fcore',
+    '/tmp/fcore', // absolute path (tests/dev flows)
   ];
   for (const url of ok) assert.equal(validateToolRepo(url), url, url);
 });
@@ -69,7 +69,7 @@ test('validateToolRepo rejects injection vectors and malformed values', () => {
     '--upload-pack=touch /tmp/pwned', // leading dash parsed as a git option
     '-origin', // leading dash
     'relative/path/to/repo', // relative path
-    './agent-base', // relative path
+    './fcore', // relative path
     'https://example.com/\x00repo', // control character
     '', // empty
     42, // non-string

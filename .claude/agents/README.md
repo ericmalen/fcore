@@ -21,12 +21,12 @@ in Claude Code it is always invoked as a subagent.
   setup phase 4. Adoption-time only: installed for the setup window,
   removed again before merge.
 - [`example-reviewer.md`](./example-reviewer.md) — annotated example of a
-  read-only reviewer. Agent Base-side reference to copy from; NOT installed into
+  read-only reviewer. FleetCore-side reference to copy from; NOT installed into
   targets.
 
-**Orchestration meta-agents** — discovery, generation, and orchestration health. Agent Base-side
-only (never installed into targets). Entry point: `/base-orchestrate` in an
-open base checkout. How-to:
+**Orchestration meta-agents** — discovery, generation, and orchestration health. FleetCore-side
+only (never installed into targets). Entry point: `/fcore-fleet-config` in an
+open fcore checkout. How-to:
 [`docs/how-to/orchestration-guide.md`](../../docs/how-to/orchestration-guide.md).
 
 - [`repo-analyst.md`](./repo-analyst.md) — profiles a project into
@@ -82,7 +82,7 @@ Markdown links for progressive disclosure).
 
 ## Flat orchestration (preferred default)
 
-agent-base prefers flat orchestration: orchestrators call every specialist
+fcore prefers flat orchestration: orchestrators call every specialist
 directly. Nesting (a subagent invoking subagents) is possible in both tools
 but compounds token cost and is harder to debug — reach for it only when a
 specialist genuinely needs its own helpers. See
@@ -102,14 +102,14 @@ New agents live in this same folder. The steps mirror the skills workflow:
    the role statement, procedures, tool list, and lazy-load `## Documents`
    section.
 
-2. **Check** — run the `base-check` skill; agent conventions are enforced
+2. **Check** — run the `fcore-check` skill; agent conventions are enforced
    by rule ID (R-27..R-37).
 
-In the Agent Base repo itself, `setup-verifier` and `docs-auditor` are dual-role:
-loaded while developing Agent Base AND installed path-for-path into adopted
+In the FleetCore repo itself, `setup-verifier` and `docs-auditor` are dual-role:
+loaded while developing FleetCore AND installed path-for-path into adopted
 repos per the allowlist in `scripts/lib/baseline.mjs`, consumed by
 `scripts/install-setup.mjs` (the allowlist decides what
-ships; `example-reviewer` stays Agent Base-side).
+ships; `example-reviewer` stays FleetCore-side).
 
 ## Filename convention
 

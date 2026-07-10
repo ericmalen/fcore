@@ -282,7 +282,7 @@ export function validateBlueprint(blueprint) {
     e(`orchestrator.name "${blueprint.orchestrator.name}" collides with a specialist name`);
   }
 
-  // Key names verbatim from §9.3 — the one snake_case island in Agent Base.
+  // Key names verbatim from §9.3 — the one snake_case island in FleetCore.
   const dr = blueprint.dispatch_rules;
   if (!isPlainObject(dr)) {
     e('dispatch_rules must be an object');
@@ -421,7 +421,7 @@ const MANIFEST_ENTRY_KEYS = new Set(['path', 'templateId', 'templateVersion', 's
 // Scaffolder-owned record of every generated file (DD-13): path → template
 // id, pinned template version, content SHA. Deliberately NO timestamps —
 // re-scaffolding the same blueprint must be byte-identical, manifest
-// included — so unknown keys are REJECTED here (unique among Agent Base's
+// included — so unknown keys are REJECTED here (unique among FleetCore's
 // validators): any extra field is a determinism leak waiting to happen.
 export function validateGenerationManifest(manifest) {
   if (!isPlainObject(manifest)) return ['generation manifest must be an object'];

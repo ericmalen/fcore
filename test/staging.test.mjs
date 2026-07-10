@@ -9,7 +9,7 @@ import { bootstrapPrompt } from '../bin/lib/prompts.mjs';
 
 function fakePackage(version = '1.2.3') {
   const root = mkdtempSync(join(tmpdir(), 'ab-pkg-'));
-  writeFileSync(join(root, 'package.json'), JSON.stringify({ name: 'agent-base', version }));
+  writeFileSync(join(root, 'package.json'), JSON.stringify({ name: 'fcore', version }));
   mkdirSync(join(root, 'scripts'), { recursive: true });
   writeFileSync(join(root, 'scripts', 'audit.mjs'), '// stub\n');
   return root;
@@ -92,13 +92,13 @@ test('pruneStaged sweeps stale orphaned partial dirs, keeps fresh ones', () => {
 });
 
 test('bootstrapPrompt references the right skill and immutability note', () => {
-  const p = bootstrapPrompt({ command: 'orchestrate', checkoutPath: '/stage/v1.2.3', targetPath: '/proj' });
-  assert.match(p, /\/stage\/v1\.2\.3\/\.claude\/skills\/base-orchestrate\/SKILL\.md/);
+  const p = bootstrapPrompt({ command: 'fleet-config', checkoutPath: '/stage/v1.2.3', targetPath: '/proj' });
+  assert.match(p, /\/stage\/v1\.2\.3\/\.claude\/skills\/fcore-fleet-config\/SKILL\.md/);
   assert.match(p, /target \/proj/);
   assert.match(p, /never `git pull`/);
 
-  const dev = bootstrapPrompt({ command: 'setup', checkoutPath: '/clone', dev: true });
-  assert.match(dev, /base-setup\/SKILL\.md/);
+  const dev = bootstrapPrompt({ command: 'onboard', checkoutPath: '/clone', dev: true });
+  assert.match(dev, /fcore-onboard\/SKILL\.md/);
   assert.match(dev, /pull --ff-only/);
 
   assert.throws(() => bootstrapPrompt({ command: 'audit', checkoutPath: '/x' }), /no bootstrap prompt/);

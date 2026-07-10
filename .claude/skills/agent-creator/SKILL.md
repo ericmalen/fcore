@@ -57,7 +57,7 @@ and Copilot read.
 
 ## Flat orchestration reminder
 
-agent-base prefers flat orchestration: orchestrators call every specialist
+fcore prefers flat orchestration: orchestrators call every specialist
 directly. Nesting is possible but compounds token cost and is harder to debug —
 it should be a deliberate choice. If this agent is part of an orchestrated
 workflow, default to having the orchestrator call it directly rather than
@@ -65,5 +65,5 @@ chaining it under another specialist.
 
 ## References
 
-- [Custom agents in agent-base](../../agents/README.md)
+- [Custom agents in fcore](../../agents/README.md)
 - [Tool tiers](./references/tool-tiers.md)

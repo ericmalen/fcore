@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { execPath } from 'node:process';
 
 const BASE_ROOT = new URL('..', import.meta.url).pathname;
-const NUDGE = join(BASE_ROOT, '.claude/skills/docs/scripts/docs-nudge.mjs');
+const NUDGE = join(BASE_ROOT, '.claude/skills/docs-manager/scripts/docs-nudge.mjs');
 const CEILING = realpathSync(tmpdir());
 
 const CFG = { tier: 'T3', codePaths: ['src/'], docsPaths: ['docs/', 'README.md'] };
@@ -61,8 +61,8 @@ function runNudge(dir, mode) {
   return spawnSync(execPath, args, { cwd: dir, env: isolatedEnv(), encoding: 'utf8' });
 }
 
-const baselineOf = (dir) => join(dir, '.git', 'agent-base-docs-baseline');
-const nudgedOf = (dir) => join(dir, '.git', 'agent-base-docs-nudged');
+const baselineOf = (dir) => join(dir, '.git', 'fcore-docs-baseline');
+const nudgedOf = (dir) => join(dir, '.git', 'fcore-docs-nudged');
 
 // ── matches(): direct unit tests ────────────────────────────────────────────
 // docs-nudge.mjs exports matches() but also runs its CLI at module top level,
@@ -79,7 +79,7 @@ async function importMatches() {
     process.env.GIT_CEILING_DIRECTORIES = CEILING;
     process.chdir(dir);
     process.exit = () => {};
-    const mod = await import(new URL('../.claude/skills/docs/scripts/docs-nudge.mjs', import.meta.url));
+    const mod = await import(new URL('../.claude/skills/docs-manager/scripts/docs-nudge.mjs', import.meta.url));
     return mod.matches;
   } finally {
     process.exit = origExit;

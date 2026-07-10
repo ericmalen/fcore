@@ -1,5 +1,5 @@
 // F-2 regression: validate-assert reads the setup report from git history
-// when base-verify has removed .setup/ before merge. The original F-2 fix
+// when fcore-verify has removed .setup/ before merge. The original F-2 fix
 // used `git log -1 -- <path>`, which returns the DELETION commit; the follow-up
 // `git show <deletion>:<path>` then fails, leaving the report empty so every
 // dropped-but-documented sentinel reads as SILENT-LOSS. The guard is
@@ -24,7 +24,7 @@ function git(dir, ...args) {
   return (r.stdout ?? '').trim();
 }
 
-// Build a repo in the state base-verify leaves behind: the report was
+// Build a repo in the state fcore-verify leaves behind: the report was
 // generated and committed, then .setup/ was git-rm'd in a later commit.
 // Sentinels live ONLY in the report's drop section — never in the working
 // tree — so the report read is the only thing standing between "accounted"
@@ -48,7 +48,7 @@ function repoAfterMergePrep() {
   git(dir, 'add', '-A');
   git(dir, 'commit', '-qm', 'chore(setup): report + converged gates');
 
-  // base-verify merge prep: remove the setup tooling in its own commit.
+  // fcore-verify merge prep: remove the setup tooling in its own commit.
   git(dir, 'rm', '-q', '-r', '.setup');
   git(dir, 'commit', '-qm', 'chore(setup): remove setup-time tooling');
   return dir;
@@ -79,11 +79,11 @@ test('F-2: report read survives the .setup deletion commit (no false SILENT-LOSS
 });
 
 // ── R-55: optional-skill invariant + expectation ────────────────────────────
-// Built against the `optional-skills` fixture (expect.optionalSkills = ['retro']).
+// Built against the `optional-skills` fixture (expect.optionalSkills = ['checklist-intake']).
 // We assert on the R-55 failure strings specifically — the minimal hand-built
 // repo has unrelated failures (no .setup report, sentinel not in tree); those
 // are irrelevant to what B1 checks.
-function repoWithMarker(optionalSkills, { installRetro = false } = {}) {
+function repoWithMarker(optionalSkills, { installChecklistIntake = false } = {}) {
   const dir = mkdtempSync(join(tmpdir(), 'aikit-r55-'));
   git(dir, 'init', '-q', '-b', 'main');
   git(dir, 'config', 'user.email', 't@t');
@@ -91,10 +91,10 @@ function repoWithMarker(optionalSkills, { installRetro = false } = {}) {
   mkdirSync(join(dir, '.claude'), { recursive: true });
   const marker = { standard: '1.0.0', toolRepo: 'x', setupAt: '2026-01-01', githubCodeReview: false };
   if (optionalSkills !== null) marker.optionalSkills = optionalSkills;
-  writeFileSync(join(dir, '.claude/agent-base.json'), JSON.stringify(marker, null, 2) + '\n');
-  if (installRetro) {
-    mkdirSync(join(dir, '.claude/skills/retro'), { recursive: true });
-    writeFileSync(join(dir, '.claude/skills/retro/SKILL.md'), '---\nname: retro\n---\n');
+  writeFileSync(join(dir, '.claude/fcore.json'), JSON.stringify(marker, null, 2) + '\n');
+  if (installChecklistIntake) {
+    mkdirSync(join(dir, '.claude/skills/checklist-intake'), { recursive: true });
+    writeFileSync(join(dir, '.claude/skills/checklist-intake/SKILL.md'), '---\nname: checklist-intake\n---\n');
   }
   git(dir, 'add', '-A');
   git(dir, 'commit', '-qm', 'init');
@@ -108,29 +108,29 @@ function runAssertFixture(dir, fixture) {
 }
 
 test('R-55: marker lists an optional skill that is not installed → failure', () => {
-  const dir = repoWithMarker(['retro']);
+  const dir = repoWithMarker(['checklist-intake']);
   try {
     const res = runAssertFixture(dir, 'optional-skills');
-    assert.ok(res.failures.some((f) => /R-55.*"retro".*not installed/.test(f)),
+    assert.ok(res.failures.some((f) => /R-55.*"checklist-intake".*not installed/.test(f)),
       `expected listed-but-missing R-55 failure, got: ${res.failures.join(' | ')}`);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
 test('R-55: marker lists an installed optional skill matching expect → no R-55 failure', () => {
-  const dir = repoWithMarker(['retro'], { installRetro: true });
+  const dir = repoWithMarker(['checklist-intake'], { installChecklistIntake: true });
   try {
     const res = runAssertFixture(dir, 'optional-skills');
     assert.ok(!res.failures.some((f) => f.includes('R-55')),
       `no R-55 failure expected, got: ${res.failures.join(' | ')}`);
-    assert.deepEqual(res.optionalSkills, ['retro']);
+    assert.deepEqual(res.optionalSkills, ['checklist-intake']);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
 test('R-55: fixture expects an optional the marker did not select → failure', () => {
-  const dir = repoWithMarker([]); // expect.optionalSkills=['retro'] but none selected
+  const dir = repoWithMarker([]); // expect.optionalSkills=['checklist-intake'] but none selected
   try {
     const res = runAssertFixture(dir, 'optional-skills');
-    assert.ok(res.failures.some((f) => /R-55: expected optionals \[retro\]/.test(f)),
+    assert.ok(res.failures.some((f) => /R-55: expected optionals \[checklist-intake\]/.test(f)),
       `expected requested-but-not-applied R-55 failure, got: ${res.failures.join(' | ')}`);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });

@@ -1,6 +1,6 @@
-# Contributing to Agent Base
+# Contributing to FleetCore
 
-Thanks for helping improve Agent Base. This repo is the **setup tool**, not an
+Thanks for helping improve FleetCore. This repo is the **setup tool**, not an
 application — read [`AGENTS.md`](./AGENTS.md) first for the architecture and the
 conventions that govern changes.
 

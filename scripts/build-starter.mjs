@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // build-starter — emit a clean starter repo (the target state,
-// nothing else). Used by Agent Base CI to publish the "clone and go" starter, and
+// nothing else). Used by FleetCore CI to publish the "clone and go" starter, and
 // runnable directly. Usage: node scripts/build-starter.mjs <dir> [--git]
 
 import { resolve, dirname, join } from 'node:path';
@@ -11,8 +11,8 @@ import { instantiate as instantiateTemplate } from './lib/template.mjs';
 import { buildMarker } from './lib/marker.mjs';
 import { BASELINE_COPIES } from './lib/baseline.mjs';
 
-const baseRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const baseVersion = JSON.parse(readFileSync(join(baseRoot, 'package.json'), 'utf8')).version ?? '1.0.0';
+const fcoreRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const baseVersion = JSON.parse(readFileSync(join(fcoreRoot, 'package.json'), 'utf8')).version ?? '1.0.0';
 
 const [dir, ...flags] = process.argv.slice(2);
 if (!dir) {
@@ -35,14 +35,14 @@ if (existsSync(target)) {
 // tag yet — the emitted marker pin would dangle until the release is tagged.
 // Best-effort: staged releases have no .git (the staging path itself proves a
 // published version), and a failed git spawn must never block the build.
-if (existsSync(join(baseRoot, '.git'))) {
-  const r = spawnSync('git', ['-C', baseRoot, 'tag', '--list', `v${baseVersion}`], { encoding: 'utf8' });
+if (existsSync(join(fcoreRoot, '.git'))) {
+  const r = spawnSync('git', ['-C', fcoreRoot, 'tag', '--list', `v${baseVersion}`], { encoding: 'utf8' });
   if (!r.error && r.status === 0 && r.stdout.trim() === '') {
-    console.warn(`warning: tag v${baseVersion} not found in base clone — marker pin will dangle until the release is tagged`);
+    console.warn(`warning: tag v${baseVersion} not found in fcore clone — marker pin will dangle until the release is tagged`);
   }
 }
 
-const tpl = (rel) => readFileSync(join(baseRoot, 'templates', rel), 'utf8');
+const tpl = (rel) => readFileSync(join(fcoreRoot, 'templates', rel), 'utf8');
 // starter: no slot is filled → optional sections drop out, mandatory slots
 // instantiate empty (shared with apply so the two stay byte-identical).
 const instantiate = (rel) => instantiateTemplate(tpl(rel));
@@ -55,24 +55,24 @@ const files = {
   '.vscode/settings.json': tpl('settings/vscode/settings.json'),
   '.claude/skills/README.md': tpl('readmes/skills/README.md'),
   '.claude/agents/README.md': tpl('readmes/agents/README.md'),
-  '.claude/agent-base.json': `${JSON.stringify(buildMarker({
+  '.claude/fcore.json': `${JSON.stringify(buildMarker({
     standard: baseVersion,
     setupAt: new Date().toISOString().slice(0, 10),
     githubCodeReview: false,
   }), null, 2)}\n`,
   'README.md': `# New Project
 
-Started from the agent-base starter — this repo is pre-wired for AI-assisted
+Started from the fcore starter — this repo is pre-wired for AI-assisted
 coding with Claude Code and GitHub Copilot (VS Code).
 
 Next steps (delete this section when done):
 
 1. Fill in \`AGENTS.md\` — keep it under two pages.
-2. Open Claude Code or Copilot (agent mode) here and run the \`base-check\`
+2. Open Claude Code or Copilot (agent mode) here and run the \`fcore-check\`
    skill: it audits the setup and maps the full lifecycle (deep sweeps,
    optional orchestration, baseline refresh).
 3. If your team uses GitHub.com Copilot code review, set
-   \`githubCodeReview: true\` in \`.claude/agent-base.json\` and add a short
+   \`githubCodeReview: true\` in \`.claude/fcore.json\` and add a short
    \`.github/copilot-instructions.md\` pointing at AGENTS.md.
 `,
 };
@@ -86,9 +86,9 @@ for (const [rel, content] of Object.entries(files)) {
 // Permanent baseline ships verbatim from the same allowlist install-setup and
 // sync-baseline use — the starter is born repair-complete.
 for (const [src, dst] of BASELINE_COPIES) {
-  const from = join(baseRoot, src);
+  const from = join(fcoreRoot, src);
   if (!existsSync(from)) {
-    console.error(`build-starter: missing in Agent Base: ${src} (incomplete clone?)`);
+    console.error(`build-starter: missing in FleetCore: ${src} (incomplete clone?)`);
     process.exit(1);
   }
   const to = join(target, dst);
@@ -108,12 +108,12 @@ if (flags.includes('--git')) {
   };
   g(['init', '-q', '-b', 'main']);
   g(['add', '-A']);
-  g(['-c', 'user.email=starter@agent-base', '-c', 'user.name=agent-base', '-c', 'commit.gpgsign=false', 'commit', '-qm', `chore: agent-base starter (v${baseVersion})`]);
+  g(['-c', 'user.email=starter@fcore', '-c', 'user.name=fcore', '-c', 'commit.gpgsign=false', 'commit', '-qm', `chore: fcore starter (v${baseVersion})`]);
 }
 console.log(`starter → ${target} (v${baseVersion})`);
 console.log('');
 console.log('Next steps:');
 console.log('  1. Fill in AGENTS.md (keep it under two pages).');
 console.log('  2. Open Claude Code or Copilot (agent mode) in the project and run the');
-console.log('     base-check skill — it audits the setup and maps the full lifecycle');
+console.log('     fcore-check skill — it audits the setup and maps the full lifecycle');
 console.log('     (deep sweep, optional orchestration, baseline refresh).');

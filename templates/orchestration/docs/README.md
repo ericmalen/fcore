@@ -4,8 +4,8 @@ State and reference docs for this repo's generated orchestration setup.
 Generated agents live in `.claude/agents/`, paired skills in
 `.claude/skills/`; work intake is `tasks.md` at the repo root.
 
-Agent Base how-to (discovery, generation, execution):
-`docs/how-to/orchestration-guide.md` in the Agent Base clone — not copied into
+FleetCore how-to (discovery, generation, execution):
+`docs/how-to/orchestration-guide.md` in the FleetCore clone — not copied into
 targets; link from your team's internal docs if needed.
 
 ## Files
@@ -18,7 +18,7 @@ targets; link from your team's internal docs if needed.
 | `generation-manifest.json` | scaffolder | every generated file: template id, pinned version, content SHA |
 | `handoff-log.jsonl` | orchestrator (single writer) | one entry per dispatch/return, plus a permanent completion entry per finished task |
 | `runs/<task-id>/` | dispatched specialists | ephemeral per-task outputs (screenshots, transcripts); gitignored, deleted by the orchestrator at task completion |
-| `checklists/review-checklist.md` | retro flywheel | accumulated review checks |
+| `checklists/review-checklist.md` | checklist-intake flywheel | accumulated review checks |
 | `evals/<agent>/` | eval goldens | expected-properties checks per agent |
 | `evals/routing/` | eval goldens | main-loop routing-decision checks (does the fleet get dispatched?) |
 
@@ -28,7 +28,7 @@ task is pruned once its completion is logged here — see `tasks-format.md` and
 
 ## Updating generated assets
 
-Generated files are never edited by hand. When Agent Base's templates improve:
+Generated files are never edited by hand. When FleetCore's templates improve:
 
 1. Re-run the scaffolder against the stored `blueprint.json`. It
    re-instantiates from current templates and refreshes the manifest with
@@ -36,7 +36,7 @@ Generated files are never edited by hand. When Agent Base's templates improve:
 2. The manifest distinguishes a clean regeneration from a hand-edited file:
    any generated file whose bytes no longer match its manifest SHA is
    reported as a conflict and **nothing is overwritten** — resolve by hand
-   (usually: move your change into the blueprint or the Agent Base template), then
+   (usually: move your change into the blueprint or the FleetCore template), then
    re-run.
 3. A major template version bump signals an incompatible change — confirm
    it deliberately before regenerating.

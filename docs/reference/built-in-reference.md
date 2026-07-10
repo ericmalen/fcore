@@ -18,8 +18,8 @@ CLI, some in both.
 
 | Command                                | What it does                                                                                                         | Where                  |
 | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| `/init`                                | Generate a repo-wide `.github/copilot-instructions.md` tailored to the codebase. agent-base uses `AGENTS.md` instead — move the generated content into `AGENTS.md` and delete the generated file. | VS Code, Visual Studio |
-| `/create-prompt`                       | Generate a `.prompt.md` file from a description — not part of agent-base's surface (R-54: cross-tool slash commands ship as `user-invocable` skills) | VS Code                |
+| `/init`                                | Generate a repo-wide `.github/copilot-instructions.md` tailored to the codebase. fcore uses `AGENTS.md` instead — move the generated content into `AGENTS.md` and delete the generated file. | VS Code, Visual Studio |
+| `/create-prompt`                       | Generate a `.prompt.md` file from a description — not part of fcore's surface (R-54: cross-tool slash commands ship as `user-invocable` skills) | VS Code                |
 | `/create-skill`                        | Generate a skill folder with `SKILL.md`                                                                              | VS Code                |
 | `/create-agent`                        | Generate a `.agent.md` file                                                                                          | VS Code                |
 | `/plan`                                | Switch to the Plan agent                                                                                             | VS Code                |
@@ -35,11 +35,11 @@ CLI, some in both.
 | `/new`                                 | Scaffold a new project                                                                                               | VS Code                |
 
 User-invocable skills (from `.claude/skills/`) appear in the same `/` menu —
-that is agent-base's cross-tool slash-command mechanism (R-54).
+that is fcore's cross-tool slash-command mechanism (R-54).
 
-> **Note:** agent-base ships meta-skills named `/skill-creator` (Anthropic's
+> **Note:** fcore ships meta-skills named `/skill-creator` (Anthropic's
 > official authoring tool) and `/agent-creator` — distinct from VS Code's
-> built-in `/create-skill` and `/create-agent` above. agent-base's versions
+> built-in `/create-skill` and `/create-agent` above. fcore's versions
 > follow Anthropic's spec and this project's conventions; VS Code's
 > built-ins generate generic files.
 
@@ -62,7 +62,7 @@ in the same picker.
 ## Built-in tools
 
 Tools available to agents, in Copilot's native `category/tool` namespace; the
-bare parent name (e.g. `search`) grants the whole category. Note: agent-base
+bare parent name (e.g. `search`) grants the whole category. Note: fcore
 agents use **Claude tool names** in `tools:` (R-29) — this table is the
 Copilot-native vocabulary those names are mapped onto. VS Code releases
 weekly and the list evolves — confirm against the

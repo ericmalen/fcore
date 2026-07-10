@@ -1,17 +1,17 @@
 # Why This Way
 
 Optional reading. Design rationale for readers curious about the choices baked
-into Agent Base. Skip this and go to [`conventions.md`](../reference/conventions.md) if
+into FleetCore. Skip this and go to [`conventions.md`](../reference/conventions.md) if
 you just want the rules.
 
-## Why agent-base, not a fork
+## Why fcore, not a fork
 
-The author of Agent Base maintains a mature Copilot setup in a production
+The author of FleetCore maintains a mature Copilot setup in a production
 repo. Copying it wholesale would ship stack-specific and domain-specific
 content — layering rules, framework conventions, internal workflow names — that
 would require subtraction before addition in any other project.
 
-Agent Base inverts that. You start with the structure and conventions, then add
+FleetCore inverts that. You start with the structure and conventions, then add
 your own content. No deleting before building.
 
 ## Why a shared `.claude/` home
@@ -42,7 +42,7 @@ just imports it) would double-load the content.
 
 ## Why meta-skills
 
-One of Agent Base's defining design choices is **skills-as-tooling**. Two meta-skills
+One of FleetCore's defining design choices is **skills-as-tooling**. Two meta-skills
 — `skill-creator` and `agent-creator` — walk you through
 producing new assets that conform to the conventions. (`skill-creator` is
 Anthropic's official skill-authoring tool, shipped here as a baseline skill.)
@@ -72,7 +72,7 @@ duplicates the same framing 15 times — and drifts when conventions change.
 
 One README per asset-type folder covers the same ground with less maintenance.
 The READMEs explain the pattern. The annotated example assets (like
-`example-reviewer`, kept Agent Base-side) show what good looks like. Individual
+`example-reviewer`, kept FleetCore-side) show what good looks like. Individual
 assets stay lean.
 
 ## Why annotated examples instead of blank templates
@@ -82,7 +82,7 @@ you what to type and why it belongs there.
 
 The meta-skills provide the templates (paste-ready, stub content). The
 example assets (like `example-reviewer.md`) provide the annotated versions with
-inline comments explaining the non-obvious choices — they are Agent Base-side examples
+inline comments explaining the non-obvious choices — they are FleetCore-side examples
 to copy from, not assets installed into set-up projects. Together they cover both
 modes — "I just need a starting point" and "I want to see a real one."
 
@@ -92,7 +92,7 @@ Both Copilot and Claude Code support nested subagents (a subagent invoking
 subagents). Token cost compounds with depth, and recursive chains are easy to
 introduce by accident and hard to debug.
 
-Agent Base prefers a **flat topology** as the default: one orchestrator
+FleetCore prefers a **flat topology** as the default: one orchestrator
 calls every specialist directly. Reasons:
 
 - Easier to debug — every call appears in the orchestrator's transcript.
@@ -101,8 +101,8 @@ calls every specialist directly. Reasons:
 - Harder to accidentally make recursive — flat agents can't chain into a
   five-deep loop.
 
-Agent Base does not install an orchestration layer at setup — it is generated
-on demand from a base checkout (`base-orchestrate`). In a generated (or
+FleetCore does not install an orchestration layer at setup — it is generated
+on demand from a fcore checkout (`fcore-fleet-config`). In a generated (or
 hand-added) layer, review loops and human gates go in the orchestrator, not
 between specialists.
 Nesting is available when a specialist legitimately needs its own helpers —

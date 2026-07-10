@@ -334,7 +334,7 @@ test('defect: missing literal in a late install entry → apply throws, tree unt
   try {
     const inv = runInv({ root: repo, outDir: '.setup', allowDirty: false });
     saveManifest(repo, assemblingEntries(inv), {
-      installs: [{ file: '.claude/agent-base.json', literal: 'literals/ghost.json' }],
+      installs: [{ file: '.claude/fcore.json', literal: 'literals/ghost.json' }],
     });
     const before = treeSnapshot(repo);
     assert.throws(() => apply({ root: repo, templatesDir: KIT_TPL }), /install literal missing: literals\/ghost\.json/);

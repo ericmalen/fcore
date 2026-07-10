@@ -20,7 +20,7 @@
 #   - Optional: docs/orchestration/tracker-sync.json to chain a tracker sync
 #     before the run (GitHub Issues need no extra secret; gh uses the
 #     workflow token).
-#   - Private Agent Base repo? Route git credentials via insteadOf — see commented line.
+#   - Private FleetCore repo? Route git credentials via insteadOf — see commented line.
 name: orchestrator-run
 on:
   schedule:
@@ -42,16 +42,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Resolve Agent Base npx spec
+      - name: Resolve FleetCore npx spec
         run: |
           set -euo pipefail
-          test -f .claude/agent-base.json
-          NPX_SPEC="$(node -e 'const m=require("./.claude/agent-base.json");const pin=m.pin||("v"+m.standard);const url=String(m.toolRepo).trim().replace(/\/+$/,"");const gh=url.match(/^(?:git\+)?https:\/\/github\.com\/([^\/]+)\/([^\/]+?)(?:\.git)?$/);process.stdout.write((gh?"github:"+gh[1]+"/"+gh[2]:url.startsWith("git+")?url:url.startsWith("git@")?"git+ssh://"+url.replace(":","/"):"git+"+url)+"#"+pin)')"
+          test -f .claude/fcore.json
+          NPX_SPEC="$(node -e 'const m=require("./.claude/fcore.json");const pin=m.pin||("v"+m.standard);const url=String(m.toolRepo).trim().replace(/\/+$/,"");const gh=url.match(/^(?:git\+)?https:\/\/github\.com\/([^\/]+)\/([^\/]+?)(?:\.git)?$/);process.stdout.write((gh?"github:"+gh[1]+"/"+gh[2]:url.startsWith("git+")?url:url.startsWith("git@")?"git+ssh://"+url.replace(":","/"):"git+"+url)+"#"+pin)')"
           echo "NPX_SPEC=$NPX_SPEC" >> "$GITHUB_ENV"
-          # Private Agent Base repo? npm fetches git deps through git — route credentials, e.g.:
+          # Private FleetCore repo? npm fetches git deps through git — route credentials, e.g.:
           # git config --global url."https://x-token:${{ secrets.KIT_TOKEN }}@github.com/".insteadOf "https://github.com/"
           npx --yes "$NPX_SPEC" --version || {
-            echo "::error title=Agent Base pin resolution failed::Could not resolve $NPX_SPEC; do not fall back to an unpinned ref."
+            echo "::error title=FleetCore pin resolution failed::Could not resolve $NPX_SPEC; do not fall back to an unpinned ref."
             exit 1
           }
       - name: Guard - decide whether to run

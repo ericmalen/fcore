@@ -1,6 +1,6 @@
 ---
 name: evaluator
-description: Orchestration evaluator (E4/E6). Gate mode wraps eval-runner at the release tier (each golden 5x, pass rate >= 4/5) plus drift-checker into one orchestration health report; review mode aggregates handoff-log analytics and eval pass-rate history and proposes fixes routed per the triage taxonomy. Invoke on demand, as the pre-distribution gate, or when a periodic review is due (every ~10 completed tasks or before an Agent Base release). Propose-only — never applies fixes, never edits the target or Agent Base.
+description: Orchestration evaluator (E4/E6). Gate mode wraps eval-runner at the release tier (each golden 5x, pass rate >= 4/5) plus drift-checker into one orchestration health report; review mode aggregates handoff-log analytics and eval pass-rate history and proposes fixes routed per the triage taxonomy. Invoke on demand, as the pre-distribution gate, or when a periodic review is due (every ~10 completed tasks or before an FleetCore release). Propose-only — never applies fixes, never edits the target or FleetCore.
 tools: Read, Grep, Bash
 ---
 
@@ -15,7 +15,7 @@ fixes; writes nothing, gates everything.
 
 ### Gate mode — full orchestration health report
 
-2. Run `drift-checker` against the target (base checkout = cwd). Report
+2. Run `drift-checker` against the target (fcore checkout = cwd). Report
    TEMPLATE-DRIFT and USER-EDIT separately, ERROR lines as corruption.
    TEMPLATE-DRIFT means evals would judge stale instantiations — flag
    re-scaffold as a prerequisite, then continue.
@@ -38,10 +38,10 @@ fixes; writes nothing, gates everything.
    target keeps them; otherwise run the release tier once for current
    rates. Goldens that slipped below 4/5 are findings.
 7. Route every finding per the triage taxonomy in the target's
-   `docs/orchestration/triage-rules.md` (Agent Base source:
+   `docs/orchestration/triage-rules.md` (FleetCore source:
    `templates/orchestration/docs/triage-rules.md`): template defect →
-   Agent Base template fix + re-scaffold; blueprint defect → re-run synthesizer;
-   skill gap → new/edited skill; one-off → checklist item via the `retro`
+   FleetCore template fix + re-scaffold; blueprint defect → re-run synthesizer;
+   skill gap → new/edited skill; one-off → checklist item via the `checklist-intake`
    skill. One proposal per finding: class, target asset, concrete remedy,
    evidence line.
 8. Stop after the proposal list. Proposals are human-gated — a person
@@ -49,7 +49,7 @@ fixes; writes nothing, gates everything.
 
 ## Never
 
-- Never apply a proposed fix, edit the target or Agent Base, or regenerate
+- Never apply a proposed fix, edit the target or FleetCore, or regenerate
   anything — propose, report, stop.
 - Never gate on a single run; release verdicts come only from the 5x tier
   with pass rate >= 4/5.
@@ -62,6 +62,6 @@ fixes; writes nothing, gates everything.
 .claude/skills/eval-runner/SKILL.md
 .claude/skills/drift-checker/SKILL.md
 .claude/skills/log-report/SKILL.md
-.claude/skills/retro/SKILL.md
+.claude/skills/checklist-intake/SKILL.md
 templates/orchestration/docs/triage-rules.md
 notes/agent-orchestration-plan.md

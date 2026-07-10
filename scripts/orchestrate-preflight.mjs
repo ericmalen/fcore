@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// orchestrate-preflight — readiness guard for base-orchestrate. Thin CLI over
+// orchestrate-preflight — readiness guard for fcore-fleet-config. Thin CLI over
 // lib/orchestration/preflight.mjs: gathers filesystem evidence, the pure
 // decision lives in the library so it stays unit-testable.
 //
@@ -28,7 +28,7 @@ function readJson(path) {
 }
 
 // Simple trailing-star expansion only (`apps/*`, `packages/*`) — the shape
-// every Agent Base fixture and the vast majority of real workspace configs
+// every FleetCore fixture and the vast majority of real workspace configs
 // use. Anything fancier (nested globs, negation) is outside this probe's
 // remit; discovery's structure-detector does the real job later.
 function expandWorkspaces(root, workspaces) {

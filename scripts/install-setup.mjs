@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// install-setup — copy the setup tooling from a base clone into a project.
-// Run FROM the base clone:
+// install-setup — copy the setup tooling from a fcore clone into a project.
+// Run FROM the fcore clone:
 //   node <clone>/scripts/install-setup.mjs /path/to/project
 
 import { cpSync, existsSync, mkdirSync } from 'node:fs';
@@ -12,7 +12,7 @@ import { readFileSync } from 'node:fs';
 import { ALL_INSTALL_COPIES } from './lib/baseline.mjs';
 import { buildMarker, writeMarker } from './lib/marker.mjs';
 
-const baseRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const fcoreRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const target = process.argv[2] ? resolve(process.argv[2]) : null;
 
 if (!target) {
@@ -23,10 +23,10 @@ if (!existsSync(target)) {
   console.error(`install-setup: target does not exist: ${target}`);
   process.exit(2);
 }
-// Refuse to copy the base checkout onto itself (or into/over a nested path) —
+// Refuse to copy the fcore checkout onto itself (or into/over a nested path) —
 // cpSync onto itself errors mid-copy with files already written.
-if (target === baseRoot || target.startsWith(baseRoot + sep) || baseRoot.startsWith(target + sep)) {
-  console.error(`install-setup: target overlaps the Agent Base checkout (${baseRoot}); refusing.`);
+if (target === fcoreRoot || target.startsWith(fcoreRoot + sep) || fcoreRoot.startsWith(target + sep)) {
+  console.error(`install-setup: target overlaps the FleetCore checkout (${fcoreRoot}); refusing.`);
   process.exit(2);
 }
 const inTree = spawnSync('git', ['rev-parse', '--is-inside-work-tree'], { cwd: target, encoding: 'utf8' });
@@ -40,7 +40,7 @@ if (major < 20) {
   process.exit(2);
 }
 
-const baseVersion = JSON.parse(readFileSync(join(baseRoot, 'package.json'), 'utf8')).version ?? '1.0.0';
+const baseVersion = JSON.parse(readFileSync(join(fcoreRoot, 'package.json'), 'utf8')).version ?? '1.0.0';
 
 // Warn about destinations that already exist — the copy clobbers them. Setup is
 // branch-reversible, so a warning (not a prompt) is the right strength.
@@ -52,10 +52,10 @@ if (collisions.length > 0) {
 }
 
 for (const [src, dst] of ALL_INSTALL_COPIES) {
-  const from = join(baseRoot, src);
+  const from = join(fcoreRoot, src);
   const to = join(target, dst);
   if (!existsSync(from)) {
-    console.error(`install-setup: missing in Agent Base: ${src} (incomplete clone?)`);
+    console.error(`install-setup: missing in FleetCore: ${src} (incomplete clone?)`);
     process.exit(1);
   }
   mkdirSync(dirname(to), { recursive: true });
@@ -64,18 +64,18 @@ for (const [src, dst] of ALL_INSTALL_COPIES) {
 }
 
 // Seed marker when absent (setup phases may rewrite via manifest literal).
-const markerPath = join(target, '.claude/agent-base.json');
+const markerPath = join(target, '.claude/fcore.json');
 if (!existsSync(markerPath)) {
   writeMarker(target, buildMarker({
     standard: baseVersion,
     setupAt: new Date().toISOString().slice(0, 10),
     githubCodeReview: false,
   }));
-  console.log('  installed: .claude/agent-base.json (marker seed)');
+  console.log('  installed: .claude/fcore.json (marker seed)');
 }
 
 console.log(`
 Done. Next, in the project:
-  1. Commit the tooling:  git add -A && git commit --no-verify -m "chore: agent-base setup tooling"
-  2. Open your AI tool and invoke the base-inventory skill.
-Setup is fully reversible until you merge the agent-base-setup branch.`);
+  1. Commit the tooling:  git add -A && git commit --no-verify -m "chore: fcore setup tooling"
+  2. Open your AI tool and invoke the fcore-inventory skill.
+Setup is fully reversible until you merge the fcore-onboard branch.`);

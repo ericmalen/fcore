@@ -1,5 +1,5 @@
-// install-setup tests: the permanent baseline skills (notably base-check)
-// ship verbatim from Agent Base's .claude/skills/, not via the manifest.
+// install-setup tests: the permanent baseline skills (notably fcore-check)
+// ship verbatim from FleetCore's .claude/skills/, not via the manifest.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -20,58 +20,58 @@ function makeGitRepo() {
   return dir;
 }
 
-test('install-setup ships base-check verbatim from .claude/skills', () => {
+test('install-setup ships fcore-check verbatim from .claude/skills', () => {
   const target = makeGitRepo();
   try {
     const r = spawnSync(process.execPath,
       [join(BASE, 'scripts/install-setup.mjs'), target], { encoding: 'utf8' });
     assert.equal(r.status, 0, `install-setup failed: ${r.stderr}`);
 
-    const skill = '.claude/skills/base-check/SKILL.md';
-    const rubric = '.claude/skills/base-check/references/rubric.md';
-    const lifecycle = '.claude/skills/base-check/references/lifecycle.md';
+    const skill = '.claude/skills/fcore-check/SKILL.md';
+    const rubric = '.claude/skills/fcore-check/references/rubric.md';
+    const lifecycle = '.claude/skills/fcore-check/references/lifecycle.md';
     assert.ok(existsSync(join(target, skill)), 'SKILL.md installed');
     assert.ok(existsSync(join(target, rubric)), 'rubric.md installed');
     assert.ok(existsSync(join(target, lifecycle)), 'lifecycle.md installed');
 
-    // byte-identical to the source of truth under Agent Base's .claude/skills
+    // byte-identical to the source of truth under FleetCore's .claude/skills
     assert.equal(readFileSync(join(target, skill), 'utf8'),
-      readFileSync(join(BASE, skill), 'utf8'), 'SKILL.md matches Agent Base source');
+      readFileSync(join(BASE, skill), 'utf8'), 'SKILL.md matches FleetCore source');
     assert.equal(readFileSync(join(target, rubric), 'utf8'),
-      readFileSync(join(BASE, rubric), 'utf8'), 'rubric.md matches Agent Base source');
+      readFileSync(join(BASE, rubric), 'utf8'), 'rubric.md matches FleetCore source');
     assert.equal(readFileSync(join(target, lifecycle), 'utf8'),
-      readFileSync(join(BASE, lifecycle), 'utf8'), 'lifecycle.md matches Agent Base source');
+      readFileSync(join(BASE, lifecycle), 'utf8'), 'lifecycle.md matches FleetCore source');
   } finally {
     rmSync(target, { recursive: true, force: true });
   }
 });
 
-test('install-setup ships only the five setup scripts + lib, no Agent Base-dev tooling', () => {
+test('install-setup ships only the five setup scripts + lib, no FleetCore-dev tooling', () => {
   const target = makeGitRepo();
   try {
     const r = spawnSync(process.execPath,
       [join(BASE, 'scripts/install-setup.mjs'), target], { encoding: 'utf8' });
     assert.equal(r.status, 0, `install-setup failed: ${r.stderr}`);
 
-    const base = '.claude/agent-base-setup/scripts';
+    const base = '.claude/fcore-onboard/scripts';
     for (const f of ['inventory-extract.mjs', 'apply.mjs', 'check.mjs', 'report.mjs', 'audit.mjs',
       'lib/extract.mjs', 'lib/manifest.mjs', 'lib/audit/checks.mjs', 'lib/audit/util.mjs', 'lib/template.mjs']) {
       assert.ok(existsSync(join(target, base, f)), `${f} must ship`);
     }
-    // Agent Base-dev tooling depends on Agent Base-side test/ and spec/ and must NOT ship.
+    // FleetCore-dev tooling depends on FleetCore-side test/ and spec/ and must NOT ship.
     for (const f of ['build-starter.mjs', 'build-fixture.mjs', 'validate-assert.mjs',
       'rule-check-map.mjs', 'docs-consistency.mjs', 'install-setup.mjs']) {
       assert.ok(!existsSync(join(target, base, f)), `${f} must NOT ship`);
     }
-    // The two Agent Base-side-only skills stay home.
-    assert.ok(!existsSync(join(target, '.claude/skills/base-setup')), 'base-setup must NOT ship');
+    // The two FleetCore-side-only skills stay home.
+    assert.ok(!existsSync(join(target, '.claude/skills/fcore-onboard')), 'fcore-onboard must NOT ship');
     assert.ok(!existsSync(join(target, '.claude/skills/validate-setup')), 'validate-setup must NOT ship');
   } finally {
     rmSync(target, { recursive: true, force: true });
   }
 });
 
-test('install-setup stages optional lifecycle skills (not live), keeps discovery/generation Agent Base-only', () => {
+test('install-setup stages optional lifecycle skills (not live), keeps discovery/generation FleetCore-only', () => {
   const target = makeGitRepo();
   try {
     const r = spawnSync(process.execPath,
@@ -79,18 +79,18 @@ test('install-setup stages optional lifecycle skills (not live), keeps discovery
     assert.equal(r.status, 0, `install-setup failed: ${r.stderr}`);
 
     // Optional lifecycle skills are NOT installed to their live path by a plain
-    // setup (R-55: opt-in). They ARE staged in the setup window so base-apply
-    // can copy any the user selects; staged copies match the Agent Base source.
-    for (const id of ['retro', 'log-report', 'eval-runner', 'tracker-sync']) {
+    // setup (R-55: opt-in). They ARE staged in the setup window so fcore-apply
+    // can copy any the user selects; staged copies match the FleetCore source.
+    for (const id of ['checklist-intake', 'log-report', 'eval-runner', 'tracker-sync']) {
       assert.ok(!existsSync(join(target, `.claude/skills/${id}`)),
         `${id} must NOT be installed live by a plain setup`);
-      const staged = `.claude/agent-base-setup/optional-skills/${id}/SKILL.md`;
+      const staged = `.claude/fcore-onboard/optional-skills/${id}/SKILL.md`;
       assert.ok(existsSync(join(target, staged)), `${id} staged in setup window`);
       assert.equal(readFileSync(join(target, staged), 'utf8'),
         readFileSync(join(BASE, `.claude/skills/${id}/SKILL.md`), 'utf8'),
-        `${id} staged copy matches Agent Base source`);
+        `${id} staged copy matches FleetCore source`);
     }
-    // Discovery/generation meta-skills run FROM the Agent Base clone and stay home.
+    // Discovery/generation meta-skills run FROM the FleetCore clone and stay home.
     for (const id of ['structure-detector', 'dependency-mapper', 'convention-detector',
       'interview-guide', 'blueprint-generator', 'handoff-validator',
       'agent-instantiator', 'skill-instantiator', 'drift-checker']) {
@@ -102,9 +102,9 @@ test('install-setup stages optional lifecycle skills (not live), keeps discovery
       assert.ok(!existsSync(join(target, `.claude/agents/${a}.md`)), `${a} must NOT ship`);
     }
     // Orchestration engine + templates ride along with the wholesale copies.
-    assert.ok(existsSync(join(target, '.claude/agent-base-setup/scripts/lib/orchestration/schemas.mjs')),
+    assert.ok(existsSync(join(target, '.claude/fcore-onboard/scripts/lib/orchestration/schemas.mjs')),
       'scripts/lib/orchestration rides along');
-    assert.ok(existsSync(join(target, '.claude/agent-base-setup/templates/orchestration/template-registry.json')),
+    assert.ok(existsSync(join(target, '.claude/fcore-onboard/templates/orchestration/template-registry.json')),
       'templates/orchestration rides along');
   } finally {
     rmSync(target, { recursive: true, force: true });
@@ -114,8 +114,8 @@ test('install-setup stages optional lifecycle skills (not live), keeps discovery
 test('install-setup warns on pre-existing baseline paths, then still copies', () => {
   const target = makeGitRepo();
   try {
-    mkdirSync(join(target, '.claude/skills/docs'), { recursive: true });
-    writeFileSync(join(target, '.claude/skills/docs/SKILL.md'), 'project-owned content\n');
+    mkdirSync(join(target, '.claude/skills/docs-manager'), { recursive: true });
+    writeFileSync(join(target, '.claude/skills/docs-manager/SKILL.md'), 'project-owned content\n');
 
     const r = spawnSync(process.execPath,
       [join(BASE, 'scripts/install-setup.mjs'), target], { encoding: 'utf8' });
@@ -123,35 +123,35 @@ test('install-setup warns on pre-existing baseline paths, then still copies', ()
     assert.match(r.stderr, /overwriting existing \.claude\/skills\/docs/, 'warning names the colliding path');
 
     // The copy still proceeds — baseline wins (setup is branch-reversible).
-    assert.equal(readFileSync(join(target, '.claude/skills/docs/SKILL.md'), 'utf8'),
-      readFileSync(join(BASE, '.claude/skills/docs/SKILL.md'), 'utf8'), 'SKILL.md matches Agent Base source');
+    assert.equal(readFileSync(join(target, '.claude/skills/docs-manager/SKILL.md'), 'utf8'),
+      readFileSync(join(BASE, '.claude/skills/docs-manager/SKILL.md'), 'utf8'), 'SKILL.md matches FleetCore source');
   } finally {
     rmSync(target, { recursive: true, force: true });
   }
 });
 
-test('install-setup refuses target == base checkout', () => {
+test('install-setup refuses target == fcore checkout', () => {
   const r = spawnSync(process.execPath,
     [join(BASE, 'scripts/install-setup.mjs'), BASE], { encoding: 'utf8' });
   assert.notEqual(r.status, 0, 'must exit non-zero');
-  assert.match(r.stderr, /overlaps the Agent Base checkout/);
+  assert.match(r.stderr, /overlaps the FleetCore checkout/);
   assert.equal(r.stdout.indexOf('installed:'), -1, 'nothing copied');
 });
 
-test('install-setup refuses target nested inside the base checkout', () => {
+test('install-setup refuses target nested inside the fcore checkout', () => {
   const inside = join(BASE, 'scripts'); // exists, inside base — guard fires before any write
   const r = spawnSync(process.execPath,
     [join(BASE, 'scripts/install-setup.mjs'), inside], { encoding: 'utf8' });
   assert.notEqual(r.status, 0, 'must exit non-zero');
-  assert.match(r.stderr, /overlaps the Agent Base checkout/);
+  assert.match(r.stderr, /overlaps the FleetCore checkout/);
   assert.ok(!existsSync(join(inside, '.claude')), 'nothing written inside base');
 });
 
-test('install-setup refuses base checkout nested inside the target', () => {
-  const parent = dirname(BASE); // always contains the base checkout
+test('install-setup refuses fcore checkout nested inside the target', () => {
+  const parent = dirname(BASE); // always contains the fcore checkout
   const r = spawnSync(process.execPath,
     [join(BASE, 'scripts/install-setup.mjs'), parent], { encoding: 'utf8' });
   assert.notEqual(r.status, 0, 'must exit non-zero');
-  assert.match(r.stderr, /overlaps the Agent Base checkout/);
+  assert.match(r.stderr, /overlaps the FleetCore checkout/);
   assert.equal(r.stdout.indexOf('installed:'), -1, 'nothing copied');
 });

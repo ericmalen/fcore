@@ -13,7 +13,7 @@ import { spawnSync } from 'node:child_process';
 import { fixtures } from '../test/fixtures/defs.mjs';
 import { stripJsonComments } from './lib/extract.mjs';
 
-const baseRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const fcoreRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 const args = process.argv.slice(2);
 const opt = { fixture: null, dir: null, json: false };
@@ -36,25 +36,25 @@ const git = (...a) => { const r = run('git', a); if (r.status !== 0) throw new E
 
 // 1. Gates: check + audit exit 0 (skip for pure-starter with no .setup)
 const hasSetup = existsSync(join(dir, '.setup'))
-  && existsSync(join(dir, '.claude/agent-base-setup/scripts/check.mjs'));
+  && existsSync(join(dir, '.claude/fcore-onboard/scripts/check.mjs'));
 if (hasSetup) {
-  const check = run(process.execPath, [join(dir, '.claude/agent-base-setup/scripts/check.mjs'), '--root', dir,
-    '--templates', join(dir, '.claude/agent-base-setup/templates')]);
+  const check = run(process.execPath, [join(dir, '.claude/fcore-onboard/scripts/check.mjs'), '--root', dir,
+    '--templates', join(dir, '.claude/fcore-onboard/templates')]);
   results.checkExit = check.status;
   if (check.status !== 0) failures.push(`check.mjs exit ${check.status}: ${check.stdout.trim().slice(0, 400)}`);
-  const audit = run(process.execPath, [join(dir, '.claude/agent-base-setup/scripts/audit.mjs'), '--root', dir]);
+  const audit = run(process.execPath, [join(dir, '.claude/fcore-onboard/scripts/audit.mjs'), '--root', dir]);
   results.auditExit = audit.status;
   if (audit.status !== 0) failures.push(`audit.mjs exit ${audit.status}: ${audit.stdout.trim().slice(0, 400)}`);
 } else {
   results.note = 'no .setup dir (starter path or already merged)';
-  const audit = run(process.execPath, [join(baseRoot, 'scripts/audit.mjs'), '--root', dir]);
+  const audit = run(process.execPath, [join(fcoreRoot, 'scripts/audit.mjs'), '--root', dir]);
   results.auditExit = audit.status;
   if (audit.status !== 0) failures.push(`audit.mjs exit ${audit.status}`);
 }
 
 // 2. Sentinel accounting: each sentinel present in working tree OR covered in
 //    the report's drop / out-of-scope sections. Silent loss = hard failure.
-// F-2: base-verify removes .setup/ as merge prep — when absent, read the
+// F-2: fcore-verify removes .setup/ as merge prep — when absent, read the
 // report from git history. REGRESSION GUARD: the lookup MUST use
 // --diff-filter=AM. Plain `git log -1 -- <path>` returns the DELETION commit
 // (the rm that removed .setup/); `git show <deletion>:<path>` then fails,
@@ -129,11 +129,11 @@ if (diff.status === 0) {
 //    finding never flips auditExit; the equality check catches the inverse
 //    (a fixture requested optionals that the flow failed to install).
 {
-  const markerPath = join(dir, '.claude/agent-base.json');
+  const markerPath = join(dir, '.claude/fcore.json');
   let optionalSkills = null;
   if (existsSync(markerPath)) {
     try { optionalSkills = JSON.parse(stripJsonComments(readFileSync(markerPath, 'utf8'))).optionalSkills ?? []; }
-    catch { failures.push('R-55: .claude/agent-base.json is not valid JSON'); }
+    catch { failures.push('R-55: .claude/fcore.json is not valid JSON'); }
   }
   if (optionalSkills) {
     for (const name of optionalSkills) {

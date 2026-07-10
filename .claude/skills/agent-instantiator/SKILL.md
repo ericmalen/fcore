@@ -1,6 +1,6 @@
 ---
 name: agent-instantiator
-description: Orchestration generation step — instantiates ONE agent definition (specialist or orchestrator) from its agent template via pure slot substitution from a validated blueprint entry, writing the result into the project's .claude/agents/. Zero authoring; the same blueprint always yields byte-identical output. Use when an orchestration blueprint.json has passed the handoff gate and its agents must be materialized into a project. Not for creating or designing new agents (use agent-creator), not for instantiating paired skills (use skill-instantiator), not for agent-base setup materialization, and not for any agent work outside orchestration generation.
+description: Orchestration generation step — instantiates ONE agent definition (specialist or orchestrator) from its agent template via pure slot substitution from a validated blueprint entry, writing the result into the project's .claude/agents/. Zero authoring; the same blueprint always yields byte-identical output. Use when an orchestration blueprint.json has passed the handoff gate and its agents must be materialized into a project. Not for creating or designing new agents (use agent-creator), not for instantiating paired skills (use skill-instantiator), not for fcore setup materialization, and not for any agent work outside orchestration generation.
 ---
 
 # agent-instantiator
@@ -20,7 +20,7 @@ from its pin would produce a file no manifest version describes (C5).
   validated `docs/orchestration/blueprint.json` in the target.
 - The project path.
 - The entry's template: `templates/orchestration/agents/<templateId>.template.md`
-  in the base checkout.
+  in the fcore checkout.
 
 ## Procedure
 
@@ -38,7 +38,7 @@ from its pin would produce a file no manifest version describes (C5).
    [dispatch-order.mjs](../../../scripts/lib/orchestration/dispatch-order.mjs).
    Specialists never get it (an unused slot is an error).
 
-2. Instantiate the template strictly. From the base checkout root:
+2. Instantiate the template strictly. From the fcore checkout root:
 
    ```
    node --input-type=module -e '
@@ -78,7 +78,7 @@ On ANY error (missing entry, missing template, drifted sha256 pin,
 unfilled/unused/malformed slot): stop and report the error-string array
 verbatim. Never write partial output; never hand-patch the template, the
 slots, or the generated file. Fixes belong upstream in the blueprint
-(re-gate it with handoff-validator) or in the Agent Base template.
+(re-gate it with handoff-validator) or in the FleetCore template.
 
 ## Contract
 

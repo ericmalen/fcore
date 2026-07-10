@@ -14,9 +14,9 @@ const BASE_ROOT = join(import.meta.dirname, '..');
 const BASE_VERSION = JSON.parse(readFileSync(join(BASE_ROOT, 'package.json'), 'utf8')).version;
 
 function seedProject(root, markerExtra = {}) {
-  mkdirSync(join(root, '.claude/skills/base-check'), { recursive: true });
-  writeFileSync(join(root, '.claude/skills/base-check/SKILL.md'), readFileSync(
-    join(BASE_ROOT, '.claude/skills/base-check/SKILL.md'), 'utf8'));
+  mkdirSync(join(root, '.claude/skills/fcore-check'), { recursive: true });
+  writeFileSync(join(root, '.claude/skills/fcore-check/SKILL.md'), readFileSync(
+    join(BASE_ROOT, '.claude/skills/fcore-check/SKILL.md'), 'utf8'));
   writeMarker(root, buildMarker({
     standard: BASE_VERSION,
     pin: `v${BASE_VERSION}`,
@@ -26,11 +26,11 @@ function seedProject(root, markerExtra = {}) {
   }));
 }
 
-test('sync-baseline --check current when pin matches base-root version', () => {
+test('sync-baseline --check current when pin matches fcore-root version', () => {
   const root = mkdtempSync(join(tmpdir(), 'sync-chk-'));
   try {
     seedProject(root);
-    const res = runSyncBaseline({ root, baseRoot: BASE_ROOT, check: true, json: true });
+    const res = runSyncBaseline({ root, fcoreRoot: BASE_ROOT, check: true, json: true });
     assert.equal(res.exitCode, 0);
     assert.equal(res.payload.behind, false);
   } finally {
@@ -42,7 +42,7 @@ test('sync-baseline --check behind when pin is older', () => {
   const root = mkdtempSync(join(tmpdir(), 'sync-behind-'));
   try {
     seedProject(root, { standard: '0.9.0', pin: 'v0.9.0' });
-    const res = runSyncBaseline({ root, baseRoot: BASE_ROOT, check: true, json: true });
+    const res = runSyncBaseline({ root, fcoreRoot: BASE_ROOT, check: true, json: true });
     assert.equal(res.payload.behind, true);
     assert.equal(res.exitCode, 1);
   } finally {
@@ -55,11 +55,11 @@ test('sync-baseline --report lists updates when pin is behind', () => {
   const oldBase = mkdtempSync(join(tmpdir(), 'sync-oldkit-'));
   try {
     mkdirSync(join(oldBase, '.claude/skills'), { recursive: true });
-    cpSync(join(BASE_ROOT, '.claude/skills/base-check'), join(oldBase, '.claude/skills/base-check'), { recursive: true });
-    writeFileSync(join(oldBase, '.claude/skills/base-check/SKILL.md'), 'old-version\n');
+    cpSync(join(BASE_ROOT, '.claude/skills/fcore-check'), join(oldBase, '.claude/skills/fcore-check'), { recursive: true });
+    writeFileSync(join(oldBase, '.claude/skills/fcore-check/SKILL.md'), 'old-version\n');
     seedProject(root, { standard: '0.9.0', pin: 'v0.9.0' });
     const res = runSyncBaseline({
-      root, baseRoot: BASE_ROOT, oldBaseRoot: oldBase, report: true, json: true,
+      root, fcoreRoot: BASE_ROOT, oldFcoreRoot: oldBase, report: true, json: true,
     });
     assert.equal(res.exitCode, 0);
     assert.ok(res.payload.updateCount >= 1);
@@ -71,8 +71,8 @@ test('sync-baseline --report lists updates when pin is behind', () => {
 function seedOldKit() {
   const oldBase = mkdtempSync(join(tmpdir(), 'sync-oldkit-'));
   mkdirSync(join(oldBase, '.claude/skills'), { recursive: true });
-  cpSync(join(BASE_ROOT, '.claude/skills/base-check'), join(oldBase, '.claude/skills/base-check'), { recursive: true });
-  writeFileSync(join(oldBase, '.claude/skills/base-check/SKILL.md'), 'old-version\n');
+  cpSync(join(BASE_ROOT, '.claude/skills/fcore-check'), join(oldBase, '.claude/skills/fcore-check'), { recursive: true });
+  writeFileSync(join(oldBase, '.claude/skills/fcore-check/SKILL.md'), 'old-version\n');
   return oldBase;
 }
 
@@ -82,21 +82,21 @@ test('sync-baseline --upgrade applies updates and bumps marker pin', () => {
   try {
     seedProject(root, { standard: '0.9.0', pin: 'v0.9.0' });
     // Project file matches the old release exactly → safe update, no conflict.
-    writeFileSync(join(root, '.claude/skills/base-check/SKILL.md'), 'old-version\n');
+    writeFileSync(join(root, '.claude/skills/fcore-check/SKILL.md'), 'old-version\n');
     // Non-canonical marker field must survive the upgrade rewrite.
-    const markerPath = join(root, '.claude/agent-base.json');
+    const markerPath = join(root, '.claude/fcore.json');
     const seeded = JSON.parse(readFileSync(markerPath, 'utf8'));
     writeFileSync(markerPath, JSON.stringify({ ...seeded, customField: 'keep-me' }, null, 2) + '\n');
 
     const res = runSyncBaseline({
-      root, baseRoot: BASE_ROOT, oldBaseRoot: oldBase, upgrade: true, json: true,
+      root, fcoreRoot: BASE_ROOT, oldFcoreRoot: oldBase, upgrade: true, json: true,
     });
     assert.equal(res.exitCode, 0);
     assert.equal(res.payload.applied, true);
     assert.equal(res.payload.conflictCount, 0);
 
-    const synced = readFileSync(join(root, '.claude/skills/base-check/SKILL.md'), 'utf8');
-    assert.equal(synced, readFileSync(join(BASE_ROOT, '.claude/skills/base-check/SKILL.md'), 'utf8'));
+    const synced = readFileSync(join(root, '.claude/skills/fcore-check/SKILL.md'), 'utf8');
+    assert.equal(synced, readFileSync(join(BASE_ROOT, '.claude/skills/fcore-check/SKILL.md'), 'utf8'));
 
     const baseVersion = JSON.parse(readFileSync(join(BASE_ROOT, 'package.json'), 'utf8')).version;
     const marker = readMarker(root);
@@ -113,9 +113,9 @@ test('sync-baseline --upgrade applies updates and bumps marker pin', () => {
 test('sync-baseline --upgrade restores missing baseline files at current pin', () => {
   const root = mkdtempSync(join(tmpdir(), 'sync-fix-'));
   try {
-    // Current pin, but only base-check present — rest of the baseline missing.
+    // Current pin, but only fcore-check present — rest of the baseline missing.
     seedProject(root);
-    const res = runSyncBaseline({ root, baseRoot: BASE_ROOT, upgrade: true, json: true });
+    const res = runSyncBaseline({ root, fcoreRoot: BASE_ROOT, upgrade: true, json: true });
     assert.equal(res.exitCode, 0);
     assert.equal(res.payload.applied, true);
     assert.ok(res.payload.updateCount >= 1);
@@ -123,8 +123,8 @@ test('sync-baseline --upgrade restores missing baseline files at current pin', (
     assert.match(res.message, /restored .* at v/);
 
     assert.equal(
-      readFileSync(join(root, '.claude/skills/docs/SKILL.md'), 'utf8'),
-      readFileSync(join(BASE_ROOT, '.claude/skills/docs/SKILL.md'), 'utf8'));
+      readFileSync(join(root, '.claude/skills/docs-manager/SKILL.md'), 'utf8'),
+      readFileSync(join(BASE_ROOT, '.claude/skills/docs-manager/SKILL.md'), 'utf8'));
 
     const marker = readMarker(root);
     assert.equal(marker.pin, `v${BASE_VERSION}`);
@@ -138,7 +138,7 @@ test('sync-baseline --report at current pin lists missing baseline files', () =>
   const root = mkdtempSync(join(tmpdir(), 'sync-rpt-fix-'));
   try {
     seedProject(root);
-    const res = runSyncBaseline({ root, baseRoot: BASE_ROOT, report: true, json: true });
+    const res = runSyncBaseline({ root, fcoreRoot: BASE_ROOT, report: true, json: true });
     assert.equal(res.exitCode, 0);
     assert.equal(res.payload.behind, false);
     assert.ok(res.payload.updateCount >= 1);
@@ -155,10 +155,10 @@ test('sync-baseline --upgrade at current pin: restores missing, leaves local edi
     for (const [src, dst] of BASELINE_COPIES) {
       cpSync(join(BASE_ROOT, src), join(root, dst), { recursive: true });
     }
-    writeFileSync(join(root, '.claude/skills/docs/SKILL.md'), 'deliberate local edit\n');
+    writeFileSync(join(root, '.claude/skills/docs-manager/SKILL.md'), 'deliberate local edit\n');
     rmSync(join(root, '.claude/skills/git-conventions'), { recursive: true });
 
-    const res = runSyncBaseline({ root, baseRoot: BASE_ROOT, upgrade: true, json: true });
+    const res = runSyncBaseline({ root, fcoreRoot: BASE_ROOT, upgrade: true, json: true });
     assert.equal(res.exitCode, 0);
     assert.equal(res.payload.applied, true);
     assert.equal(res.payload.conflictCount, 1);
@@ -168,7 +168,7 @@ test('sync-baseline --upgrade at current pin: restores missing, leaves local edi
       readFileSync(join(root, '.claude/skills/git-conventions/SKILL.md'), 'utf8'),
       readFileSync(join(BASE_ROOT, '.claude/skills/git-conventions/SKILL.md'), 'utf8'));
     assert.equal(
-      readFileSync(join(root, '.claude/skills/docs/SKILL.md'), 'utf8'),
+      readFileSync(join(root, '.claude/skills/docs-manager/SKILL.md'), 'utf8'),
       'deliberate local edit\n');
   } finally {
     rmSync(root, { recursive: true, force: true });
@@ -182,15 +182,15 @@ test('sync-baseline --upgrade at current pin: local edits alone are a no-op, exi
     for (const [src, dst] of BASELINE_COPIES) {
       cpSync(join(BASE_ROOT, src), join(root, dst), { recursive: true });
     }
-    writeFileSync(join(root, '.claude/skills/docs/SKILL.md'), 'deliberate local edit\n');
+    writeFileSync(join(root, '.claude/skills/docs-manager/SKILL.md'), 'deliberate local edit\n');
 
-    const res = runSyncBaseline({ root, baseRoot: BASE_ROOT, upgrade: true, json: true });
+    const res = runSyncBaseline({ root, fcoreRoot: BASE_ROOT, upgrade: true, json: true });
     assert.equal(res.exitCode, 0);
     assert.equal(res.payload.applied, false);
     assert.equal(res.payload.conflictCount, 1);
     assert.match(res.message, /already at latest/);
     assert.equal(
-      readFileSync(join(root, '.claude/skills/docs/SKILL.md'), 'utf8'),
+      readFileSync(join(root, '.claude/skills/docs-manager/SKILL.md'), 'utf8'),
       'deliberate local edit\n');
   } finally {
     rmSync(root, { recursive: true, force: true });
@@ -202,17 +202,17 @@ test('sync-baseline --upgrade refuses when pin is ahead of target: exit 2, no wr
   const stale = mkdtempSync(join(tmpdir(), 'sync-stale-'));
   try {
     seedProject(root);
-    // Stale base checkout reports an older version than the project pin.
+    // Stale fcore checkout reports an older version than the project pin.
     writeFileSync(join(stale, 'package.json'), JSON.stringify({ version: '0.1.0' }));
 
-    const res = runSyncBaseline({ root, baseRoot: stale, upgrade: true, json: true });
+    const res = runSyncBaseline({ root, fcoreRoot: stale, upgrade: true, json: true });
     assert.equal(res.exitCode, 2);
     assert.match(res.error, /ahead of target/);
 
     const marker = readMarker(root);
     assert.equal(marker.pin, `v${BASE_VERSION}`);
     assert.equal(marker.standard, BASE_VERSION);
-    assert.ok(!existsSync(join(root, '.claude/skills/docs')));
+    assert.ok(!existsSync(join(root, '.claude/skills/docs-manager')));
   } finally {
     for (const d of [root, stale]) rmSync(d, { recursive: true, force: true });
   }
@@ -224,9 +224,9 @@ test('sync-baseline --upgrade: symlinked baseline path is a conflict, never writ
   try {
     seedProject(root);
     // Committed symlink at a baseline dst: updates would land out-of-tree.
-    symlinkSync(victim, join(root, '.claude/skills/docs'));
+    symlinkSync(victim, join(root, '.claude/skills/docs-manager'));
 
-    const res = runSyncBaseline({ root, baseRoot: BASE_ROOT, upgrade: true, json: true });
+    const res = runSyncBaseline({ root, fcoreRoot: BASE_ROOT, upgrade: true, json: true });
     // Plan classifies the symlinked paths as conflicts (drift at a current
     // pin); the rest of the baseline is still repaired around them.
     assert.equal(res.exitCode, 0, res.error ?? res.message);
@@ -249,7 +249,7 @@ test('sync-baseline --upgrade no-op at current pin with complete baseline', () =
     for (const [src, dst] of BASELINE_COPIES) {
       cpSync(join(BASE_ROOT, src), join(root, dst), { recursive: true });
     }
-    const res = runSyncBaseline({ root, baseRoot: BASE_ROOT, upgrade: true, json: true });
+    const res = runSyncBaseline({ root, fcoreRoot: BASE_ROOT, upgrade: true, json: true });
     assert.equal(res.exitCode, 0);
     assert.equal(res.payload.applied, false);
     assert.match(res.message, /already at latest/);
@@ -264,17 +264,17 @@ test('sync-baseline --upgrade blocked by local edit: exit 1, no writes', () => {
   try {
     seedProject(root, { standard: '0.9.0', pin: 'v0.9.0' });
     // Differs from both old and new release → local edit conflict.
-    writeFileSync(join(root, '.claude/skills/base-check/SKILL.md'), 'local edit\n');
+    writeFileSync(join(root, '.claude/skills/fcore-check/SKILL.md'), 'local edit\n');
 
     const res = runSyncBaseline({
-      root, baseRoot: BASE_ROOT, oldBaseRoot: oldBase, upgrade: true, json: true,
+      root, fcoreRoot: BASE_ROOT, oldFcoreRoot: oldBase, upgrade: true, json: true,
     });
     assert.equal(res.exitCode, 1);
     assert.ok(res.payload.conflicts.some(
-      (c) => c.path === '.claude/skills/base-check/SKILL.md'));
+      (c) => c.path === '.claude/skills/fcore-check/SKILL.md'));
 
     // Nothing applied: file and marker untouched.
-    assert.equal(readFileSync(join(root, '.claude/skills/base-check/SKILL.md'), 'utf8'), 'local edit\n');
+    assert.equal(readFileSync(join(root, '.claude/skills/fcore-check/SKILL.md'), 'utf8'), 'local edit\n');
     const marker = readMarker(root);
     assert.equal(marker.pin, 'v0.9.0');
     assert.equal(marker.standard, '0.9.0');
@@ -288,9 +288,9 @@ test('sync-baseline --upgrade at current pin: file-where-dir-expected is drift, 
   try {
     seedProject(root);
     // A regular FILE squats where the baseline ships the docs skill DIR.
-    writeFileSync(join(root, '.claude/skills/docs'), 'i am a file\n');
+    writeFileSync(join(root, '.claude/skills/docs-manager'), 'i am a file\n');
 
-    const res = runSyncBaseline({ root, baseRoot: BASE_ROOT, upgrade: true, json: true });
+    const res = runSyncBaseline({ root, fcoreRoot: BASE_ROOT, upgrade: true, json: true });
     assert.equal(res.exitCode, 0, res.error ?? res.message);
     assert.equal(res.payload.applied, true);
     assert.ok(res.payload.conflictCount >= 1);
@@ -298,7 +298,7 @@ test('sync-baseline --upgrade at current pin: file-where-dir-expected is drift, 
       || /local edit/.test(c.reason)));
 
     // Squatting file untouched; the rest of the baseline restored around it.
-    assert.equal(readFileSync(join(root, '.claude/skills/docs'), 'utf8'), 'i am a file\n');
+    assert.equal(readFileSync(join(root, '.claude/skills/docs-manager'), 'utf8'), 'i am a file\n');
     assert.ok(existsSync(join(root, '.claude/skills/git-conventions/SKILL.md')));
   } finally {
     rmSync(root, { recursive: true, force: true });
@@ -311,15 +311,15 @@ test('sync-baseline (R-55): unselected optional skill is never synced or reporte
     seedProject(root); // no optionalSkills in marker
     // A leftover optional skill on disk is invisible to a project that did not
     // select it — sync neither upgrades it nor flags it as removed.
-    cpSync(join(BASE_ROOT, '.claude/skills/retro'), join(root, '.claude/skills/retro'), { recursive: true });
-    writeFileSync(join(root, '.claude/skills/retro/SKILL.md'), 'stale local copy\n');
+    cpSync(join(BASE_ROOT, '.claude/skills/checklist-intake'), join(root, '.claude/skills/checklist-intake'), { recursive: true });
+    writeFileSync(join(root, '.claude/skills/checklist-intake/SKILL.md'), 'stale local copy\n');
 
-    const res = runSyncBaseline({ root, baseRoot: BASE_ROOT, report: true, json: true });
+    const res = runSyncBaseline({ root, fcoreRoot: BASE_ROOT, report: true, json: true });
     assert.equal(res.exitCode, 0);
-    assert.ok(!res.payload.updates.some((p) => p.startsWith('.claude/skills/retro')));
-    assert.ok(!res.payload.removed.some((p) => p.startsWith('.claude/skills/retro')));
+    assert.ok(!res.payload.updates.some((p) => p.startsWith('.claude/skills/checklist-intake')));
+    assert.ok(!res.payload.removed.some((p) => p.startsWith('.claude/skills/checklist-intake')));
     // Left exactly as-is — not touched.
-    assert.equal(readFileSync(join(root, '.claude/skills/retro/SKILL.md'), 'utf8'), 'stale local copy\n');
+    assert.equal(readFileSync(join(root, '.claude/skills/checklist-intake/SKILL.md'), 'utf8'), 'stale local copy\n');
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -328,15 +328,15 @@ test('sync-baseline (R-55): unselected optional skill is never synced or reporte
 test('sync-baseline (R-55): a selected optional skill is repaired like the baseline', () => {
   const root = mkdtempSync(join(tmpdir(), 'sync-opt-sel-'));
   try {
-    seedProject(root, { optionalSkills: ['retro'] });
+    seedProject(root, { optionalSkills: ['checklist-intake'] });
     // Selected but missing on disk → restored from the pinned release.
-    const res = runSyncBaseline({ root, baseRoot: BASE_ROOT, upgrade: true, json: true });
+    const res = runSyncBaseline({ root, fcoreRoot: BASE_ROOT, upgrade: true, json: true });
     assert.equal(res.exitCode, 0, res.error ?? res.message);
     assert.equal(
-      readFileSync(join(root, '.claude/skills/retro/SKILL.md'), 'utf8'),
-      readFileSync(join(BASE_ROOT, '.claude/skills/retro/SKILL.md'), 'utf8'));
+      readFileSync(join(root, '.claude/skills/checklist-intake/SKILL.md'), 'utf8'),
+      readFileSync(join(BASE_ROOT, '.claude/skills/checklist-intake/SKILL.md'), 'utf8'));
     // Selection survives the marker rewrite.
-    assert.deepEqual(readMarker(root).optionalSkills, ['retro']);
+    assert.deepEqual(readMarker(root).optionalSkills, ['checklist-intake']);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -355,12 +355,12 @@ test('sync-baseline checkout failure: exit 2 result (no throw), no temp-dir leak
     git('tag', 'v0.2.0'); // pin v0.1.0 exists in the marker only — clone at it must fail
     seedProject(root, { standard: '0.1.0', pin: 'v0.1.0', toolRepo: repo });
 
-    const before = new Set(readdirSync(tmpdir()).filter((d) => d.startsWith('agent-base-sync-')));
+    const before = new Set(readdirSync(tmpdir()).filter((d) => d.startsWith('fcore-sync-')));
     const res = runSyncBaseline({ root, upgrade: true, json: true });
     assert.equal(res.exitCode, 2);
     assert.match(res.error, /baseline checkout failed/);
     const leaked = readdirSync(tmpdir())
-      .filter((d) => d.startsWith('agent-base-sync-') && !before.has(d));
+      .filter((d) => d.startsWith('fcore-sync-') && !before.has(d));
     assert.deepEqual(leaked, []);
   } finally {
     for (const d of [root, repo]) rmSync(d, { recursive: true, force: true });

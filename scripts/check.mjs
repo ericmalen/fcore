@@ -139,7 +139,7 @@ export function check({ root, templatesDir, skipRepro = false }) {
       v('reproducibility', 'no generated.json — run apply first');
     } else {
       const recorded = JSON.parse(readFileSync(genPath, 'utf8'));
-      const tmp = mkdtempSync(join(tmpdir(), 'agent-base-repro-'));
+      const tmp = mkdtempSync(join(tmpdir(), 'fcore-repro-'));
       try {
         const fresh = apply({ root, templatesDir, outRoot: tmp });
         const paths = new Set([...Object.keys(recorded.generated), ...Object.keys(fresh.generated)]);

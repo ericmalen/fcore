@@ -11,10 +11,10 @@ manifest is the only state it owns.
 
 1. Read the invocation brief — it names one project path with a
    `docs/orchestration/blueprint.json`. Gate it first via
-   `.claude/skills/handoff-validator/SKILL.md` (base checkout = cwd). At
+   `.claude/skills/handoff-validator/SKILL.md` (fcore checkout = cwd). At
    generation time a SKIP (missing template) is as fatal as a FAIL — every
    referenced template must exist. REJECT → stop and report.
-2. Generate, from the base checkout (all-or-nothing; the script refuses to
+2. Generate, from the fcore checkout (all-or-nothing; the script refuses to
    touch a target whose previously generated files were hand-edited). On a
    re-run, a prior-manifest path absent from the new plan — a specialist or
    paired skill the blueprint dropped — is deleted as an orphan once the
@@ -93,7 +93,7 @@ manifest is the only state it owns.
    const target = process.argv[1];
    const bp = JSON.parse(readFileSync(join(target, "docs/orchestration/blueprint.json"), "utf8"));
    const agentsPath = join(target, "AGENTS.md");
-   if (!existsSync(agentsPath)) { console.error("AGENTS.md missing — run base-setup first"); process.exit(1); }
+   if (!existsSync(agentsPath)) { console.error("AGENTS.md missing — run fcore-onboard first"); process.exit(1); }
    const body = renderOrchestrationRouting(bp);
    writeFileSync(agentsPath, upsertManagedRegion(readFileSync(agentsPath, "utf8"), ROUTING_REGION_START, ROUTING_REGION_END, body));
    console.log(body ? "routing region upserted" : "routing region omitted (manual policy)");
@@ -104,7 +104,7 @@ manifest is the only state it owns.
    manifest entry's `sha256` matches the on-disk file. Re-run step 4 too — the
    routing region must come out byte-identical. Any mismatch is a defect to
    report, never to patch by hand.
-6. Run the Agent Base audit against the target (`node scripts/audit.mjs --root
+6. Run the FleetCore audit against the target (`node scripts/audit.mjs --root
    <target>`) and report: file list with SHAs, stubs created, `.gitignore`
    runs/ coverage, routing region upserted/omitted, audit findings, validator
    outputs. Then stop.
@@ -117,7 +117,7 @@ manifest is the only state it owns.
 - Never modify `blueprint.json` or any discovery output — one writer per
   artifact: the scaffolder owns only the manifest (and the generated files
   it records).
-- Never bump or invent template versions — pins come from Agent Base's
+- Never bump or invent template versions — pins come from FleetCore's
   template registry verbatim.
 - Never track living state (tasks.md, handoff log, checklists, the AGENTS.md
   routing region) in the manifest — so orphan removal can never touch them,

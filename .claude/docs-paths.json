@@ -1,5 +1,5 @@
 {
   "tier": "T3",
-  "codePaths": ["scripts/", "test/", "templates/", ".claude/skills/docs/scripts/", ".claude/skills/base-check/scripts/"],
+  "codePaths": ["scripts/", "test/", "templates/", ".claude/skills/docs-manager/scripts/", ".claude/skills/fcore-check/scripts/"],
   "docsPaths": ["README.md", "AGENTS.md", "CLAUDE.md", "docs/", "spec/"]
 }

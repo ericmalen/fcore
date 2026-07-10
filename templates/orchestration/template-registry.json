@@ -2,54 +2,54 @@
   "schemaVersion": 1,
   "agents": {
     "orchestrator": {
-      "version": "1.3.0",
-      "sha256": "e1dbc3bb799dec539332b2a5f3f7a73cbe88d0bf6f7757b5f8aa4d358b900a0b"
+      "version": "1.3.1",
+      "sha256": "23e5340de294198fceca93862c5c4c5d5c43fbe1b448fd4fac5cce6e1df3b077"
     },
     "generic-specialist": {
-      "version": "1.1.0",
-      "sha256": "19a9ed27ffe480727df60770066d78e29df5ec3d48eda40441a4ad6613067125"
+      "version": "1.1.1",
+      "sha256": "ae79ad7befdc0f57b560d82d10b1d57081b2ffa03804bba0debdce042947b71d"
     },
     "code-reviewer": {
-      "version": "1.0.1",
-      "sha256": "6153b40e0fdf21eedae573be168ebe76006ec1ea3dad312cb6f53f0dce682f0c"
+      "version": "1.0.2",
+      "sha256": "54376d13d58176b64d4b6eb777fad01bc58f46c5c1d086edf904b89f997a3ccc"
     },
     "qa-agent": {
-      "version": "1.0.1",
-      "sha256": "04eeac9bd212e2324d6dabaab71d2b16e7eb7375061e8479a832246f1f0a4404"
+      "version": "1.0.2",
+      "sha256": "419e0dc278f2ff932f3e8ff1871ccdefb18b6b940309322bacca0ee92f0615e1"
     },
     "security-reviewer": {
-      "version": "1.0.1",
-      "sha256": "b6452d0f23168f3d9a87e0d5636faa073b1dc08946c4c2389fc4fb32c2e99048"
+      "version": "1.0.2",
+      "sha256": "0cd0278e214348b85d0e884b365b06a5b42a36710804707c2231cac018c9e02d"
     }
   },
   "skills": {
     "api-testing": {
-      "version": "1.2.0",
+      "version": "1.2.1",
       "stackEvidence": [
         "express",
         "fastify",
         "http server"
       ],
-      "sha256": "646eddb08e924c6a56491ab7e901d3194c8426eb8fb38b9f5b88ae4a5324d458"
+      "sha256": "77a8262dfc9c2104e653e33a0c2cc4240bf6cbb55360ef080e74bf974610004e"
     },
     "ui-component-pattern": {
-      "version": "1.2.0",
+      "version": "1.2.1",
       "stackEvidence": [
         "react",
         "vue",
         "vite",
         "frontend"
       ],
-      "sha256": "61f295e8a096bf9e1fcdcc7be1ccd409c0fac8949bed847f5c0355f49b75780f"
+      "sha256": "ff3e7794efbd69312d2cfeee07de1ae878d7b820a86f7f3569ad09673350cbe2"
     },
     "db-migration": {
-      "version": "1.2.0",
+      "version": "1.2.1",
       "stackEvidence": [
         "prisma",
         "orm",
         "migration"
       ],
-      "sha256": "a97f8dd900d8971f983e09a2adee4fc862020ed15c098e05525a52227475cebf"
+      "sha256": "a06bc08b331c8383d369d4e0c9f90910f7cfef2f429b2a99f7f91808b0b04e0e"
     }
   },
   "docs": {
@@ -58,20 +58,20 @@
       "sha256": "437cfbd7def2662765c08ffde92ec38b5b0282416aa5ade01bb81491620fc25d"
     },
     "tasks-format": {
-      "version": "1.3.0",
-      "sha256": "3fe18ebbb4cd7cd169118bb8174c9e96d06310ae6ac9aabae51d51beb9862049"
+      "version": "1.3.1",
+      "sha256": "98e184cb0069f676c1c788871602a7cfe7ff12b3d39e0205a3fd61cbb2836455"
     },
     "handoff-logging": {
       "version": "1.2.0",
       "sha256": "d3a0ede74d4b44db6667e83716aad39c5bbf0505b88a472b89f5085bb62fd1f4"
     },
     "README": {
-      "version": "1.1.3",
-      "sha256": "9b6ebe2fce68108a6c739869b863abca0f96d2232dc76eec340cf16fb2cfdc00"
+      "version": "1.1.5",
+      "sha256": "16c755840ace0b439f964771322062ec21e9a4d2780bb54c97acba5a9fc63f44"
     },
     "triage-rules": {
-      "version": "1.0.1",
-      "sha256": "e9520b4725d65c8ae71fa2e9b6c3007e2c5ef88eb28c6adf4cbddc44bec4aa70"
+      "version": "1.0.3",
+      "sha256": "3c4279b6f7f9eb9df76b53d9a81e5004a36dd0a89267c5a7a2d2f000a5f5e9b6"
     },
     "agent-teams": {
       "version": "1.1.0",

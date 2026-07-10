@@ -9,16 +9,16 @@ const BASE_ROOT = new URL('..', import.meta.url).pathname;
 const TPL = [
   '# Title',
   '',
-  '<!-- agent-base:slot:intro -->',
+  '<!-- fcore:slot:intro -->',
   '',
   '## Overview',
-  '<!-- agent-base:optional -->',
+  '<!-- fcore:optional -->',
   '',
-  '<!-- agent-base:slot:overview -->',
+  '<!-- fcore:slot:overview -->',
   '',
   '## Do Not',
   '',
-  '<!-- agent-base:slot:do-not -->',
+  '<!-- fcore:slot:do-not -->',
   '',
 ].join('\n');
 
@@ -26,15 +26,15 @@ test('empty optional section is removed; mandatory section stays', () => {
   const out = instantiate(TPL, () => undefined); // nothing filled
   assert.ok(!out.includes('## Overview'), 'empty optional Overview should be gone');
   assert.ok(out.includes('## Do Not'), 'mandatory Do Not stays even when empty (R-03)');
-  assert.ok(!out.includes('agent-base:optional'), 'optional markers are stripped');
-  assert.ok(!out.includes('agent-base:slot'), 'slot markers are stripped');
+  assert.ok(!out.includes('fcore:optional'), 'optional markers are stripped');
+  assert.ok(!out.includes('fcore:slot'), 'slot markers are stripped');
 });
 
 test('filled optional section is kept with its content and no markers', () => {
   const out = instantiate(TPL, (name) => (name === 'overview' ? 'Real overview text.' : undefined));
   assert.ok(out.includes('## Overview'), 'filled optional section stays');
   assert.ok(out.includes('Real overview text.'));
-  assert.ok(!out.includes('agent-base:optional'));
+  assert.ok(!out.includes('fcore:optional'));
 });
 
 test('stripEmptyOptionalSections preserves byte content of kept sections', () => {
@@ -43,7 +43,7 @@ test('stripEmptyOptionalSections preserves byte content of kept sections', () =>
   assert.ok(pruned.includes('## Overview'));
   assert.ok(pruned.includes('## Do Not'));
   // intro/do-not are mandatory (no optional marker) → never removed
-  assert.ok(pruned.includes('<!-- agent-base:slot:intro -->'));
+  assert.ok(pruned.includes('<!-- fcore:slot:intro -->'));
 });
 
 test('no optional markers → text is returned unchanged', () => {
@@ -62,5 +62,5 @@ test('starter AGENTS template drops Overview/Architecture, keeps Do Not + More C
   // installed .claude/ assets, even on a starter repo with no routed content.
   assert.ok(out.includes('## More Context'), 'More Context stays in starter');
   assert.ok(out.includes('.claude/skills/'), 'footer points at installed assets');
-  assert.ok(!out.includes('agent-base:'), 'no leftover agent-base markers');
+  assert.ok(!out.includes('fcore:'), 'no leftover fcore markers');
 });

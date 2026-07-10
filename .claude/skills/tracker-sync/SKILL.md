@@ -37,20 +37,20 @@ Non-Basic ADO process template? Set `ado.stateMap` (`basic` | `agile`) in
 
 ## Run
 
-Locate an Agent Base root first (same resolution as base-check): a base checkout
-if you are in one; else the target's `.claude/agent-base-setup/` while setup
-tooling is present; else shallow-clone the Agent Base repo (URL in
-`.claude/agent-base.json` → `toolRepo`). Then **always dry-run first**:
+Locate an FleetCore root first (same resolution as fcore-check): a fcore checkout
+if you are in one; else the target's `.claude/fcore-onboard/` while setup
+tooling is present; else shallow-clone the FleetCore repo (URL in
+`.claude/fcore.json` → `toolRepo`). Then **always dry-run first**:
 
 ```
-node <agent-base>/scripts/tracker-sync.mjs --target /path/to/project
+node <fcore>/scripts/tracker-sync.mjs --target /path/to/project
 ```
 
 Present the plan (imports / status updates / prunes / conflicts) to the user.
 Only after they confirm:
 
 ```
-node <agent-base>/scripts/tracker-sync.mjs --target /path/to/project --apply
+node <fcore>/scripts/tracker-sync.mjs --target /path/to/project --apply
 ```
 
 Then commit the `tasks.md` change in the target with a conventional message

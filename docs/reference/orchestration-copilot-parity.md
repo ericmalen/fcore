@@ -10,10 +10,10 @@ and where it does not. No silent divergence — gaps are explicit.
 | Generated agents and skills | `.claude/agents/`, `.claude/skills/` |
 | Orchestration state | `docs/orchestration/*`, `tasks.md` |
 | Subagent dispatch | Orchestrator delegates specialists in-session |
-| Lifecycle skills | `retro`, `log-report`, `eval-runner` |
-| Agent Base scripts | Node validators and scaffold (allowlist when prompted) |
+| Lifecycle skills | `checklist-intake`, `log-report`, `eval-runner` |
+| FleetCore scripts | Node validators and scaffold (allowlist when prompted) |
 
-Discovery and generation (`/base-orchestrate`) should **attempt** subagent
+Discovery and generation (`/fcore-fleet-config`) should **attempt** subagent
 dispatch in Copilot the same as Claude Code. If subagent dispatch fails, run
 each phase inline in a fresh chat following the session table in the
 [orchestration guide](../how-to/orchestration-guide.md).
@@ -60,8 +60,8 @@ approval behavior use VS Code settings. Setup wires the shared subset; see
 
 ## Practical guidance for Copilot users
 
-1. Set up the project first (`/base-setup`).
-2. Run `/base-orchestrate` from the base checkout; allowlist `node` on Agent Base
+1. Set up the project first (`/fcore-onboard`).
+2. Run `/fcore-fleet-config` from the fcore checkout; allowlist `node` on FleetCore
    scripts when prompted.
 3. After generation, open the **target** and invoke `feature-orchestrator` on
    `tasks.md` items — expect in-session dispatch even for wide scopes.

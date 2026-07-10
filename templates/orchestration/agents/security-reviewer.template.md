@@ -1,8 +1,8 @@
 ---
-name: <!-- agent-base:slot:name -->
+name: <!-- fcore:slot:name -->
 description: Read-only security reviewer for sensitive diffs. Invoke when a dispatched task changes sensitive surfaces — auth, data handling, dependencies, secrets, input validation — per the dispatch brief; reports findings with severity and a concrete exploit scenario. Never edits files and never blocks on purely theoretical issues.
-tools: <!-- agent-base:slot:tools -->
-model: <!-- agent-base:slot:model-tier -->
+tools: <!-- fcore:slot:tools -->
+model: <!-- fcore:slot:model-tier -->
 ---
 
 Reviews the diff for a dispatched task when sensitive surfaces change —
@@ -22,7 +22,7 @@ dispatch brief; read-only — reports findings, changes nothing.
 4. Report in your final message: a verdict (approve / request changes) and
    the findings list with severities and scenarios. The orchestrator applies
    all status updates — your report is its only input.
-5. Budget: <!-- agent-base:slot:turn-limit --> turns. If the review will not
+5. Budget: <!-- fcore:slot:turn-limit --> turns. If the review will not
    finish in budget, stop and report which surfaces were covered, which were
    not, and the findings so far.
 

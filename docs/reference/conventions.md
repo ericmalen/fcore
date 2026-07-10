@@ -1,6 +1,6 @@
 # Conventions
 
-The do-and-don't sheet for agent-base. One page, reference only — the practices
+The do-and-don't sheet for fcore. One page, reference only — the practices
 for working *with* these conventions live in
 [`workflow-tips.md`](../how-to/workflow-tips.md); the rationale behind them in
 [`why-this-way.md`](../explanation/why-this-way.md).
@@ -56,7 +56,7 @@ names (Copilot maps them):
 
 The copy shipped into targets lives in
 [`agent-creator/references/tool-tiers.md`](../../.claude/skills/agent-creator/references/tool-tiers.md)
-(Agent Base docs are not installed); the two tables are kept in sync.
+(FleetCore docs are not installed); the two tables are kept in sync.
 
 ## File-naming conventions
 
@@ -66,20 +66,20 @@ The copy shipped into targets lives in
 | Skills     | `{kebab-case-name}/SKILL.md`     | `tdd-workflow/SKILL.md` |
 | Rules      | `{scope}.md` in `.claude/rules/` | `tests.md`              |
 
-New skills and agents for agent-base follow the conventions in
+New skills and agents for fcore follow the conventions in
 [`.claude/skills/README.md`](../../.claude/skills/README.md) and the "Adding
 agents" section of [`.claude/agents/README.md`](../../.claude/agents/README.md).
 What ships into set-up projects is decided by the installer allowlist in
 `scripts/lib/baseline.mjs` (consumed by `scripts/install-setup.mjs`) — there
 is no separate distribution step.
-Every setup installs the baseline skills (`base-check`, `docs`,
+Every setup installs the baseline skills (`fcore-check`, `docs-manager`,
 `git-conventions`, `skill-creator`, `agent-creator`) and the `docs-auditor`
-agent. The orchestration lifecycle skills (`retro`, `log-report`,
+agent. The orchestration lifecycle skills (`checklist-intake`, `log-report`,
 `eval-runner`, `tracker-sync`) are optional (R-55, `OPTIONAL_SKILLS`) — opt-in
 per project, dormant until orchestration generation creates their surfaces
-(`docs/orchestration/`, generated agents); `base-orchestrate` installs them as
-a prerequisite, or add them with `agent-base skills add`. Orchestration
-discovery/generation meta-assets stay Agent Base-side and run from a base checkout against
+(`docs/orchestration/`, generated agents); `fcore-fleet-config` installs them as
+a prerequisite, or add them with `fcore skills add`. Orchestration
+discovery/generation meta-assets stay FleetCore-side and run from a fcore checkout against
 a target path — see [`spec/target-layout.md`](../../spec/target-layout.md).
 
 Directory- or layer-scoped conventions go in a path-scoped rules file at
@@ -97,9 +97,9 @@ files stay lean.
 
 ## Conformance tooling (and a name disambiguation)
 
-Conformance to these conventions is audited by the `base-check` skill: it
-runs `node <agent-base>/scripts/audit.mjs --root .` and fixes findings by rule ID
+Conformance to these conventions is audited by the `fcore-check` skill: it
+runs `node <fcore>/scripts/audit.mjs --root .` and fixes findings by rule ID
 (usage tips: [`workflow-tips.md`](../how-to/workflow-tips.md#keeping-the-config-conformant)).
 Despite the similar names, `scripts/check.mjs` is unrelated — it enforces the
-manifest gates during setup phase 3, while the `base-check` skill is the
+manifest gates during setup phase 3, while the `fcore-check` skill is the
 recurring after setup audit.

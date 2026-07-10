@@ -1,12 +1,12 @@
 ---
 name: validate-setup
-description: Runs the full agent-base setup validation end-to-end — builds fixture repos, executes every setup phase in fresh contexts, runs mechanical assertions and sabotage tests, and writes a results report. Use when asked to validate, test, or qualify the setup tooling.
+description: Runs the full fcore setup validation end-to-end — builds fixture repos, executes every setup phase in fresh contexts, runs mechanical assertions and sabotage tests, and writes a results report. Use when asked to validate, test, or qualify the setup tooling.
 ---
 
 # validate-setup
 
-One command, zero choreography. Run FROM the agent-base repo (this clone is
-Agent Base). The user only reads the final report.
+One command, zero choreography. Run FROM the fcore repo (this clone is
+FleetCore). The user only reads the final report.
 
 Arguments (parse from the user's message): fixture names, `all` (default:
 `mixed-messy`), `--sabotage` (default ON for mixed-messy), `--keep` (retain
@@ -20,11 +20,11 @@ when no recognizable fixture/flag is present.
 
 ## Procedure
 
-1. Workspace: `WORK=~/agent-base-validation/<YYYYMMDD-HHMM>`; record Agent Base SHA.
+1. Workspace: `WORK=~/fcore-validation/<YYYYMMDD-HHMM>`; record FleetCore SHA.
 2. For EACH fixture, sequentially:
-   a. `node <agent-base>/scripts/build-fixture.mjs <name> $WORK/fx-<name>`
-   b. `node <agent-base>/scripts/install-setup.mjs $WORK/fx-<name>`, then commit
-      ("chore: agent-base setup tooling") in the fixture.
+   a. `node <fcore>/scripts/build-fixture.mjs <name> $WORK/fx-<name>`
+   b. `node <fcore>/scripts/install-setup.mjs $WORK/fx-<name>`, then commit
+      ("chore: fcore setup tooling") in the fixture.
    c. Run the four phases, EACH as a fresh-context subagent whose prompt is:
       "Read <fixtureDir>/.claude/skills/base-<phase>/SKILL.md and execute its
       procedure in <fixtureDir>. Setup answers: githubCodeReview=NO,
@@ -36,7 +36,7 @@ when no recognizable fixture/flag is present.
       You (orchestrator) record each subagent's summary, gate contents, any
       escalations, and the iteration counts it reports.
    d. Mechanical verdict:
-      `node <agent-base>/scripts/validate-assert.mjs --fixture <name> --dir $WORK/fx-<name> --json`
+      `node <fcore>/scripts/validate-assert.mjs --fixture <name> --dir $WORK/fx-<name> --json`
       (also enforces the R-55 invariant — every optional skill in the marker's
       `optionalSkills` must be installed, and must match the fixture's
       `expect.optionalSkills` when declared.)
@@ -56,19 +56,19 @@ when no recognizable fixture/flag is present.
    fixture), fresh verifier subagent per defect, record caught/missed.
    Catch-rate = n/4.
 3b. npx packaging e2e (once per validation run, not per fixture): from a
-   throwaway dir, `npx --yes "git+file://<agent-base>#<current-branch>" audit
+   throwaway dir, `npx --yes "git+file://<fcore>#<current-branch>" audit
    --root $WORK/fx-mixed-messy --json` — exercises npm's real git-pack
    delivery path (bin resolution, packlist completeness). PASS = audit runs
    and emits JSON (findings are fine; a module-not-found or missing-template
    error is the failure being hunted). Record verdict in the report.
-4. Report → `<agent-base>/reports/validation-report-<date>.md` (create `reports/`
+4. Report → `<fcore>/reports/validation-report-<date>.md` (create `reports/`
    if missing; it is gitignored — reports are working outputs, never committed):
    per-fixture table (phases completed, gate loops, assert verdict, sentinel
    accounting, merged-bytes %), sabotage catch-rate, ALL escalations gathered
-   for the human, environment (tool, model, Agent Base SHA), and a plain-language
+   for the human, environment (tool, model, FleetCore SHA), and a plain-language
    verdict against the pivot triggers. Honest caveat in the
    header: this validates the Claude Code column; Copilot runs are manual.
-5. TEARDOWN: after the report is written to Agent Base's reports/ —
+5. TEARDOWN: after the report is written to FleetCore's reports/ —
    - PASSING fixture dirs: `rm -rf` them.
    - FAILING fixture dirs: keep automatically for forensics; list their paths
      in the report so the user can inspect, then delete when done.
@@ -80,7 +80,7 @@ when no recognizable fixture/flag is present.
 
 ## Never
 
-- Never run fixtures inside the base checkout; always a separate work dir.
+- Never run fixtures inside the fcore checkout; always a separate work dir.
 - Never let a subagent edit generated files directly — manifest/literals only
   (the reproducibility gate will catch it; a catch is a finding, not a fix).
 - Never soften failures in the report; a gate that failed is the headline.

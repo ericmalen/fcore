@@ -7,7 +7,7 @@
 //                                           [--allow-dirty] [--include <paths>] [--json]
 // --out defaults to .setup (resolved against --root). apply/check/report
 // hardcode <root>/.setup/, so pointing --out elsewhere is only useful for
-// report-only runs (e.g. base-check's deep sweep) that must leave the repo
+// report-only runs (e.g. fcore-check's deep sweep) that must leave the repo
 // clean. An out-of-root dir is only accepted if it's new, empty, or looks
 // like a previous inventory-extract output — never an arbitrary populated
 // directory (it gets wiped).
@@ -53,7 +53,7 @@ export function runInventory({ root, outDir, allowDirty = false, include = [] })
   // Adoption-time tooling is not repo content — never inventory it.
   const TOOLING = [
     /^\.setup\//,
-    /^\.claude\/agent-base-setup\//,
+    /^\.claude\/fcore-onboard\//,
     /^\.claude\/skills\/base-(inventory|plan|apply|verify)\//,
     /^\.claude\/agents\/setup-verifier\.md$/,
   ];
@@ -83,7 +83,7 @@ export function runInventory({ root, outDir, allowDirty = false, include = [] })
   // The out dir is wiped wholesale below. A strict subdirectory of root
   // (e.g. the default .setup) is always fine. root itself or an ancestor of
   // root would take the repo (and .git) with it — always refused. An
-  // out-of-root dir (report-only runs, e.g. base-check's deep sweep) is
+  // out-of-root dir (report-only runs, e.g. fcore-check's deep sweep) is
   // refused unless it's new, empty, or looks like a previous
   // inventory-extract output — so a rerun into the same scratch dir is
   // idempotent, but an arbitrary populated directory is never wiped.

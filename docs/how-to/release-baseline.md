@@ -1,6 +1,6 @@
 # Release a baseline version
 
-Maintainer how-to: cut a tagged Agent Base release that set-up projects can
+Maintainer how-to: cut a tagged FleetCore release that set-up projects can
 pin and sync against (consumer side: [baseline-sync](./baseline-sync.md)).
 
 ## When to tag
@@ -8,9 +8,9 @@ pin and sync against (consumer side: [baseline-sync](./baseline-sync.md)).
 Tag when consumers should be able to pull the change:
 
 - Permanent-baseline asset changes (`BASELINE_COPIES` in
-  `scripts/lib/baseline.mjs`: `base-check`, `docs`, `git-conventions`,
+  `scripts/lib/baseline.mjs`: `fcore-check`, `docs-manager`, `git-conventions`,
   `skill-creator`, `agent-creator`, `docs-auditor`).
-- Optional lifecycle skill changes (`OPTIONAL_SKILLS`: `retro`, `log-report`,
+- Optional lifecycle skill changes (`OPTIONAL_SKILLS`: `checklist-intake`, `log-report`,
   `eval-runner`, `tracker-sync`) — `sync` upgrades them only in projects that
   selected them (R-55).
 - Audit rule changes (`spec/rules.md` + `scripts/audit.mjs`).
@@ -38,18 +38,18 @@ From a clean tree on `main`:
 npm pack --dry-run            # packlist sanity: the package.json files whitelist
                               # ships templates/, .claude/, spec/, scripts/, bin/,
                               # docs/ — never test/ or notes/
-node bin/agent-base.mjs --help
+node bin/fcore.mjs --help
 
 npm version patch   # or minor / major — bumps package.json, commits, tags vX.Y.Z
 git push origin main --follow-tags
 ```
 
 The tag must reach the origin remote — consumers resolve releases with
-`npx github:<owner>/agent-base#vX.Y.Z` (or `git+<url>#vX.Y.Z`), which fails
+`npx github:<owner>/fcore#vX.Y.Z` (or `git+<url>#vX.Y.Z`), which fails
 if the tag is absent. Optionally verify from a scratch directory:
 
 ```sh
-npx --yes github:ericmalen/agent-base#vX.Y.Z --version
+npx --yes github:ericmalen/fcore#vX.Y.Z --version
 ```
 
 ## Tag gate

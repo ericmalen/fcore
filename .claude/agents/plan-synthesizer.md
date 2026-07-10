@@ -14,7 +14,7 @@ only file it writes.
    `<target>/docs/orchestration/decisions.json`; if either is missing, stop
    and report which discovery step must run first.
 2. Apply the synthesis rulebook: `.claude/skills/blueprint-generator/SKILL.md`
-   in the base checkout — specialist selection per layer evidence, policy-driven
+   in the fcore checkout — specialist selection per layer evidence, policy-driven
    additions, slot values from the profile, the defaults table. Where no
    rule covers a layer, use `generic-specialist` with `pairedSkills: []`;
    never invent a slot value
@@ -25,7 +25,7 @@ only file it writes.
    never hand-order; a cycle error aborts synthesis with the errors
    reported verbatim.
 3. Gate the candidate with `.claude/skills/handoff-validator/SKILL.md`
-   (schema check + slot dry-run, from the base checkout). REJECT → fix the
+   (schema check + slot dry-run, from the fcore checkout). REJECT → fix the
    candidate per the error lines and re-gate; never write a rejected
    blueprint. Report any SKIP lines (templates not yet authored) verbatim.
 4. Only on PASS: write `<target>/docs/orchestration/blueprint.json`, then

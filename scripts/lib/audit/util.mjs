@@ -27,13 +27,13 @@ export function isGitRepo(root) {
 const SKIP_DIRS = new Set([
   '.git', 'node_modules', '.setup', 'dist', 'build', 'coverage',
   '.next', '.venv', 'target', 'out', '.turbo', '.cache',
-  'agent-base-setup', // setup-time tooling dir (.claude/agent-base-setup)
+  'fcore-onboard', // setup-time tooling dir (.claude/fcore-onboard)
 ]);
 
 // Setup-time tooling — present only during setup; never audited
 // (mirrors the extractor's universe exclusion).
 const TOOLING_RE = [
-  /^\.claude\/agent-base-setup\//,
+  /^\.claude\/fcore-onboard\//,
   /^\.claude\/skills\/base-(inventory|plan|apply|verify)\//,
   /^\.claude\/agents\/setup-verifier\.md$/,
 ];
@@ -42,17 +42,17 @@ export function isSetupTooling(rel) {
 }
 
 // Vendored third-party assets — an UPSTREAM provenance marker beside SKILL.md
-// means the skill is held to upstream's conventions, not Agent Base's. The audit
+// means the skill is held to upstream's conventions, not FleetCore's. The audit
 // skips style rules (R-20..R-25) for these; load-critical rules still apply.
 export function isVendored(root, rel) {
   return existsSync(join(root, dirname(rel), 'UPSTREAM'));
 }
 
-// Template payload skeletons — files carrying agent-base slot/optional markers are
-// Agent Base payload, not live configuration; live-config checks skip them
+// Template payload skeletons — files carrying fcore slot/optional markers are
+// FleetCore payload, not live configuration; live-config checks skip them
 // (spec/rules.md: Audit exemptions).
 export function isPayloadSkeleton(text) {
-  return /<!--\s*agent-base:(slot|optional)/.test(text ?? '');
+  return /<!--\s*fcore:(slot|optional)/.test(text ?? '');
 }
 
 // Recursive walk yielding absolute file paths; skips junk dirs.
@@ -161,9 +161,9 @@ export function finding(rule, severity, file, message, extra = {}) {
   return { rule, severity, file, message, ...extra };
 }
 
-// Read the Agent Base marker (.claude/agent-base.json). Returns {} when absent/unparseable.
+// Read the FleetCore marker (.claude/fcore.json). Returns {} when absent/unparseable.
 export function readMarker(root) {
-  const text = readSafe(join(root, '.claude', 'agent-base.json'));
+  const text = readSafe(join(root, '.claude', 'fcore.json'));
   if (!text) return { present: false };
   const parsed = parseJsonc(text);
   if (!parsed) return { present: true, invalid: true };

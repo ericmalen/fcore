@@ -8,7 +8,7 @@ import { tmpdir } from 'node:os';
 import { buildFixture } from './fixtures/defs.mjs';
 import { runInventory } from '../scripts/inventory-extract.mjs';
 
-const BIN = join(import.meta.dirname, '..', 'bin', 'agent-base.mjs');
+const BIN = join(import.meta.dirname, '..', 'bin', 'fcore.mjs');
 const APPLY = join(import.meta.dirname, '..', 'scripts', 'apply.mjs');
 const CHECK = join(import.meta.dirname, '..', 'scripts', 'check.mjs');
 const FIXTURES = join(import.meta.dirname, 'fixtures', 'orchestration');
@@ -19,7 +19,7 @@ const run = (args, opts = {}) =>
 test('cli: --help prints command surface, exit 0', () => {
   const r = run(['--help']);
   assert.equal(r.status, 0);
-  for (const cmd of ['setup', 'orchestrate', 'refresh', 'install', 'audit', 'sync', 'tracker-sync', 'starter', 'headless-guard', 'cache', 'skills']) {
+  for (const cmd of ['onboard', 'fleet-config', 'update', 'install', 'audit', 'sync', 'tracker-sync', 'init', 'headless-guard', 'cache', 'skills']) {
     assert.match(r.stdout, new RegExp(`\\b${cmd}\\b`), `help mentions ${cmd}`);
   }
   assert.match(r.stdout, /EXISTING repository/, 'setup is disambiguated from starter');
@@ -29,7 +29,7 @@ test('cli: --help prints command surface, exit 0', () => {
 test('cli: no command prints help, exit 2', () => {
   const r = run([]);
   assert.equal(r.status, 2);
-  assert.match(r.stdout, /Usage: agent-base/);
+  assert.match(r.stdout, /Usage: fcore/);
 });
 
 test('cli: --version matches package.json', () => {
@@ -72,31 +72,31 @@ test('cli: headless-guard delegation produces guard output lines', () => {
 test('cli: setup --no-launch drops the launcher skill and prints the prompt', () => {
   const target = mkdtempSync(join(tmpdir(), 'ab-cli-target-'));
   spawnSync('git', ['-C', target, 'init', '-q']);
-  const r = run(['setup', target, '--no-launch']);
+  const r = run(['onboard', target, '--no-launch']);
   assert.equal(r.status, 0);
   // repo has .git → dev mode, no staging into the real home
   assert.match(r.stdout, /running from clone/);
-  assert.match(r.stdout, /\/agent-base-bootstrap/);
-  assert.match(r.stdout, /base-setup\/SKILL\.md/);
-  assert.ok(existsSync(join(target, '.claude', 'skills', 'agent-base-bootstrap', 'SKILL.md')));
+  assert.match(r.stdout, /\/fcore-bootstrap/);
+  assert.match(r.stdout, /fcore-onboard\/SKILL\.md/);
+  assert.ok(existsSync(join(target, '.claude', 'skills', 'fcore-bootstrap', 'SKILL.md')));
 });
 
 test('cli: setup --print touches nothing and prints the prompt only', () => {
   const target = mkdtempSync(join(tmpdir(), 'ab-cli-target-'));
-  const r = run(['setup', target, '--print']);
+  const r = run(['onboard', target, '--print']);
   assert.equal(r.status, 0);
   assert.match(r.stdout, /Paste this prompt/);
   assert.ok(!existsSync(join(target, '.claude')));
 });
 
 test('cli: bootstrap command rejects unknown flags', () => {
-  const r = run(['setup', '--frobnicate']);
+  const r = run(['onboard', '--frobnicate']);
   assert.equal(r.status, 2);
   assert.match(r.stderr, /unknown flag --frobnicate/);
 });
 
 test('cli: bootstrap command rejects a nonexistent target path', () => {
-  const r = run(['setup', join(tmpdir(), 'ab-cli-no-such-dir-7f3a'), '--print']);
+  const r = run(['onboard', join(tmpdir(), 'ab-cli-no-such-dir-7f3a'), '--print']);
   assert.equal(r.status, 2);
   assert.match(r.stderr, /target is not an existing directory/);
 });
@@ -105,14 +105,14 @@ test('cli: bootstrap command rejects a file as target', () => {
   const target = mkdtempSync(join(tmpdir(), 'ab-cli-target-'));
   const file = join(target, 'somefile');
   writeFileSync(file, 'x\n');
-  const r = run(['setup', file, '--print']);
+  const r = run(['onboard', file, '--print']);
   assert.equal(r.status, 2);
   assert.match(r.stderr, /target is not an existing directory/);
 });
 
 test('cli: bootstrap command rejects extra positional args', () => {
   const target = mkdtempSync(join(tmpdir(), 'ab-cli-target-'));
-  const r = run(['setup', target, target]);
+  const r = run(['onboard', target, target]);
   assert.equal(r.status, 2);
   assert.match(r.stderr, /expected at most one path/);
 });
@@ -150,25 +150,25 @@ test('cli: piped stdio never auto-launches — falls back to the skill drop', ()
   // path; timeout turns a regression (hung interactive session) into a fail
   const target = mkdtempSync(join(tmpdir(), 'ab-cli-target-'));
   spawnSync('git', ['-C', target, 'init', '-q']);
-  const r = run(['setup', target], { timeout: 30000 });
+  const r = run(['onboard', target], { timeout: 30000 });
   assert.equal(r.status, 0);
-  assert.match(r.stdout, /\/agent-base-bootstrap/);
+  assert.match(r.stdout, /\/fcore-bootstrap/);
   assert.doesNotMatch(r.stdout, /launching Claude Code/);
-  assert.ok(existsSync(join(target, '.claude', 'skills', 'agent-base-bootstrap', 'SKILL.md')));
+  assert.ok(existsSync(join(target, '.claude', 'skills', 'fcore-bootstrap', 'SKILL.md')));
 });
 
-test('cli: cache list/prune honor AGENT_BASE_HOME', () => {
+test('cli: cache list/prune honor FCORE_HOME', () => {
   const home = mkdtempSync(join(tmpdir(), 'ab-cli-home-'));
-  const env = { ...process.env, AGENT_BASE_HOME: home };
+  const env = { ...process.env, FCORE_HOME: home };
 
   const empty = run(['cache', 'list'], { env });
   assert.equal(empty.status, 0);
   assert.match(empty.stdout, /no staged releases/);
 
   for (const v of ['1.0.0', '1.1.0', '1.2.0']) {
-    const dir = join(home, '.agent-base', 'versions', `v${v}`);
+    const dir = join(home, '.fcore', 'versions', `v${v}`);
     mkdirSync(dir, { recursive: true });
-    writeFileSync(join(dir, '.agent-base-staged'), 'x\n');
+    writeFileSync(join(dir, '.fcore-staged'), 'x\n');
   }
   const list = run(['cache', 'list'], { env });
   assert.equal(list.status, 0);
@@ -177,8 +177,8 @@ test('cli: cache list/prune honor AGENT_BASE_HOME', () => {
   const prune = run(['cache', 'prune', '--keep', '1'], { env });
   assert.equal(prune.status, 0);
   assert.match(prune.stdout, /pruned: v1\.1\.0, v1\.0\.0/);
-  assert.ok(existsSync(join(home, '.agent-base', 'versions', 'v1.2.0')));
-  assert.ok(!existsSync(join(home, '.agent-base', 'versions', 'v1.0.0')));
+  assert.ok(existsSync(join(home, '.fcore', 'versions', 'v1.2.0')));
+  assert.ok(!existsSync(join(home, '.fcore', 'versions', 'v1.0.0')));
 });
 
 test('cli: apply --dry-run with no value exits nonzero WITHOUT applying', () => {
@@ -214,7 +214,7 @@ test('cli: check value flags require values', () => {
 
 test('cli: setup pre-flight rejects a non-git target', () => {
   const target = mkdtempSync(join(tmpdir(), 'ab-cli-target-'));
-  const r = run(['setup', target, '--no-launch']);
+  const r = run(['onboard', target, '--no-launch']);
   assert.equal(r.status, 2);
   assert.match(r.stderr, /not a git repository/);
 });
@@ -223,7 +223,7 @@ test('cli: setup pre-flight rejects a dirty working tree', () => {
   const target = mkdtempSync(join(tmpdir(), 'ab-cli-target-'));
   spawnSync('git', ['-C', target, 'init', '-q']);
   writeFileSync(join(target, 'dirty.txt'), 'x\n');
-  const r = run(['setup', target, '--no-launch']);
+  const r = run(['onboard', target, '--no-launch']);
   assert.equal(r.status, 2);
   assert.match(r.stderr, /uncommitted changes/);
 });

@@ -1,20 +1,20 @@
 // template — shared template-instantiation helpers for materialize + build-starter.
 //
-// Slot markers (<!-- agent-base:slot:NAME -->) are replaced with routed content.
-// A section may also be marked optional (<!-- agent-base:optional -->): a level-2
+// Slot markers (<!-- fcore:slot:NAME -->) are replaced with routed content.
+// A section may also be marked optional (<!-- fcore:optional -->): a level-2
 // (## ) section whose slot(s) receive NO content is removed entirely — heading
 // through the line before the next ## heading (or EOF). This is what keeps a
 // starter AGENTS.md from shipping empty skeleton headings.
 
-export const SLOT_RE = /^[ \t]*<!--\s*agent-base:slot:([a-z0-9-]+)\s*-->[ \t]*\r?\n?/gm;
-export const OPTIONAL_RE = /^[ \t]*<!--\s*agent-base:optional\s*-->[ \t]*\r?\n?/gm;
+export const SLOT_RE = /^[ \t]*<!--\s*fcore:slot:([a-z0-9-]+)\s*-->[ \t]*\r?\n?/gm;
+export const OPTIONAL_RE = /^[ \t]*<!--\s*fcore:optional\s*-->[ \t]*\r?\n?/gm;
 
 const H2_RE = /^##[ \t]/;
-const SLOT_NAME_RE = /<!--\s*agent-base:slot:([a-z0-9-]+)\s*-->/;
-const OPTIONAL_LINE_RE = /<!--\s*agent-base:optional\s*-->/;
+const SLOT_NAME_RE = /<!--\s*fcore:slot:([a-z0-9-]+)\s*-->/;
+const OPTIONAL_LINE_RE = /<!--\s*fcore:optional\s*-->/;
 
 // Remove every optional ## section whose slots are all absent from filledSlots.
-// Operates on template bytes only (Agent Base-owned), before slot replacement. Splits
+// Operates on template bytes only (FleetCore-owned), before slot replacement. Splits
 // on "\n" and rejoins on "\n" — line endings are preserved exactly.
 export function stripEmptyOptionalSections(text, filledSlots) {
   const lines = text.split('\n');

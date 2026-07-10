@@ -29,7 +29,7 @@
   // specific agent's frontmatter.
   "chat.useCustomAgentHooks": true,
   // Allow subagents to invoke subagents. Depth capped at 5 by VS Code; no
-  // cycle detection. agent-base still prefers flat orchestration as a
+  // cycle detection. fcore still prefers flat orchestration as a
   // default — nesting is available for legitimate compositional cases.
   "chat.subagents.allowInvocationsFromSubagents": true,
 

@@ -5,7 +5,7 @@
 // payload docs — content, target path, template id, pinned version. Pure
 // given its inputs and deterministic in output order (blueprint order for
 // agents; skill ids sorted per specialist; blueprint.docs order), so the
-// same blueprint + Agent Base state always yields byte-identical files AND a
+// same blueprint + FleetCore state always yields byte-identical files AND a
 // byte-identical manifest (no timestamps, DD-13).
 //
 // Living state (tasks.md, handoff-log.jsonl, checklists/) is deliberately
@@ -41,7 +41,7 @@ export function agentSlots(agent, blueprint) {
   return slots;
 }
 
-// readTemplate(kind, id) -> template/doc source text, or null when Agent Base
+// readTemplate(kind, id) -> template/doc source text, or null when FleetCore
 // has no such file ('agent' | 'skill' | 'doc').
 // Returns { files: [{ path, templateId, templateVersion, content }], errors }.
 // files is [] whenever errors is non-empty — all-or-nothing, no partial plans.
@@ -78,7 +78,7 @@ export function planGeneration(blueprint, registry, readTemplate) {
     }
     const source = readTemplate('agent', agent.templateId);
     if (source === null) {
-      e(`agent ${agent.name}: template ${agent.templateId}.template.md missing from Agent Base`);
+      e(`agent ${agent.name}: template ${agent.templateId}.template.md missing from FleetCore`);
       continue;
     }
     if (!checkPin(reg, source, `agent template ${agent.templateId}`)) continue;
@@ -105,7 +105,7 @@ export function planGeneration(blueprint, registry, readTemplate) {
       }
       const source = readTemplate('skill', skillId);
       if (source === null) {
-        e(`skill ${skillId}: template missing from Agent Base`);
+        e(`skill ${skillId}: template missing from FleetCore`);
         continue;
       }
       if (!checkPin(meta, source, `skill template ${skillId}`)) continue;
@@ -134,7 +134,7 @@ export function planGeneration(blueprint, registry, readTemplate) {
     }
     const source = readTemplate('doc', id);
     if (source === null) {
-      e(`doc ${docPath}: ${id}.md missing from Agent Base payload`);
+      e(`doc ${docPath}: ${id}.md missing from FleetCore payload`);
       continue;
     }
     if (!checkPin(reg, source, `doc ${id}`)) continue;
@@ -181,8 +181,8 @@ export function findOrphans(priorManifest, plannedFiles) {
 // state — upserted between markers, never manifest-tracked (same class as
 // tasks.md): a human may edit the prose around it without tripping drift.
 
-export const ROUTING_REGION_START = '<!-- agent-base:orchestration-routing:start -->';
-export const ROUTING_REGION_END = '<!-- agent-base:orchestration-routing:end -->';
+export const ROUTING_REGION_START = '<!-- fcore:orchestration-routing:start -->';
+export const ROUTING_REGION_END = '<!-- fcore:orchestration-routing:end -->';
 
 // Body for the routing region, derived purely from the blueprint. Returns null
 // when routing_policy is `manual` (or absent) — the main loop keeps deciding by
