@@ -50,11 +50,11 @@ export function runInventory({ root, outDir, allowDirty = false, include = [] })
   }
 
   // Universe: tracked + untracked-but-not-ignored. Never a raw fs walk.
-  // Adoption-time tooling is not repo content — never inventory it.
+  // Setup-time tooling is not repo content — never inventory it.
   const TOOLING = [
     /^\.setup\//,
     /^\.claude\/fcore-onboard\//,
-    /^\.claude\/skills\/base-(inventory|plan|apply|verify)\//,
+    /^\.claude\/skills\/fcore-(inventory|plan|apply|verify)\//,
     /^\.claude\/agents\/setup-verifier\.md$/,
   ];
   const universe = git(root, ['ls-files', '--cached', '--others', '--exclude-standard', '-z'])

@@ -82,7 +82,7 @@ tooling, and held to FleetCore's own conventions because they load here too:
 
 **Orchestration meta-skills** — discovery, generation, and quality. FleetCore-side
 only except the lifecycle skills (`checklist-intake`, `log-report`, `eval-runner`,
-`tracker-sync`), which install into every adopted repo. Entry point:
+`tracker-sync`), which install into every set-up project. Entry point:
 [`fcore-fleet-config`](./fcore-fleet-config/SKILL.md). How-to:
 [`docs/how-to/orchestration-guide.md`](../../docs/how-to/orchestration-guide.md).
 

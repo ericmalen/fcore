@@ -88,5 +88,4 @@ team tier is Claude Code-only) — see
 
 Route per [`triage-rules`](../../templates/orchestration/docs/triage-rules.md):
 template defect → FleetCore fix + re-scaffold; blueprint defect → re-synthesize;
-skill gap → FleetCore skill edit; one-off → `checklist-intake` checklist item. During a pilot,
-also log it as friction in the [pilot report](../../notes/orchestration-pilot.md).
+skill gap → FleetCore skill edit; one-off → `checklist-intake` checklist item.

@@ -51,7 +51,7 @@ preconditions — failing one stops the run):
 From the project:
 
 ```sh
-npx github:ericmalen/fcore#v1.2.1 orchestrate
+npx github:ericmalen/fcore#v2.1.1 fleet-config
 ```
 
 which launches Claude Code with the flow started (without the `claude`
@@ -330,5 +330,3 @@ re-synthesize; skill gap → edit skill; one-off → checklist-intake checklist 
   limitations
 - [First run tutorial](../tutorials/orchestration-first-run.md) — walkthrough
   on FleetCore fixtures
-- [Build plan (engineering)](../../notes/agent-orchestration-plan.md) — phase
-  history and acceptance criteria (not a how-to)

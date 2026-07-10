@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { checkLinks } from '../.claude/skills/docs-manager/scripts/check-links.mjs';
 
 function makeRepo(files) {
-  const dir = mkdtempSync(join(tmpdir(), 'aikit-links-'));
+  const dir = mkdtempSync(join(tmpdir(), 'fcore-links-'));
   for (const [rel, content] of Object.entries(files)) {
     const abs = join(dir, rel);
     mkdirSync(join(abs, '..'), { recursive: true });

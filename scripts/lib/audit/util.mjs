@@ -34,7 +34,7 @@ const SKIP_DIRS = new Set([
 // (mirrors the extractor's universe exclusion).
 const TOOLING_RE = [
   /^\.claude\/fcore-onboard\//,
-  /^\.claude\/skills\/base-(inventory|plan|apply|verify)\//,
+  /^\.claude\/skills\/fcore-(inventory|plan|apply|verify)\//,
   /^\.claude\/agents\/setup-verifier\.md$/,
 ];
 export function isSetupTooling(rel) {

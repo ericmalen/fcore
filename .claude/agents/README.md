@@ -18,7 +18,7 @@ in Claude Code it is always invoked as a subagent.
 - [`docs-auditor.md`](./docs-auditor.md) — heavy documentation audit/migration
   planner. Permanent baseline: installed into every set-up project.
 - [`setup-verifier.md`](./setup-verifier.md) — fresh-context verifier for
-  setup phase 4. Adoption-time only: installed for the setup window,
+  setup phase 4. Setup-time only: installed for the setup window,
   removed again before merge.
 - [`example-reviewer.md`](./example-reviewer.md) — annotated example of a
   read-only reviewer. FleetCore-side reference to copy from; NOT installed into
@@ -106,8 +106,8 @@ New agents live in this same folder. The steps mirror the skills workflow:
    by rule ID (R-27..R-37).
 
 In the FleetCore repo itself, `setup-verifier` and `docs-auditor` are dual-role:
-loaded while developing FleetCore AND installed path-for-path into adopted
-repos per the allowlist in `scripts/lib/baseline.mjs`, consumed by
+loaded while developing FleetCore AND installed path-for-path into set-up
+projects per the allowlist in `scripts/lib/baseline.mjs`, consumed by
 `scripts/install-setup.mjs` (the allowlist decides what
 ships; `example-reviewer` stays FleetCore-side).
 

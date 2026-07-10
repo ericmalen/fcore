@@ -254,7 +254,7 @@ tools (same format). Never delivered via plugins (known Stop-hook plugin bug).
 
 **R-42 · No chatmodes** · mechanical · audit, warning
 No `.github/chatmodes/` directory or `*.chatmode.md` files (deprecated → custom
-agents). Brownfield: migration sources.
+agents). Existing-project setup: migration sources.
 
 **R-47 · Gitignore coverage** · mechanical · audit, info → warning
 `.gitignore` exists (in git repos) and covers `.claude/settings.local.json`.
@@ -332,7 +332,7 @@ Besides the vendored-UPSTREAM exemption above, the audit implementation carries
 three narrow exemptions the rules would otherwise flag:
 
 - **Setup-window tooling.** `.claude/fcore-onboard/`,
-  `.claude/skills/base-{inventory,plan,apply,verify}/`, and
+  `.claude/skills/fcore-{inventory,plan,apply,verify}/`, and
   `.claude/agents/setup-verifier.md` are skipped by the skills/agents/
   reference checks: they exist only between install and the fcore-verify
   teardown, and transient references (e.g. `.setup/report.md`) are legal
@@ -353,7 +353,7 @@ three narrow exemptions the rules would otherwise flag:
 ## Dropped v1 rules (machinery — no v2 equivalent)
 
 Registration checks (`skill/agent-not-registered`), `pending-integration-present` +
-sidecar flow, audit-report gitignore/leak checks, `isAiKitOwnAsset` and
+sidecar flow, audit-report gitignore/leak checks, the v1 own-asset check and
 manifest-role exemptions, migrate-specific permission allow-list entries,
 hash-manifest update flow. (Two narrow exemptions DID survive into v2 — see
 "Audit exemptions (implementation)" above.)

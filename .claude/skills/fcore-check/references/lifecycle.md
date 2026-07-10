@@ -42,11 +42,11 @@ generated multi-agent team and a `tasks.md` work backlog. Once the repo has
 at least one code layer with a test command:
 
 ```sh
-npx github:<owner>/fcore#<tag> orchestrate
+npx github:<owner>/fcore#<tag> fleet-config
 ```
 
-(or `/fcore-fleet-config /path/to/project` from a clone). It runs Agent
-Base-side and is deliberately **not** installed into this project — that's
+(or `/fcore-fleet-config /path/to/project` from a clone). It runs FleetCore-
+side and is deliberately **not** installed into this project — that's
 why you won't find a `fcore-fleet-config` skill here. Discovery and generation
 run in fresh contexts with two human policy gates; nothing merges without
 you. Re-run the same command as new layers ship — it re-profiles the repo,
@@ -57,7 +57,7 @@ keeps prior policy answers, and only asks about what's new.
 When `pin` in the marker falls behind the latest compatible release:
 
 ```sh
-npx github:<owner>/fcore#<new-tag> refresh
+npx github:<owner>/fcore#<new-tag> update
 ```
 
 (or `sync-baseline --check` / `--report` / `--upgrade` directly). Re-run

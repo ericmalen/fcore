@@ -11,7 +11,7 @@ import { spawnSync } from 'node:child_process';
 const BASE = process.cwd();
 
 function makeGitRepo() {
-  const dir = mkdtempSync(join(tmpdir(), 'aikit-install-'));
+  const dir = mkdtempSync(join(tmpdir(), 'fcore-install-'));
   const g = (args) => {
     const r = spawnSync('git', args, { cwd: dir, encoding: 'utf8' });
     assert.equal(r.status, 0, `git ${args.join(' ')}: ${r.stderr}`);

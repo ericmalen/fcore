@@ -308,7 +308,7 @@ fixtures.large.expect.sweepMustInclude = ['docs/big-guide.md'];
 export function buildFixture(name) {
   const def = fixtures[name];
   if (!def) throw new Error(`unknown fixture: ${name}`);
-  const dir = mkdtempSync(join(tmpdir(), `aikit-fx-${name}-`));
+  const dir = mkdtempSync(join(tmpdir(), `fcore-fx-${name}-`));
   for (const [rel, content] of Object.entries(def.files)) {
     const abs = join(dir, rel);
     mkdirSync(join(abs, '..'), { recursive: true });

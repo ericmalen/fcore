@@ -29,7 +29,7 @@ record, not this line.
 | Platform | Needs |
 |---|---|
 | ADO | `ADO_ORG`, `ADO_PROJECT` env vars (or `ado.org`/`ado.project` in `docs/orchestration/tracker-sync.json`); `AZURE_DEVOPS_PAT` env var — the PAT is env-only, never config |
-| GitHub | `gh` CLI authenticated for the target repo |
+| GitHub | `gh` CLI authenticated for the project |
 
 Non-Basic ADO process template? Set `ado.stateMap` (`basic` | `agile`) in
 `docs/orchestration/tracker-sync.json` (shape gated by

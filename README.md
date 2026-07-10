@@ -47,7 +47,7 @@ first-time setup or bringing existing AI config up to the team standard.
 From your project, no clone needed:
 
 ```sh
-npx github:ericmalen/fcore#v1.2.1 setup
+npx github:ericmalen/fcore#v2.1.1 onboard
 ```
 
 This stages the release, then launches Claude Code in your project with
@@ -69,7 +69,7 @@ tool, and run `/fcore-onboard /path/to/project`.
 session entirely and emit the clean standard layout directly:
 
 ```sh
-npx github:ericmalen/fcore#v1.2.1 starter /path/to/new-repo --git
+npx github:ericmalen/fcore#v2.1.1 init /path/to/new-repo --git
 # or from a clone: node ~/tools/fcore/scripts/build-starter.mjs /path/to/new-repo --git
 ```
 
@@ -81,7 +81,7 @@ as a full setup. Either path ends the same way: run the installed
 
 Set-up projects get a permanent `fcore-check` skill — run it any time to audit
 against the conventions and fix findings by rule ID. To pull a newer baseline
-release, run `npx github:ericmalen/fcore#<new-tag> refresh` (or
+release, run `npx github:ericmalen/fcore#<new-tag> update` (or
 `fcore-update` from a clone, or `sync-baseline` directly) — see
 [`docs/how-to/baseline-sync.md`](./docs/how-to/baseline-sync.md).
 
@@ -91,7 +91,7 @@ For repos with multiple layers or packages that need a generated multi-agent
 team and a `tasks.md` backlog:
 
 ```sh
-npx github:ericmalen/fcore#v1.2.1 orchestrate
+npx github:ericmalen/fcore#v2.1.1 fleet-config
 ```
 
 which launches Claude Code with the flow started — without the `claude`
@@ -117,7 +117,7 @@ scripts/ test/   the engine (zero-dep Node ≥ 20). Setup copies only the
 bin/             the fcore npx entry point (never ships into projects;
                  see docs/reference/fcore-cli.md)
 .claude/         this repo's own live config; the fcore-* setup skills, baseline
-                 skills (fcore-check, docs, git-conventions, skill-creator,
+                 skills (fcore-check, docs-manager, git-conventions, skill-creator,
                  agent-creator) and docs-auditor agent are dual-role (used here
                  AND installed into every project). The lifecycle skills (checklist-intake,
                  log-report, eval-runner, tracker-sync) are optional (R-55):
@@ -165,8 +165,7 @@ Index READMEs for the live `.claude/` config:
 
 Orchestration assets: `templates/orchestration/` (agent/skill/doc templates),
 `scripts/lib/orchestration/` (validators and scaffold), FleetCore-side entry skill
-[`fcore-fleet-config`](./.claude/skills/fcore-fleet-config/SKILL.md). Build-plan
-history: [`notes/agent-orchestration-plan.md`](./notes/agent-orchestration-plan.md).
+[`fcore-fleet-config`](./.claude/skills/fcore-fleet-config/SKILL.md).
 
 ## License
 

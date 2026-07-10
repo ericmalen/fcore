@@ -8,7 +8,7 @@ installer allowlist in `scripts/lib/baseline.mjs` decides what ships).
 ## Invocation
 
 ```sh
-npx github:ericmalen/fcore#v1.2.1 <command> [args]
+npx github:ericmalen/fcore#v2.1.1 <command> [args]
 ```
 
 The `#<tag>` ref is the same release tag recorded as the project's pin in
@@ -43,9 +43,9 @@ step 1; `--print` forces step 3 (never modifies the target).
 
 | Command | Starts |
 |---|---|
-| `setup [path]` | `fcore-onboard` — full fcore setup of a repository |
-| `orchestrate [path]` | `fcore-fleet-config` — repo-specific orchestration generation |
-| `refresh [path]` | `fcore-update` — baseline pin upgrade |
+| `onboard [path]` | `fcore-onboard` — full fcore setup of a repository |
+| `fleet-config [path]` | `fcore-fleet-config` — repo-specific orchestration generation |
+| `update [path]` | `fcore-update` — baseline pin upgrade |
 
 `path` defaults to the current directory and must be an existing directory
 (usage error 2 otherwise — nothing is staged or written). When run from a
@@ -65,7 +65,7 @@ exit codes propagate.
 | `audit [--root --json --strict]` | `scripts/audit.mjs` | conformance audit (CI: `audit --root . --strict`) |
 | `sync [--check\|--report\|--upgrade ...]` | `scripts/sync-baseline.mjs` | baseline pin check/upgrade |
 | `tracker-sync [--target --apply ...]` | `scripts/tracker-sync.mjs` | tasks.md ⇄ tracker bridge |
-| `starter <dir> [--git]` | `scripts/build-starter.mjs` | emit a clean starter repo — refuses a non-empty `<dir>`; prints next steps |
+| `init <dir> [--git]` | `scripts/build-starter.mjs` | emit a clean starter repo — refuses a non-empty `<dir>`; prints next steps |
 | `headless-guard [--root --open-branches <json>]` | `scripts/headless-guard.mjs` | run/skip decision for scheduled orchestrator pipelines; prints `run=`/`reason=`/`task=` lines |
 
 ## Optional skills (`skills`)

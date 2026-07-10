@@ -37,17 +37,17 @@ From a project root (or pass `--root`), via npx at your pin — no clone needed:
 
 ```sh
 # CI / weekly nudge — exit 1 when pin is behind
-npx github:ericmalen/fcore#v1.2.1 sync --check
+npx github:ericmalen/fcore#v2.1.1 sync --check
 
 # Bot-friendly JSON plan (files to update, conflicts, removed)
-npx github:ericmalen/fcore#v1.2.1 sync --report --json
+npx github:ericmalen/fcore#v2.1.1 sync --report --json
 
 # Apply updates — any local edit vs the old release blocks the whole upgrade.
 # Also works at a current pin: restores missing baseline files (repair).
-npx github:ericmalen/fcore#v1.2.1 sync --upgrade
+npx github:ericmalen/fcore#v2.1.1 sync --upgrade
 
 # Preview only
-npx github:ericmalen/fcore#v1.2.1 sync --upgrade --dry-run
+npx github:ericmalen/fcore#v2.1.1 sync --upgrade --dry-run
 ```
 
 The same commands work from a clone

@@ -17,7 +17,7 @@ import { check } from '../scripts/check.mjs';
 import { generateReport } from '../scripts/report.mjs';
 
 const KIT_TEMPLATES = join(process.cwd(), 'templates');
-const EMPTY_TEMPLATES = mkdtempSync(join(tmpdir(), 'aikit-notmpl-'));
+const EMPTY_TEMPLATES = mkdtempSync(join(tmpdir(), 'fcore-notmpl-'));
 
 function setup(fixture) {
   const repo = buildFixture(fixture);

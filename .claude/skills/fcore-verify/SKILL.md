@@ -45,12 +45,12 @@ finding); `.setup/report.md` is current.
    (per-iteration commits are individually reviewable). The USER merges and
    deletes the branch — never merge on their behalf.
    Also tell them: the baseline `docs-manager` skill is installed but its enforcement
-   (tier, `.claude/docs-paths.json`, hooks) stays OFF until they run `docs
+   (tier, `.claude/docs-paths.json`, hooks) stays OFF until they run `docs-manager
    setup` — point them there as the recommended next step (it needs human
    tier confirmation, so setup never runs it automatically).
    And point them at the lifecycle beyond that: run `fcore-check` routinely;
    orchestration is available later, once the repo has a code layer with
-   tests, via the marker-derived `npx …#<pin> orchestrate` — it is
+   tests, via the marker-derived `npx …#<pin> fleet-config` — it is
    deliberately not installed here. The in-project map is the installed
    fcore-check skill's `references/lifecycle.md`.
 

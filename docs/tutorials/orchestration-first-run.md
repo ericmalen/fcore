@@ -5,7 +5,7 @@ project. You learn the five-session flow without touching a real codebase.
 
 ## What you need
 
-- This fcore checkout open in Claude Code or Copilot agent mode (a clone, or the release `npx github:ericmalen/fcore#v1.2.1 orchestrate` stages — it opens the session for you when the `claude` CLI is on PATH)
+- This fcore checkout open in Claude Code or Copilot agent mode (a clone, or the release `npx github:ericmalen/fcore#v2.1.1 fleet-config` stages — it opens the session for you when the `claude` CLI is on PATH)
 - Node ≥ 20
 - Familiarity with [setup](../how-to/setup-guide.md) (target must be
   set up first — fixtures below are pre-built for orchestration tests)

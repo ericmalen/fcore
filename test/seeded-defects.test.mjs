@@ -34,7 +34,7 @@ test('defect: binary AI-surface file is skipped VISIBLY, never silently', () => 
 });
 
 test('defect: oversized sweep file is skipped VISIBLY', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'aikit-big-'));
+  const dir = mkdtempSync(join(tmpdir(), 'fcore-big-'));
   try {
     writeFileSync(join(dir, 'huge.md'), 'claude guidance line\n'.repeat(60000)); // >1MB, has marker
     const g = (a) => spawnSync('git', a, { cwd: dir, encoding: 'utf8' });
@@ -71,7 +71,7 @@ import { runInventory as runInv } from '../scripts/inventory-extract.mjs';
 import { apply } from '../scripts/apply.mjs';
 import { check } from '../scripts/check.mjs';
 
-const EMPTY_TPL = mkdtemp(join(tmpdir(), 'aikit-sd-tpl-'));
+const EMPTY_TPL = mkdtemp(join(tmpdir(), 'fcore-sd-tpl-'));
 const KIT_TPL = join(process.cwd(), 'templates');
 
 function setupContext(fixture = 'claude-only') {

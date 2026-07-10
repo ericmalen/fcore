@@ -63,4 +63,3 @@ never decisions or blueprints.
 scripts/lib/orchestration/schemas.mjs
 test/fixtures/orchestration/maxi-repo.profile.json
 test/fixtures/orchestration/mini-repo.profile.json
-notes/agent-orchestration-plan.md

@@ -23,18 +23,18 @@ printf '# Demo\n' > README.md
 git add -A && git commit -q -m "initial"
 ```
 
-The working tree must be **clean** (everything committed) before setup — Agent
-Base refuses to run on a dirty tree so its own changes stay reviewable.
+The working tree must be **clean** (everything committed) before setup — FleetCore
+refuses to run on a dirty tree so its own changes stay reviewable.
 
 ## 2. Start setup
 
 ```sh
-npx github:ericmalen/fcore#v1.2.1 setup
+npx github:ericmalen/fcore#v2.1.1 onboard
 ```
 
 What happens, in order:
 
-1. The release is **staged** to `~/.fcore/versions/v1.2.1/` (a cached
+1. The release is **staged** to `~/.fcore/versions/v2.1.1/` (a cached
    build — safe to delete later).
 2. If the `claude` CLI is on your PATH, FleetCore launches Claude Code right
    here with setup already started. No CLI (Copilot or Windows)? It drops a

@@ -23,7 +23,7 @@ tooling, and runs every script itself.
 Emit the clean target state directly:
 
 ```sh
-npx github:ericmalen/fcore#v1.2.1 starter /path/to/new-repo --git
+npx github:ericmalen/fcore#v2.1.1 init /path/to/new-repo --git
 # or, from a clone:
 node ~/tools/fcore/scripts/build-starter.mjs /path/to/new-repo --git
 ```
@@ -39,7 +39,7 @@ rather download than run the script.)
 From your repo root:
 
 ```sh
-npx github:ericmalen/fcore#v1.2.1 setup
+npx github:ericmalen/fcore#v2.1.1 onboard
 ```
 
 This stages the release at a stable path, then hands off down a chain:
@@ -116,7 +116,7 @@ your repo is untouched until YOU merge.
 - Orchestration (a generated multi-agent team + `tasks.md` backlog) is
   **optional and evidence-driven** — most projects never need it. Once the
   repo has a code layer with a test command:
-  `npx github:ericmalen/fcore#<pin> orchestrate` (pin from
+  `npx github:ericmalen/fcore#<pin> fleet-config` (pin from
   `.claude/fcore.json`). It runs FleetCore-side and is deliberately
   not installed into the project. See
   [orchestration-guide](./orchestration-guide.md).
@@ -129,7 +129,7 @@ your repo is untouched until YOU merge.
   `sync-baseline --check` flags a stale pin; `--report` shows the plan;
   `--upgrade` applies it — see [baseline-sync](./baseline-sync.md). The
   `fcore-update` skill (run from a fcore checkout, like `fcore-onboard` —
-  `npx github:ericmalen/fcore#<new-tag> refresh` starts it)
+  `npx github:ericmalen/fcore#<new-tag> update` starts it)
   walks the full loop for you. Re-run the full setup flow only for
   major/breaking changes to routing or layout; your current state is just
   new existing-project input, protected by the same machinery.

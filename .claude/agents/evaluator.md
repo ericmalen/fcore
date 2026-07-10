@@ -64,4 +64,3 @@ fixes; writes nothing, gates everything.
 .claude/skills/log-report/SKILL.md
 .claude/skills/checklist-intake/SKILL.md
 templates/orchestration/docs/triage-rules.md
-notes/agent-orchestration-plan.md

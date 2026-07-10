@@ -30,7 +30,7 @@ function git(dir, ...args) {
 // tree — so the report read is the only thing standing between "accounted"
 // and a false SILENT-LOSS.
 function repoAfterMergePrep() {
-  const dir = mkdtempSync(join(tmpdir(), 'aikit-f2-'));
+  const dir = mkdtempSync(join(tmpdir(), 'fcore-f2-'));
   git(dir, 'init', '-q', '-b', 'main');
   git(dir, 'config', 'user.email', 't@t');
   git(dir, 'config', 'user.name', 't');
@@ -84,7 +84,7 @@ test('F-2: report read survives the .setup deletion commit (no false SILENT-LOSS
 // repo has unrelated failures (no .setup report, sentinel not in tree); those
 // are irrelevant to what B1 checks.
 function repoWithMarker(optionalSkills, { installChecklistIntake = false } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'aikit-r55-'));
+  const dir = mkdtempSync(join(tmpdir(), 'fcore-r55-'));
   git(dir, 'init', '-q', '-b', 'main');
   git(dir, 'config', 'user.email', 't@t');
   git(dir, 'config', 'user.name', 't');
@@ -137,7 +137,7 @@ test('R-55: fixture expects an optional the marker did not select → failure', 
 
 test('F-2: genuinely missing report is flagged inconclusive, not reported as silent loss', () => {
   // No .setup/ ever committed → the fallback finds no Add/Modify commit.
-  const dir = mkdtempSync(join(tmpdir(), 'aikit-f2-noreport-'));
+  const dir = mkdtempSync(join(tmpdir(), 'fcore-f2-noreport-'));
   git(dir, 'init', '-q', '-b', 'main');
   git(dir, 'config', 'user.email', 't@t');
   git(dir, 'config', 'user.name', 't');

@@ -9,7 +9,7 @@ import { audit } from '../scripts/audit.mjs';
 import { ROUTING_REGION_START, ROUTING_REGION_END, renderOrchestrationRouting } from '../scripts/lib/orchestration/scaffold.mjs';
 
 function makeRepo(files, { git = true } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), 'aikit-audit-'));
+  const dir = mkdtempSync(join(tmpdir(), 'fcore-audit-'));
   for (const [rel, content] of Object.entries(files)) {
     const abs = join(dir, rel);
     mkdirSync(join(abs, '..'), { recursive: true });

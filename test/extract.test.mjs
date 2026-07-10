@@ -230,7 +230,7 @@ test('extractFile records imports only on instruction surfaces', () => {
 // ── integration: full run against a temp git repo ───────────────────────────
 
 function makeRepo(files) {
-  const dir = mkdtempSync(join(tmpdir(), 'aikit-extract-'));
+  const dir = mkdtempSync(join(tmpdir(), 'fcore-extract-'));
   for (const [rel, content] of Object.entries(files)) {
     const abs = join(dir, rel);
     mkdirSync(join(abs, '..'), { recursive: true });
@@ -305,7 +305,7 @@ test('runInventory: outDir equal to or an ancestor of root is always refused', (
 
 test('runInventory: out-of-root outDir is allowed when new/empty, refused when populated', () => {
   const repo = makeRepo({ 'AGENTS.md': '# X\nrules\n' });
-  const scratchParent = mkdtempSync(join(tmpdir(), 'aikit-extract-out-'));
+  const scratchParent = mkdtempSync(join(tmpdir(), 'fcore-extract-out-'));
   const freshOut = join(scratchParent, 'sweep-report');
   try {
     // new (nonexistent) out-of-root dir: succeeds, leaves no <root>/.setup
@@ -354,7 +354,7 @@ test('integration: dirty tree fails precondition, --allow-dirty bypasses', () =>
 
 test('cli: --out writes report-only outside the repo, leaving no <root>/.setup', () => {
   const repo = makeRepo({ 'AGENTS.md': '# X\nrules\n' });
-  const scratch = mkdtempSync(join(tmpdir(), 'aikit-extract-cli-out-'));
+  const scratch = mkdtempSync(join(tmpdir(), 'fcore-extract-cli-out-'));
   const reportDir = join(scratch, 'report');
   try {
     const r = spawnSync(process.execPath, [

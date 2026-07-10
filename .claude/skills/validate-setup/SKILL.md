@@ -26,7 +26,7 @@ when no recognizable fixture/flag is present.
    b. `node <fcore>/scripts/install-setup.mjs $WORK/fx-<name>`, then commit
       ("chore: fcore setup tooling") in the fixture.
    c. Run the four phases, EACH as a fresh-context subagent whose prompt is:
-      "Read <fixtureDir>/.claude/skills/base-<phase>/SKILL.md and execute its
+      "Read <fixtureDir>/.claude/skills/fcore-<phase>/SKILL.md and execute its
       procedure in <fixtureDir>. Setup answers: githubCodeReview=NO,
       path-scoping=rules, optional skills = <the fixture's
       expect.optionalSkills in test/fixtures/defs.mjs, exactly those names; NONE
