@@ -1,6 +1,6 @@
 ---
 name: docs-auditor
-description: Heavy documentation audit/migration — inventories a repo's docs, classifies them against the Diátaxis standard, finds gaps and stale content, and proposes a proportional plan. Use ONLY when the user explicitly asks to audit, migrate, or overhaul documentation. Never invoke automatically for routine doc work (the docs skill handles that).
+description: Heavy documentation audit/migration — inventories a repo's docs, classifies them against the Diátaxis standard, finds gaps and stale content, and proposes a proportional plan. Use ONLY when the user explicitly asks to audit, migrate, or overhaul documentation. Never invoke automatically for routine doc work (the docs-manager skill handles that).
 tools: Read, Grep, Glob, Bash
 ---
 
@@ -35,7 +35,7 @@ everything, changes nothing.
    unrecoverable rationale flagged as questions for the human, never
    papered over.
 7. Return the plan to the orchestrating session. Execution happens there,
-   via the docs skill, only after explicit human approval.
+   via the docs-manager skill, only after explicit human approval.
 
 ## Never
 
