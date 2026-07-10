@@ -342,6 +342,19 @@ test('R-50: unparseable marker and missing fields fire', () => {
   }
 });
 
+test('R-50: pre-v2.0.0 marker (.claude/agent-base.json) is read transparently, no findings', () => {
+  const { ['.claude/fcore.json']: _omit, ...rest } = CONFORMANT;
+  const repo = makeRepo({
+    ...rest,
+    '.claude/agent-base.json': '{ "standard": "1.3.0", "toolRepo": "https://github.com/ericmalen/agent-base", "pin": "v1.3.0", "lastSyncedAt": "2026-06-10", "setupAt": "2026-06-10", "githubCodeReview": false, "optionalSkills": ["retro"] }\n',
+  });
+  try {
+    assert.equal(of(audit({ root: repo }), 'R-50').length, 0);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
 // ── R-48 per-asset READMEs + R-54 stray prompt files ────────────────────────
 
 test('R-48: per-asset README fires; vendored skill exempt', () => {

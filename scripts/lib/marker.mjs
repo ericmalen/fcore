@@ -1,12 +1,21 @@
 // marker.mjs — FleetCore marker (.claude/fcore.json) read/write/validate.
 
-import { readFileSync, writeFileSync, existsSync, lstatSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, lstatSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { stripJsonComments } from './extract.mjs';
 import { parseSemver, tagToSemver } from './release.mjs';
 import { OPTIONAL_NAMES } from './baseline.mjs';
 
 export const MARKER_PATH = '.claude/fcore.json';
+
+// Pre-v2.0.0 marker filename (agent-base → FleetCore rebrand). Read-compatible
+// only — readMarker falls back to it and translates old field values; never
+// written. writeMarker deletes it once the canonical marker is written, so
+// the fallback only ever shadows a marker for one sync/skills-write cycle.
+export const LEGACY_MARKER_PATH = '.claude/agent-base.json';
+
+// Optional-skill renames from the v2.0.0 rebrand (old name → new name).
+const LEGACY_OPTIONAL_SKILL_NAMES = { retro: 'checklist-intake' };
 
 export const REQUIRED_MARKER_FIELDS = [
   'standard',
@@ -19,15 +28,33 @@ export const PIN_FIELDS = ['pin', 'lastSyncedAt'];
 
 export const DEFAULT_TOOL_REPO = 'https://github.com/ericmalen/fcore';
 
+// Translate a marker parsed from LEGACY_MARKER_PATH to current field values.
+function migrateLegacyFields(fields) {
+  const out = { ...fields };
+  if (typeof out.toolRepo === 'string') {
+    out.toolRepo = out.toolRepo.replace('ericmalen/agent-base', 'ericmalen/fcore');
+  }
+  if (Array.isArray(out.optionalSkills)) {
+    out.optionalSkills = out.optionalSkills.map((s) => LEGACY_OPTIONAL_SKILL_NAMES[s] ?? s);
+  }
+  return out;
+}
+
 export function readMarker(root) {
-  const abs = join(root, MARKER_PATH);
-  if (!existsSync(abs)) return { present: false };
+  let abs = join(root, MARKER_PATH);
+  let legacy = false;
+  if (!existsSync(abs)) {
+    const legacyAbs = join(root, LEGACY_MARKER_PATH);
+    if (!existsSync(legacyAbs)) return { present: false };
+    abs = legacyAbs;
+    legacy = true;
+  }
   try {
     const parsed = JSON.parse(stripJsonComments(readFileSync(abs, 'utf8')));
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
       return { present: true, invalid: true };
     }
-    return { present: true, ...parsed };
+    return { present: true, ...(legacy ? migrateLegacyFields(parsed) : parsed) };
   } catch {
     return { present: true, invalid: true };
   }
@@ -40,6 +67,9 @@ export function writeMarker(root, fields) {
   try { st = lstatSync(abs); } catch { /* ENOENT: fresh marker */ }
   if (st?.isSymbolicLink()) throw new Error(`refusing to write marker through symlink: ${abs}`);
   writeFileSync(abs, `${JSON.stringify(fields, null, 2)}\n`, 'utf8');
+  // Migration cleanup: the canonical marker now exists, so a pre-v2.0.0
+  // marker (if any) is superseded — remove it before it can shadow again.
+  rmSync(join(root, LEGACY_MARKER_PATH), { force: true });
 }
 
 export function validateMarker(marker) {

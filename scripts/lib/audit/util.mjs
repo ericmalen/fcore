@@ -161,11 +161,35 @@ export function finding(rule, severity, file, message, extra = {}) {
   return { rule, severity, file, message, ...extra };
 }
 
-// Read the FleetCore marker (.claude/fcore.json). Returns {} when absent/unparseable.
+// Optional-skill renames from the v2.0.0 rebrand (old name → new name).
+const LEGACY_OPTIONAL_SKILL_NAMES = { retro: 'checklist-intake' };
+
+// Read-only translation of a marker parsed from the pre-v2.0.0 marker path
+// (.claude/agent-base.json) to current field values. Audit never writes, so
+// unlike marker.mjs's writeMarker this never migrates the file on disk —
+// running sync-baseline or `fcore skills add/remove` does that.
+function migrateLegacyFields(fields) {
+  const out = { ...fields };
+  if (typeof out.toolRepo === 'string') {
+    out.toolRepo = out.toolRepo.replace('ericmalen/agent-base', 'ericmalen/fcore');
+  }
+  if (Array.isArray(out.optionalSkills)) {
+    out.optionalSkills = out.optionalSkills.map((s) => LEGACY_OPTIONAL_SKILL_NAMES[s] ?? s);
+  }
+  return out;
+}
+
+// Read the FleetCore marker (.claude/fcore.json, falling back to the
+// pre-v2.0.0 .claude/agent-base.json). Returns {} when absent/unparseable.
 export function readMarker(root) {
-  const text = readSafe(join(root, '.claude', 'fcore.json'));
-  if (!text) return { present: false };
+  let text = readSafe(join(root, '.claude', 'fcore.json'));
+  let legacy = false;
+  if (!text) {
+    text = readSafe(join(root, '.claude', 'agent-base.json'));
+    if (!text) return { present: false };
+    legacy = true;
+  }
   const parsed = parseJsonc(text);
   if (!parsed) return { present: true, invalid: true };
-  return { present: true, ...parsed };
+  return { present: true, ...(legacy ? migrateLegacyFields(parsed) : parsed) };
 }

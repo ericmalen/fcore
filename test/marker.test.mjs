@@ -1,10 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, mkdirSync, rmSync, readFileSync, symlinkSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, mkdirSync, rmSync, readFileSync, symlinkSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import { buildMarker, readMarker, validateMarker, writeMarker } from '../scripts/lib/marker.mjs';
+import { buildMarker, readMarker, validateMarker, writeMarker, LEGACY_MARKER_PATH } from '../scripts/lib/marker.mjs';
 
 test('buildMarker emits semver pin and sync dates', () => {
   const m = buildMarker({
@@ -31,6 +31,60 @@ test('readMarker round-trips from disk', () => {
     const m = readMarker(root);
     assert.equal(validateMarker(m).length, 0);
     assert.equal(m.pin, 'v1.0.0');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('readMarker falls back to the pre-v2.0.0 marker and translates old field values', () => {
+  const root = mkdtempSync(join(tmpdir(), 'marker-'));
+  try {
+    mkdirSync(join(root, '.claude'), { recursive: true });
+    writeFileSync(join(root, LEGACY_MARKER_PATH), JSON.stringify({
+      standard: '1.3.0',
+      toolRepo: 'https://github.com/ericmalen/agent-base',
+      pin: 'v1.3.0',
+      setupAt: '2026-01-01',
+      lastSyncedAt: '2026-01-01',
+      githubCodeReview: false,
+      optionalSkills: ['retro', 'tracker-sync'],
+    }, null, 2));
+    const m = readMarker(root);
+    assert.equal(validateMarker(m).length, 0);
+    assert.equal(m.toolRepo, 'https://github.com/ericmalen/fcore');
+    assert.deepEqual(m.optionalSkills, ['checklist-intake', 'tracker-sync']);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('readMarker prefers the canonical marker over a leftover legacy one', () => {
+  const root = mkdtempSync(join(tmpdir(), 'marker-'));
+  try {
+    mkdirSync(join(root, '.claude'), { recursive: true });
+    writeFileSync(join(root, LEGACY_MARKER_PATH), JSON.stringify({
+      standard: '1.3.0', toolRepo: 'https://github.com/ericmalen/agent-base',
+      setupAt: '2026-01-01', githubCodeReview: false,
+    }, null, 2));
+    writeFileSync(join(root, '.claude/fcore.json'), JSON.stringify(buildMarker({
+      standard: '2.0.0', setupAt: '2026-07-01',
+    }), null, 2));
+    const m = readMarker(root);
+    assert.equal(m.standard, '2.0.0');
+    assert.equal(m.toolRepo, 'https://github.com/ericmalen/fcore');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('writeMarker deletes a leftover legacy marker once the canonical one is written', () => {
+  const root = mkdtempSync(join(tmpdir(), 'marker-'));
+  try {
+    mkdirSync(join(root, '.claude'), { recursive: true });
+    writeFileSync(join(root, LEGACY_MARKER_PATH), '{ "standard": "1.3.0" }\n');
+    writeMarker(root, buildMarker({ standard: '2.0.0', setupAt: '2026-07-01' }));
+    assert.ok(!existsSync(join(root, LEGACY_MARKER_PATH)), 'legacy marker removed');
+    assert.equal(JSON.parse(readFileSync(join(root, '.claude/fcore.json'), 'utf8')).standard, '2.0.0');
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

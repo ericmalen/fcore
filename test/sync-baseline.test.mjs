@@ -110,6 +110,53 @@ test('sync-baseline --upgrade applies updates and bumps marker pin', () => {
   }
 });
 
+test('sync-baseline --upgrade migrates a pre-v2.0.0 project: marker, optionalSkills, and orphaned old-named dirs', () => {
+  const root = mkdtempSync(join(tmpdir(), 'sync-migrate-'));
+  const oldBase = mkdtempSync(join(tmpdir(), 'sync-migrate-old-'));
+  try {
+    // Simulate a v1.3.x project: legacy marker + old-named skill dirs, no
+    // trace of the current .claude/fcore.json or fcore-*/docs-manager names.
+    mkdirSync(join(root, '.claude/skills/base-check'), { recursive: true });
+    writeFileSync(join(root, '.claude/skills/base-check/SKILL.md'), 'pre-rebrand content\n');
+    mkdirSync(join(root, '.claude/skills/retro'), { recursive: true });
+    writeFileSync(join(root, '.claude/skills/retro/SKILL.md'), 'pre-rebrand retro\n');
+    mkdirSync(join(root, '.claude'), { recursive: true });
+    writeFileSync(join(root, '.claude/agent-base.json'), JSON.stringify({
+      standard: '1.3.0',
+      toolRepo: 'https://github.com/ericmalen/agent-base',
+      pin: 'v1.3.0',
+      setupAt: '2026-01-01',
+      lastSyncedAt: '2026-01-01',
+      githubCodeReview: false,
+      optionalSkills: ['retro'],
+    }, null, 2) + '\n');
+
+    const res = runSyncBaseline({
+      root, fcoreRoot: BASE_ROOT, oldFcoreRoot: oldBase, upgrade: true, json: true,
+    });
+    assert.equal(res.exitCode, 0);
+    assert.equal(res.payload.applied, true);
+    assert.equal(res.payload.conflictCount, 0);
+
+    // Marker migrated: canonical path written, legacy path gone, fields translated.
+    assert.ok(!existsSync(join(root, '.claude/agent-base.json')), 'legacy marker removed');
+    const marker = readMarker(root);
+    assert.equal(marker.toolRepo, 'https://github.com/ericmalen/fcore');
+    assert.deepEqual(marker.optionalSkills, ['checklist-intake']);
+
+    // New-named baseline skill + selected optional skill added under new names.
+    assert.ok(existsSync(join(root, '.claude/skills/fcore-check/SKILL.md')));
+    assert.ok(existsSync(join(root, '.claude/skills/checklist-intake/SKILL.md')));
+
+    // Old-named dirs surfaced as removed, but never auto-deleted.
+    assert.ok(res.payload.removed.includes('.claude/skills/base-check/SKILL.md'));
+    assert.ok(res.payload.removed.includes('.claude/skills/retro/SKILL.md'));
+    assert.ok(existsSync(join(root, '.claude/skills/base-check/SKILL.md')), 'orphan left in place, not deleted');
+  } finally {
+    for (const d of [root, oldBase]) rmSync(d, { recursive: true, force: true });
+  }
+});
+
 test('sync-baseline --upgrade restores missing baseline files at current pin', () => {
   const root = mkdtempSync(join(tmpdir(), 'sync-fix-'));
   try {

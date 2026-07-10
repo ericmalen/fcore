@@ -5,6 +5,25 @@ import { readFileSync, existsSync, lstatSync, readdirSync, statSync } from 'node
 import { join, relative } from 'node:path';
 import { BASELINE_COPIES, OPTIONAL_SKILLS } from './baseline.mjs';
 
+// Pre-v2.0.0 baseline paths, renamed (not discontinued) by the rebrand. A
+// rename is invisible to the updates/removed diff below — BASELINE_COPIES
+// only lists CURRENT dst paths, so an old path under a name no longer in
+// that list is never walked for project/old/new, on any side. Listed here so
+// a leftover copy still surfaces in `removed` (never auto-deleted, same as
+// any other stale baseline path) instead of silently orphaning.
+export const LEGACY_RENAMED_PATHS = [
+  '.claude/skills/base-apply',
+  '.claude/skills/base-check',
+  '.claude/skills/base-inventory',
+  '.claude/skills/base-orchestrate',
+  '.claude/skills/base-plan',
+  '.claude/skills/base-refresh',
+  '.claude/skills/base-setup',
+  '.claude/skills/base-verify',
+  '.claude/skills/docs',
+  '.claude/skills/retro',
+];
+
 const sha = (buf) => createHash('sha256').update(buf).digest('hex');
 
 function* walkFiles(absDir, base = absDir) {
@@ -121,6 +140,15 @@ export function planBaselineSync(projectRoot, oldFcoreRoot, newFcoreRoot, { opti
     }
     conflicts.push({ path, reason: 'local edit differs from FleetCore baseline' });
   }
+
+  // Renamed (not discontinued) paths: invisible to the diff above since
+  // BASELINE_COPIES only lists current dst paths. Surfaced the same way as
+  // any other stale baseline path — never auto-deleted.
+  for (const legacyPath of LEGACY_RENAMED_PATHS) {
+    if (!existsSync(join(projectRoot, legacyPath))) continue;
+    for (const path of hashTree(projectRoot, legacyPath).keys()) removed.push(path);
+  }
+  removed.sort();
 
   return {
     updates,
