@@ -19,9 +19,10 @@ FleetCore-side only — `install-setup.mjs` never ships this skill.
 2. Clean working tree in the target (`git status --porcelain` empty) — one
    exception: an untracked `.claude/skills/fcore-bootstrap/` (the
    one-shot launcher the npx bin drops); delete it and re-check.
-3. Target shows fcore setup baseline (at minimum `.claude/fcore.json` and
-   `fcore-check` skill). If missing, tell the user to run `/fcore-onboard`
-   first.
+3. Target shows fcore setup baseline (at minimum `.claude/fcore.json` — or
+   the pre-v2.0.0 `.claude/agent-base.json`, which sync-baseline reads
+   automatically — and the `fcore-check` skill). If neither marker is
+   present, tell the user to run `/fcore-onboard` first.
 4. `node --version` >= 20.
 5. Checkout freshened — only if it is a clone (has `.git`): `git pull
    --ff-only` (warn and continue on failure). An staged release has no

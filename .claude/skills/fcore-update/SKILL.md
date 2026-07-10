@@ -17,7 +17,10 @@ files by hand.
 1. Obtain the project path (argument, or ask). Preconditions (hard — stop
    with a plain-language message if unmet):
    - target exists, is NOT this fcore checkout, and is a git repo
-   - set up: `.claude/fcore.json` marker present
+   - set up: `.claude/fcore.json` marker present, OR the pre-v2.0.0
+     `.claude/agent-base.json` (sync-baseline reads either — do not treat
+     the latter as an unsupported/different tool; it just means this project
+     predates the v2.0.0 rebrand and migrates automatically during step 3-5)
    - clean working tree: `git status --porcelain` is empty — one exception:
      an untracked `.claude/skills/fcore-bootstrap/` (the one-shot
      launcher the npx bin drops); delete it and re-check
