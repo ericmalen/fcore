@@ -119,10 +119,14 @@ bin/             the fcore npx entry point (never ships into projects;
 .claude/         this repo's own live config; the fcore-* setup skills, baseline
                  skills (fcore-check, docs-manager, git-conventions, skill-creator,
                  agent-creator) and docs-auditor agent are dual-role (used here
-                 AND installed into every project). The lifecycle skills (checklist-intake,
-                 log-report, eval-runner, tracker-sync) are optional (R-55):
-                 opt-in via `fcore skills add` or fcore-fleet-config. See the
-                 allowlist in scripts/lib/baseline.mjs, consumed by
+                 AND installed into every project). Two optional (R-55)
+                 families ship opt-in via `fcore skills add`: lifecycle
+                 skills (checklist-intake, log-report, eval-runner,
+                 tracker-sync — dual-role here, or via fcore-fleet-config)
+                 and UI-verification skills (ui-verify-web, ui-verify-ios —
+                 sourced from templates/optional-skills/ since this repo has
+                 no UI to verify). See the allowlist in
+                 scripts/lib/baseline.mjs, consumed by
                  scripts/install-setup.mjs. Orchestration
                  discovery/generation meta-assets stay FleetCore-side only.
                  fcore-onboard is the setup entry point: run from a

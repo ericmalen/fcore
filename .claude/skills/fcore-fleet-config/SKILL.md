@@ -76,7 +76,9 @@ FleetCore-side only — `install-setup.mjs` never ships this skill.
    `node <fcore>/bin/fcore.mjs skills add <name> <target>`
    (idempotent — skips any already present; records each in the target marker's
    `optionalSkills`). These back `/checklist-intake`, `/log-report`, `/eval-runner`,
-   `/tracker-sync` on the generated surfaces.
+   `/tracker-sync` on the generated surfaces. The other optional family,
+   `ui-verify-web`/`ui-verify-ios` (R-55), is unrelated to orchestration and
+   NOT auto-installed here — it's a separate opt-in via `fcore skills add`.
 8. After phase 4: remind the user to review the diff, commit if not already
    committed by the scaffolder session, and merge. Point them to
    `docs/how-to/orchestration-guide.md` § Session 5 for execution (`tasks.md` +

@@ -83,6 +83,32 @@ test('planBaselineSync: type mismatches and symlinked paths are conflicts, not u
   }
 });
 
+test('planBaselineSync: src !== dst optional skill reads FleetCore roots from src, project from dst', () => {
+  const project = mkdtempSync(join(tmpdir(), 'sync-srcdst-proj-'));
+  const oldBase = mkdtempSync(join(tmpdir(), 'sync-srcdst-old-'));
+  const newBase = mkdtempSync(join(tmpdir(), 'sync-srcdst-new-'));
+  try {
+    // FleetCore roots carry the skill at its templates/ src path, never at
+    // .claude/skills/ — that's the whole point of src !== dst for this skill.
+    write(oldBase, 'templates/optional-skills/ui-verify-web/SKILL.md', 'v1\n');
+    write(newBase, 'templates/optional-skills/ui-verify-web/SKILL.md', 'v2\n');
+    // The project only ever has the live dst path.
+    write(project, '.claude/skills/ui-verify-web/SKILL.md', 'v1\n');
+
+    const plan = planBaselineSync(project, oldBase, newBase, { optionalSkills: ['ui-verify-web'] });
+    assert.deepEqual(plan.conflicts, []);
+    assert.deepEqual(plan.updates, ['.claude/skills/ui-verify-web/SKILL.md']);
+
+    // Unselected: absent from every root, never surfaces (same R-55 guarantee
+    // as the dual-role optional skills).
+    const unselected = planBaselineSync(project, oldBase, newBase, { optionalSkills: [] });
+    assert.ok(!unselected.updates.includes('.claude/skills/ui-verify-web/SKILL.md'));
+    assert.ok(!unselected.removed.includes('.claude/skills/ui-verify-web/SKILL.md'));
+  } finally {
+    for (const d of [project, oldBase, newBase]) rmSync(d, { recursive: true, force: true });
+  }
+});
+
 test('planBaselineSync: files dropped from the new baseline land in removed, untouched', () => {
   const project = mkdtempSync(join(tmpdir(), 'sync-rm-proj-'));
   const oldBase = mkdtempSync(join(tmpdir(), 'sync-rm-old-'));

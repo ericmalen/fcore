@@ -2,12 +2,17 @@
 // and sync-baseline). Setup-window tooling is install-only, never synced.
 
 /**
- * Optional skill tier — opt-in lifecycle skills, NOT installed by default.
- * Selected at setup time (fcore-plan/fcore-apply), post-install via
- * `fcore skills add`, or auto-installed by fcore-fleet-config. Tracked per
- * project in the marker's `optionalSkills`; sync-baseline upgrades only the
- * ones a project selected. Sources stay dual-role in `.claude/skills/` (still
- * dogfooded here); they ride into the setup window via SETUP_WINDOW_COPIES so
+ * Optional skill tier — opt-in, NOT installed by default. Two families:
+ * orchestration-lifecycle skills (dormant until orchestration is generated)
+ * and UI-verification skills (useful immediately, no orchestration
+ * prerequisite). Selected at setup time (fcore-plan/fcore-apply),
+ * post-install via `fcore skills add`, or (lifecycle family only)
+ * auto-installed by fcore-fleet-config. Tracked per project in the marker's
+ * `optionalSkills`; sync-baseline upgrades only the ones a project selected.
+ * Lifecycle sources stay dual-role in `.claude/skills/` (still dogfooded
+ * here); UI-verification sources live in `templates/optional-skills/` since
+ * FleetCore itself has no web or mobile UI (see AGENTS.md "Do Not"). Either
+ * way they ride into the setup window via SETUP_WINDOW_COPIES so
  * fcore-apply can copy selected ones, but never enter BASELINE_COPIES.
  * @type {{name: string, src: string, dst: string}[]}
  */
@@ -16,6 +21,8 @@ export const OPTIONAL_SKILLS = [
   { name: 'log-report', src: '.claude/skills/log-report', dst: '.claude/skills/log-report' },
   { name: 'eval-runner', src: '.claude/skills/eval-runner', dst: '.claude/skills/eval-runner' },
   { name: 'tracker-sync', src: '.claude/skills/tracker-sync', dst: '.claude/skills/tracker-sync' },
+  { name: 'ui-verify-web', src: 'templates/optional-skills/ui-verify-web', dst: '.claude/skills/ui-verify-web' },
+  { name: 'ui-verify-ios', src: 'templates/optional-skills/ui-verify-ios', dst: '.claude/skills/ui-verify-ios' },
 ];
 
 export const OPTIONAL_NAMES = OPTIONAL_SKILLS.map((s) => s.name);
@@ -24,6 +31,19 @@ export const OPTIONAL_NAMES = OPTIONAL_SKILLS.map((s) => s.name);
 export const optionalStagingDst = (name) => `.claude/fcore-onboard/optional-skills/${name}`;
 
 export const optionalByName = (name) => OPTIONAL_SKILLS.find((s) => s.name === name);
+
+/**
+ * Rebase a project-relative dst path to its FleetCore-root-relative src path,
+ * for optional skills whose src differs from dst. Identity for everything
+ * else (BASELINE_COPIES paths, and optional skills with src === dst).
+ */
+export const fcoreSrcForProjectPath = (rel) => {
+  for (const s of OPTIONAL_SKILLS) {
+    if (s.src === s.dst) continue;
+    if (rel === s.dst || rel.startsWith(`${s.dst}/`)) return s.src + rel.slice(s.dst.length);
+  }
+  return rel;
+};
 
 /** Project-relative live dst paths for a selected optional set. */
 export const optionalProjectPaths = (selected) =>

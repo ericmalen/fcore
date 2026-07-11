@@ -47,14 +47,21 @@ function hashPath(root, rel) {
 }
 
 function hashTree(root, rel) {
-  const abs = join(root, rel);
+  return hashTreeAt(root, rel, rel);
+}
+
+// Hash the tree at root/srcRel but key entries under dstRel — lets an
+// FleetCore-root read use a skill's src path while producing the same
+// project-relative keys a project-root read produces from dst.
+function hashTreeAt(root, srcRel, dstRel) {
+  const abs = join(root, srcRel);
   if (!existsSync(abs)) return new Map();
   if (statSync(abs).isFile()) {
-    return new Map([[rel, sha(readFileSync(abs))]]);
+    return new Map([[dstRel, sha(readFileSync(abs))]]);
   }
   const out = new Map();
   for (const f of walkFiles(abs)) {
-    out.set(join(rel, f).split('\\').join('/'), sha(readFileSync(join(abs, f))));
+    out.set(join(dstRel, f).split('\\').join('/'), sha(readFileSync(join(abs, f))));
   }
   return out;
 }
@@ -64,15 +71,19 @@ function hashTree(root, rel) {
  * `optionalSkills` (the project's selected set) extends the baseline with the
  * matching optional-skill trees so sync upgrades only what the project opted
  * into — unselected optionals are absent from every root and never surface.
+ * `fcoreRoot: true` means `root` is an FleetCore checkout, not a project: optional
+ * skills with src !== dst are read from src but keyed under dst, so the same
+ * project-relative path lines up across the project/old-base/new-base maps.
  */
-export function baselineFileHashes(root, { optionalSkills = [] } = {}) {
+export function baselineFileHashes(root, { optionalSkills = [], fcoreRoot = false } = {}) {
   const out = new Map();
   for (const [, dst] of BASELINE_COPIES) {
     for (const [path, h] of hashTree(root, dst)) out.set(path, h);
   }
   for (const s of OPTIONAL_SKILLS) {
     if (!optionalSkills.includes(s.name)) continue;
-    for (const [path, h] of hashTree(root, s.dst)) out.set(path, h);
+    const srcRel = fcoreRoot ? s.src : s.dst;
+    for (const [path, h] of hashTreeAt(root, srcRel, s.dst)) out.set(path, h);
   }
   return out;
 }
@@ -109,8 +120,8 @@ function pathObstruction(projectRoot, rel) {
  */
 export function planBaselineSync(projectRoot, oldFcoreRoot, newFcoreRoot, { optionalSkills = [] } = {}) {
   const project = baselineFileHashes(projectRoot, { optionalSkills });
-  const oldBase = baselineFileHashes(oldFcoreRoot, { optionalSkills });
-  const newBase = baselineFileHashes(newFcoreRoot, { optionalSkills });
+  const oldBase = baselineFileHashes(oldFcoreRoot, { optionalSkills, fcoreRoot: true });
+  const newBase = baselineFileHashes(newFcoreRoot, { optionalSkills, fcoreRoot: true });
 
   const allPaths = new Set([...project.keys(), ...oldBase.keys(), ...newBase.keys()]);
   const updates = [];

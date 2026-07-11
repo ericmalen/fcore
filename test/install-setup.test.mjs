@@ -7,6 +7,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, existsSync
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
+import { OPTIONAL_SKILLS } from '../scripts/lib/baseline.mjs';
 
 const BASE = process.cwd();
 
@@ -78,17 +79,20 @@ test('install-setup stages optional lifecycle skills (not live), keeps discovery
       [join(BASE, 'scripts/install-setup.mjs'), target], { encoding: 'utf8' });
     assert.equal(r.status, 0, `install-setup failed: ${r.stderr}`);
 
-    // Optional lifecycle skills are NOT installed to their live path by a plain
-    // setup (R-55: opt-in). They ARE staged in the setup window so fcore-apply
-    // can copy any the user selects; staged copies match the FleetCore source.
-    for (const id of ['checklist-intake', 'log-report', 'eval-runner', 'tracker-sync']) {
-      assert.ok(!existsSync(join(target, `.claude/skills/${id}`)),
-        `${id} must NOT be installed live by a plain setup`);
-      const staged = `.claude/fcore-onboard/optional-skills/${id}/SKILL.md`;
-      assert.ok(existsSync(join(target, staged)), `${id} staged in setup window`);
+    // Optional skills (lifecycle + UI-verification) are NOT installed to
+    // their live path by a plain setup (R-55: opt-in). They ARE staged in
+    // the setup window so fcore-apply can copy any the user selects; staged
+    // copies match the FleetCore source at each entry's own `src` (which
+    // differs from `dst` for the UI-verification skills — templates-sourced,
+    // not dual-role in .claude/skills/).
+    for (const { name, src } of OPTIONAL_SKILLS) {
+      assert.ok(!existsSync(join(target, `.claude/skills/${name}`)),
+        `${name} must NOT be installed live by a plain setup`);
+      const staged = `.claude/fcore-onboard/optional-skills/${name}/SKILL.md`;
+      assert.ok(existsSync(join(target, staged)), `${name} staged in setup window`);
       assert.equal(readFileSync(join(target, staged), 'utf8'),
-        readFileSync(join(BASE, `.claude/skills/${id}/SKILL.md`), 'utf8'),
-        `${id} staged copy matches FleetCore source`);
+        readFileSync(join(BASE, `${src}/SKILL.md`), 'utf8'),
+        `${name} staged copy matches FleetCore source at ${src}`);
     }
     // Discovery/generation meta-skills run FROM the FleetCore clone and stay home.
     for (const id of ['structure-detector', 'dependency-mapper', 'convention-detector',

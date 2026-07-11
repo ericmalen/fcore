@@ -66,10 +66,11 @@ Prefer zero terminal? Paste ONE prompt instead:
 Either way that's the whole setup. The AI installs the tooling, commits it,
 and starts the four-phase flow below. The setup-time tooling is removed again
 before merge; what stays is the permanent baseline — the `fcore-check`, `docs-manager`,
-`git-conventions`, `skill-creator`, and `agent-creator` skills; the
+`git-conventions`, `skill-creator`, and `agent-creator` skills; optionally the
 orchestration lifecycle skills `checklist-intake`, `log-report`, `eval-runner`, and
 `tracker-sync` (dormant until orchestration generation creates their
-surfaces); and the `docs-auditor` agent.
+surfaces), or the UI-verification skills `ui-verify-web` and `ui-verify-ios`
+(useful immediately); and the `docs-auditor` agent.
 
 **Working from a clone (FleetCore development, or fallback):** keep a clone
 (`git clone <url> ~/tools/fcore`), open it in your tool, and say
@@ -121,10 +122,12 @@ your repo is untouched until YOU merge.
   not installed into the project. See
   [orchestration-guide](./orchestration-guide.md).
 - The orchestration lifecycle skills `checklist-intake`, `log-report`, `eval-runner`,
-  and `tracker-sync` are optional (R-55) — not installed by default. Add any
+  and `tracker-sync`, and the UI-verification skills `ui-verify-web` and
+  `ui-verify-ios`, are all optional (R-55) — not installed by default. Add any
   with `fcore skills add <name>` (list with `fcore skills list`);
-  `fcore-fleet-config` installs all four automatically when you generate
-  orchestration.
+  `fcore-fleet-config` installs the four lifecycle skills automatically when
+  you generate orchestration (UI-verification skills are never
+  auto-installed — add them explicitly if the project has web or RN/Expo UI).
 - Updating to a newer FleetCore release: use baseline sync, not a re-setup.
   `sync-baseline --check` flags a stale pin; `--report` shows the plan;
   `--upgrade` applies it — see [baseline-sync](./baseline-sync.md). The

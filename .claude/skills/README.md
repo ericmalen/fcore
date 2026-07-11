@@ -106,6 +106,13 @@ Quality / lifecycle:
 - `tracker-sync` — tasks.md ⇄ tracker bridge, ADO work items or GitHub Issues
   (project; installed at setup; DD-14 directional sync).
 
+**UI-verification skills** — the other optional (R-55) family, unrelated to
+orchestration and useful immediately (no orchestration prerequisite). Source
+lives at [`templates/optional-skills/`](../../templates/optional-skills/),
+not here — FleetCore itself has no web or mobile UI to verify. Install into a
+project the same way, via `fcore skills add ui-verify-web` /
+`ui-verify-ios`.
+
 ## A worked example: `git-conventions`
 
 [`git-conventions`](./git-conventions/SKILL.md) is the reference for what a

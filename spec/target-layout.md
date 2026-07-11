@@ -131,12 +131,16 @@ Done only until `tracker-sync` pushes its status and prunes it. The permanent
 record of every completion is the handoff log, not `tasks.md`.
 
 Generated agents and skills land in the standard `.claude/` homes and obey the
-same rules as authored ones. The optional lifecycle skills (`checklist-intake`,
-`log-report`, `eval-runner`, `tracker-sync`, R-55) operate on these surfaces;
-they are not in the plain-setup baseline — they are opt-in at setup, added via
-`fcore skills add`, or installed by `fcore-fleet-config` as a generation
-prerequisite. The discovery/generation meta-assets stay FleetCore-side and are
-never part of the target layout.
+same rules as authored ones. The optional skill tier (R-55) has two families,
+neither in the plain-setup baseline: lifecycle skills (`checklist-intake`,
+`log-report`, `eval-runner`, `tracker-sync`) operate on these orchestration
+surfaces and are dormant until orchestration is generated; UI-verification
+skills (`ui-verify-web`, `ui-verify-ios`) drive a browser or the iOS Simulator
+via an MCP server and are useful immediately, with no orchestration
+prerequisite. Both families are opt-in the same way — selected at setup,
+added via `fcore skills add`, or (lifecycle only) installed by
+`fcore-fleet-config` as a generation prerequisite. The discovery/generation
+meta-assets stay FleetCore-side and are never part of the target layout.
 
 Tracker bridge surfaces (optional, DD-14): tasks linked to a work tracker
 carry one indented `ref:` line (`AB#123` ADO / `#45` GitHub) in `tasks.md`;
@@ -154,6 +158,7 @@ rejected — PATs are env-only).
 | `.github/copilot-instructions.md` (when `githubCodeReview: false`) | folded into AGENTS.md at setup | R-09 |
 | category subfolders under `.claude/skills/` | neither tool discovers them | R-26 |
 | v1 machinery (hash manifest, sidecars, audit-report file) | v2 has no sync layer; marker is one line | — |
+| any FleetCore-shipped `.mcp.json` or MCP server config | project-owned, not templated — `ui-verify-web`/`ui-verify-ios` add their own server entry on first use (`claude mcp add --scope project ...`) | — |
 
 ## Load model (why the layout is shaped this way)
 

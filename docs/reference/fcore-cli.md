@@ -70,8 +70,9 @@ exit codes propagate.
 
 ## Optional skills (`skills`)
 
-Manage the opt-in lifecycle skills (`checklist-intake`, `log-report`, `eval-runner`,
-`tracker-sync`, R-55). They are not in the default baseline; each project's
+Manage the opt-in skills (R-55) — lifecycle (`checklist-intake`, `log-report`,
+`eval-runner`, `tracker-sync`) and UI-verification (`ui-verify-web`,
+`ui-verify-ios`). They are not in the default baseline; each project's
 selection is tracked in the marker's `optionalSkills`. Runs against a set-up
 project (path defaults to cwd) and copies from this checkout.
 

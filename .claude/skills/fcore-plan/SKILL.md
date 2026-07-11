@@ -22,13 +22,18 @@ for schema and worked examples before authoring.
      copilot-instructions.md handling, rule R-09)
    - Path-scoping: `.claude/rules/` (default) or nested AGENTS.md compat
      (only if they need other AGENTS.md-ecosystem tools)?
-   - Optional skills (R-55): the opt-in lifecycle skills `checklist-intake`,
-     `log-report`, `eval-runner`, `tracker-sync` are dormant until
-     orchestration is generated. Install any now? Default **none** — a plain
-     project does not need them; `fcore-fleet-config` auto-installs them, and
-     `fcore skills add <name>` adds them later. Record the chosen names
-     in the marker literal's `optionalSkills` array (omit the field if none);
-     `apply` copies each selected skill from the setup window to
+   - Optional skills (R-55), two families. Lifecycle — `checklist-intake`,
+     `log-report`, `eval-runner`, `tracker-sync` — are dormant until
+     orchestration is generated; default **none**, `fcore-fleet-config`
+     auto-installs them later if orchestration is generated. UI-verification
+     — `ui-verify-web` (drives a browser via Playwright MCP),
+     `ui-verify-ios` (drives the iOS Simulator for RN/Expo apps via
+     ios-simulator-mcp) — are useful immediately; offer `ui-verify-web` if
+     inventory shows a web app, `ui-verify-ios` if it shows a React
+     Native/Expo app; default **none** either way, never auto-installed.
+     `fcore skills add <name>` adds any of these later. Record the chosen
+     names in the marker literal's `optionalSkills` array (omit the field if
+     none); `apply` copies each selected skill from the setup window to
      `.claude/skills/<name>/`.
    For the marker literal's `standard`, `toolRepo`, and `pin`: copy them from
    the seeded `.claude/fcore.json` (written by install-setup) — never

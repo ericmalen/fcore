@@ -23,9 +23,9 @@ unit-tested, shell-agnostic.
 
 | Zone | Role |
 |---|---|
-| `templates/` | Payload copied into every project: `instructions/` (AGENTS.md/CLAUDE.md skeletons + slot bases), `settings/`, `readmes/`, `ci/`, `gitignore`. |
+| `templates/` | Payload copied into every project: `instructions/` (AGENTS.md/CLAUDE.md skeletons + slot bases), `settings/`, `readmes/`, `ci/`, `gitignore`, `optional-skills/` (source for the optional skills that are NOT dual-role in `.claude/` — see below). |
 | `scripts/` + `test/` | The engine. Dev tooling here; setup copies ONLY the five setup scripts (inventory-extract, apply, check, report, audit) + `scripts/lib/` + `templates/` into projects as `.claude/fcore-onboard/` — `test/` never ships. |
-| `.claude/` | This repo's live config AND the baseline shipped to every project. The allowlist in `scripts/lib/baseline.mjs` (consumed by `scripts/install-setup.mjs`) decides what ships, across three tiers: **setup-window** (`fcore-*` setup skills + `setup-verifier`, removed before merge), **baseline** (`fcore-check`, `docs-manager`, `git-conventions`, `skill-creator`, `agent-creator` skills + `docs-auditor` agent — installed into every project), and **optional** (`OPTIONAL_SKILLS`: the `checklist-intake`, `log-report`, `eval-runner`, `tracker-sync` lifecycle skills — dual-role here but opt-in per project, R-55; staged into the setup window for selection, added via `fcore skills add`, or installed by `fcore-fleet-config`). Orchestration discovery/generation meta-assets (`repo-analyst`, `scaffolder`, `evaluator`, and their paired skills) stay FleetCore-side — run from a fcore checkout (clone or staged release) against a project path, same pattern as `fcore-onboard`. `fcore-onboard` is the setup entry point — run from a checkout against a project path; deliberately NOT installed into projects. |
+| `.claude/` | This repo's live config AND the baseline shipped to every project. The allowlist in `scripts/lib/baseline.mjs` (consumed by `scripts/install-setup.mjs`) decides what ships, across three tiers: **setup-window** (`fcore-*` setup skills + `setup-verifier`, removed before merge), **baseline** (`fcore-check`, `docs-manager`, `git-conventions`, `skill-creator`, `agent-creator` skills + `docs-auditor` agent — installed into every project), and **optional** (`OPTIONAL_SKILLS`: two families, opt-in per project, R-55 — the `checklist-intake`, `log-report`, `eval-runner`, `tracker-sync` lifecycle skills, dual-role here since FleetCore dogfoods orchestration; and the `ui-verify-web`, `ui-verify-ios` UI-verification skills, sourced from `templates/optional-skills/` instead since FleetCore itself has no UI to verify. Both are staged into the setup window for selection, added via `fcore skills add`, or (lifecycle only) installed by `fcore-fleet-config`). Orchestration discovery/generation meta-assets (`repo-analyst`, `scaffolder`, `evaluator`, and their paired skills) stay FleetCore-side — run from a fcore checkout (clone or staged release) against a project path, same pattern as `fcore-onboard`. `fcore-onboard` is the setup entry point — run from a checkout against a project path; deliberately NOT installed into projects. |
 | `docs/` | Consumer-facing guides. |
 | `reports/` | Generated outputs (validation/audit reports). Gitignored. |
 
@@ -59,7 +59,11 @@ notes.
   FleetCore — everything there auto-loads here (v1's mistake; see dropped rules
   in spec). The installer allowlist (`scripts/lib/baseline.mjs`, consumed by
   `scripts/install-setup.mjs`) decides
-  what ships to projects; `fcore-onboard` stays FleetCore-side only.
+  what ships to projects; `fcore-onboard` stays FleetCore-side only. Consumer-only
+  optional skills with no FleetCore-side use (e.g. `ui-verify-web`,
+  `ui-verify-ios` — this repo has no UI to verify) live in
+  `templates/optional-skills/` instead, per-entry via `OPTIONAL_SKILLS`'
+  `src`/`dst` split (`scripts/lib/baseline.mjs`).
 - Do not move `.claude/skills/fcore-onboard/` or rename `scripts/`,
   `templates/`, or `bin/` — paths are load-bearing (one-prompt flow in
   `docs/how-to/setup-guide.md`, `apply.mjs`, `install-setup.mjs`, the

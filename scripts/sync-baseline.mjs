@@ -27,6 +27,7 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 import { readMarker, writeMarker, validateMarker, buildMarker } from './lib/marker.mjs';
+import { fcoreSrcForProjectPath } from './lib/baseline.mjs';
 import {
   compareSemver, latestCompatibleTag, listRemoteTags, shallowCloneAt, tagToSemver,
 } from './lib/release.mjs';
@@ -104,7 +105,7 @@ function assertNoSymlinkComponents(projectRoot, relPaths) {
 function applyFileUpdates(projectRoot, fcoreRoot, relPaths) {
   assertNoSymlinkComponents(projectRoot, relPaths);
   for (const rel of relPaths) {
-    const from = join(fcoreRoot, rel);
+    const from = join(fcoreRoot, fcoreSrcForProjectPath(rel));
     const to = join(projectRoot, rel);
     if (!existsSync(from)) throw new Error(`missing in FleetCore: ${rel}`);
     mkdirSync(dirname(to), { recursive: true });

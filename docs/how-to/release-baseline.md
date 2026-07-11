@@ -10,9 +10,10 @@ Tag when consumers should be able to pull the change:
 - Permanent-baseline asset changes (`BASELINE_COPIES` in
   `scripts/lib/baseline.mjs`: `fcore-check`, `docs-manager`, `git-conventions`,
   `skill-creator`, `agent-creator`, `docs-auditor`).
-- Optional lifecycle skill changes (`OPTIONAL_SKILLS`: `checklist-intake`, `log-report`,
-  `eval-runner`, `tracker-sync`) — `sync` upgrades them only in projects that
-  selected them (R-55).
+- Optional skill changes (`OPTIONAL_SKILLS`: lifecycle — `checklist-intake`,
+  `log-report`, `eval-runner`, `tracker-sync`; UI-verification —
+  `ui-verify-web`, `ui-verify-ios`) — `sync` upgrades them only in projects
+  that selected them (R-55).
 - Audit rule changes (`spec/rules.md` + `scripts/audit.mjs`).
 - CI template changes (`templates/ci/`).
 

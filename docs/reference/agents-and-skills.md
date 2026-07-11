@@ -54,7 +54,8 @@ Shipped per the allowlist in `scripts/lib/baseline.mjs` (consumed by
 | `fcore-check` | Permanent maintenance |
 | `fcore-inventory`, `fcore-plan`, `fcore-apply`, `fcore-verify` | Setup window |
 | `docs-manager`, `git-conventions`, `agent-creator`, `skill-creator` | Permanent baseline |
-| `checklist-intake`, `log-report`, `eval-runner`, `tracker-sync` | Optional lifecycle (R-55) — opt-in, not in the default baseline; selected at setup, added via `fcore skills add`, or installed by `fcore-fleet-config`. Operate on orchestration surfaces. |
+| `checklist-intake`, `log-report`, `eval-runner`, `tracker-sync` | Optional lifecycle (R-55) — opt-in, not in the default baseline; selected at setup, added via `fcore skills add`, or installed by `fcore-fleet-config`. Operate on orchestration surfaces; dormant until orchestration is generated. |
+| `ui-verify-web`, `ui-verify-ios` | Optional UI-verification (R-55) — opt-in, not in the default baseline; selected at setup or added via `fcore skills add`. Drive a browser (Playwright MCP) or the iOS Simulator (ios-simulator-mcp) to verify UI changes. Useful immediately — no orchestration prerequisite. |
 
 ## Generated per target (orchestration only)
 

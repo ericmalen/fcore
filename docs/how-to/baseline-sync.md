@@ -67,10 +67,11 @@ node ~/tools/fcore/scripts/sync-baseline.mjs --check --fcore-root ~/tools/fcore
 - `fcore-check`, `docs-manager`, `git-conventions`, `skill-creator`, `agent-creator`
 - `docs-auditor`
 
-Plus any **optional lifecycle skills** the project selected — `checklist-intake`,
-`log-report`, `eval-runner`, `tracker-sync` — but only those listed in the
-marker's `optionalSkills` (R-55). Unselected optionals are never synced and
-never reported as removed.
+Plus any **optional skills** the project selected — lifecycle
+(`checklist-intake`, `log-report`, `eval-runner`, `tracker-sync`) or
+UI-verification (`ui-verify-web`, `ui-verify-ios`) — but only those listed in
+the marker's `optionalSkills` (R-55). Unselected optionals are never synced
+and never reported as removed.
 
 Setup-window skills (`.claude/fcore-onboard/`, `fcore-inventory` …) are
 never touched.

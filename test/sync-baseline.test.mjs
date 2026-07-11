@@ -389,6 +389,24 @@ test('sync-baseline (R-55): a selected optional skill is repaired like the basel
   }
 });
 
+test('sync-baseline (R-55): a src !== dst optional skill (templates-sourced) is repaired from src, written to dst', () => {
+  const root = mkdtempSync(join(tmpdir(), 'sync-opt-srcdst-'));
+  try {
+    seedProject(root, { optionalSkills: ['ui-verify-web'] });
+    // Selected but missing on disk → restored from the pinned release, read
+    // from BASE_ROOT's templates/optional-skills/ui-verify-web (the live repo
+    // layout), written to the project's .claude/skills/ui-verify-web.
+    const res = runSyncBaseline({ root, fcoreRoot: BASE_ROOT, upgrade: true, json: true });
+    assert.equal(res.exitCode, 0, res.error ?? res.message);
+    assert.equal(
+      readFileSync(join(root, '.claude/skills/ui-verify-web/SKILL.md'), 'utf8'),
+      readFileSync(join(BASE_ROOT, 'templates/optional-skills/ui-verify-web/SKILL.md'), 'utf8'));
+    assert.deepEqual(readMarker(root).optionalSkills, ['ui-verify-web']);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('sync-baseline checkout failure: exit 2 result (no throw), no temp-dir leak', () => {
   const root = mkdtempSync(join(tmpdir(), 'sync-clone-'));
   const repo = mkdtempSync(join(tmpdir(), 'sync-repo-'));
