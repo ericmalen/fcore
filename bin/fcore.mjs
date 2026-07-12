@@ -65,7 +65,7 @@ Deterministic (delegates to the matching scripts/ entry point):
                           fresh-project path, no AI session needed (build-starter.mjs)
   headless-guard [--root --open-branches <json>]
 
-Optional skills (opt-in lifecycle skills, tracked in the project marker):
+Optional skills (opt-in lifecycle + UI-verification skills, tracked in the project marker):
   skills list [path]            show available optional skills + install state
   skills add <name> [path]      install one into the project (default: cwd)
   skills remove <name> [path]   uninstall one from the project

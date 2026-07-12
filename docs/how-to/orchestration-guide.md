@@ -154,16 +154,20 @@ Dispatch `plan-synthesizer`. It applies `blueprint-generator` rules, computes
 
 **Expected output** (~5–10 min; compare
 [`maxi-repo.synthesized.blueprint.json`](../../test/fixtures/orchestration/maxi-repo.synthesized.blueprint.json)):
-one specialist per profile layer (or the generic specialist for shapes the six
+one specialist per profile layer (or the generic specialist for shapes the
 named templates don't cover), plus reviewer/QA/security specialists when your
-decisions call for them; `dispatch_rules.dispatch_order` puts providers before
-consumers (e.g. `shared` before `ui`/`api`).
+decisions call for them, plus `ui-web-verifier`/`ui-mobile-verifier` when a
+layer evidences a web or React Native/Expo UI (evidence-driven, same as
+`pairedSkills` — no decision to make here); `dispatch_rules.dispatch_order`
+puts providers before consumers (e.g. `shared` before `ui`/`api`).
 
 **Gate 2 — approve when every answer is yes:**
 
 - [ ] Every profile layer is covered by a specialist (or a justified generic
       fallback)
 - [ ] Reviewer/QA/security roster matches your Gate 1 decisions
+- [ ] UI-verifier roster matches the profile (present iff a matching layer
+      was detected)
 - [ ] `subagent_max_scopes` / `agent_team_min_scopes` thresholds are sane for
       the repo (defaults: 2 / 3)
 - [ ] `dispatch_order` is provider-first and you recognize the ordering
@@ -269,6 +273,14 @@ once orchestration surfaces exist:
 | `tracker-sync` | Sync `tasks.md` with ADO work items / GitHub Issues (intake in, status out); prunes synced `## Done` items |
 
 See [Lifecycle maintenance](#lifecycle-maintenance) below.
+
+`fcore-fleet-config` also conditionally installs `ui-verify-web`/`ui-verify-ios`
+(R-55) — same `fcore skills add` mechanism, but only when the generated
+roster includes `ui-web-verifier`/`ui-mobile-verifier` respectively. Unlike
+the lifecycle skills, these aren't installed unconditionally, and the
+matching MCP server (Playwright / iOS Simulator) still needs `claude mcp add
+--scope project ...` in the target — generation doesn't write `.mcp.json`;
+see each skill's own first-run section.
 
 ## Copilot users
 

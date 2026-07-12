@@ -31,8 +31,9 @@ test('planGeneration: maxi synthesized blueprint plans the full asset set', () =
   const { files, errors } = planGeneration(loadFixture('maxi-repo.synthesized.blueprint.json'), registry, readTemplate);
   assert.deepEqual(errors, []);
   const paths = files.map((f) => f.path);
-  // 8 agents + 3 paired skills (ui/api/db engineers) + README + 5 docs
-  assert.equal(files.length, 17);
+  // 9 agents (incl. ui-web-verifier, no paired skill of its own) + 3 paired
+  // skills (ui/api/db engineers) + README + 5 docs
+  assert.equal(files.length, 18);
   assert.ok(paths.includes('docs/orchestration/README.md'));
   assert.ok(paths.includes('.claude/agents/feature-orchestrator.md'));
   assert.ok(paths.includes('.claude/skills/api-testing/SKILL.md'));

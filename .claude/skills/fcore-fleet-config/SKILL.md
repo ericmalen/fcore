@@ -69,16 +69,21 @@ FleetCore-side only — `install-setup.mjs` never ships this skill.
    Gate 1 still requires an explicit approval; never skip it.
 6. **Gate 2 (after phase 3):** present the specialist roster and dispatch
    rules from `blueprint.json`. STOP until the user explicitly approves.
-7. **Install lifecycle skills (R-55):** the orchestration lifecycle skills
-   are optional and absent from the plain-setup baseline, so generated
-   orchestration needs them installed. From the fcore checkout, for each of
-   `checklist-intake`, `log-report`, `eval-runner`, `tracker-sync`:
+7. **Install prerequisite skills (R-55):** the optional skills these generated
+   agents depend on are absent from the plain-setup baseline, so generation
+   needs them installed. From the fcore checkout, for each of
+   `checklist-intake`, `log-report`, `eval-runner`, `tracker-sync` (always):
    `node <fcore>/bin/fcore.mjs skills add <name> <target>`
    (idempotent — skips any already present; records each in the target marker's
    `optionalSkills`). These back `/checklist-intake`, `/log-report`, `/eval-runner`,
-   `/tracker-sync` on the generated surfaces. The other optional family,
-   `ui-verify-web`/`ui-verify-ios` (R-55), is unrelated to orchestration and
-   NOT auto-installed here — it's a separate opt-in via `fcore skills add`.
+   `/tracker-sync` on the generated surfaces. Then, conditionally on the
+   generated roster: if it includes `ui-web-verifier`, also
+   `fcore skills add ui-verify-web <target>`; if it includes
+   `ui-mobile-verifier`, also `fcore skills add ui-verify-ios <target>`.
+   Neither is installed when its verifier isn't in the roster. Remind the
+   user afterward that the matching MCP server (Playwright / iOS Simulator)
+   still needs `claude mcp add --scope project ...` in the target — see each
+   skill's first-run section; generation doesn't write `.mcp.json`.
 8. After phase 4: remind the user to review the diff, commit if not already
    committed by the scaffolder session, and merge. Point them to
    `docs/how-to/orchestration-guide.md` § Session 5 for execution (`tasks.md` +

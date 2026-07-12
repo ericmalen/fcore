@@ -277,7 +277,7 @@ export function apply({ root, templatesDir, outRoot = null }) {
     }
   }
 
-  // ── 3c. Optional skills (opt-in lifecycle skills) ─────────────────────────
+  // ── 3c. Optional skills (opt-in lifecycle + UI-verification skills) ───────
   // Selected optionals are recorded in the marker's `optionalSkills` (authored
   // during planning, written above as an install literal). Copy each selected
   // skill from the setup-window staging dir to its live `.claude/skills/` path.

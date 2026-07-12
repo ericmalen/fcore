@@ -20,6 +20,14 @@
     "security-reviewer": {
       "version": "1.0.2",
       "sha256": "0cd0278e214348b85d0e884b365b06a5b42a36710804707c2231cac018c9e02d"
+    },
+    "ui-web-verifier": {
+      "version": "1.0.0",
+      "sha256": "0d699f4d286b75e1c082ab80932529bcd3bc63d08fc4ea830215f123c9d91be1"
+    },
+    "ui-mobile-verifier": {
+      "version": "1.0.0",
+      "sha256": "80591c64496040eeadc4b365e28980d46a9a085b9e0ebeb2dac7562283f1252b"
     }
   },
   "skills": {

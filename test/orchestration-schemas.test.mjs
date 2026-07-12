@@ -315,10 +315,11 @@ test('validateBlueprint: modelTier must be a logical tier, not a concrete model 
 
 test('validateBlueprint: non-object specialist and non-string tool entries report by index', () => {
   const blueprint = loadFixture('maxi-repo.blueprint.json');
+  const pushedAt = blueprint.specialists.length;
   blueprint.specialists.push('qa-agent');
   blueprint.orchestrator.tools = ['Read', '', 'Agent'];
   assert.deepEqual(validateBlueprint(blueprint), [
-    'specialists[4] must be an object',
+    `specialists[${pushedAt}] must be an object`,
     'orchestrator.tools[1] must be a non-empty string',
   ]);
 });

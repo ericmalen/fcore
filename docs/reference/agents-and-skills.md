@@ -72,10 +72,16 @@ blueprint or FleetCore template and re-scaffold.
 | `code-reviewer` | `code-reviewer` | — |
 | `qa-agent` | `qa-agent` | — |
 | `security-reviewer` | `security-reviewer` | — |
+| `ui-web-verifier` | `ui-web-verifier` | — (requires `ui-verify-web`, installed as a generation prerequisite, not via `pairedSkills`) |
+| `ui-mobile-verifier` | `ui-mobile-verifier` | — (requires `ui-verify-ios`, installed as a generation prerequisite, not via `pairedSkills`) |
 
 Roster, slot values, and `pairedSkills` come from `blueprint.json` — one
 engineer specialist per CODE layer (always `generic-specialist`), plus
-policy-driven reviewers. Optional stack skills (`ui-component-pattern`,
+policy-driven reviewers (`code-reviewer` always, `qa-agent`/`security-reviewer`
+per `decisions.json`), plus evidence-driven UI verifiers: `ui-web-verifier`
+when a layer's stack evidences a web frontend, `ui-mobile-verifier` when it
+evidences React Native/Expo — same evidence-based inclusion as `pairedSkills`,
+no interview question. Optional stack skills (`ui-component-pattern`,
 `api-testing`, `db-migration`) attach via `pairedSkills`, at most once per
 blueprint.
 

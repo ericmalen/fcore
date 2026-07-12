@@ -32,13 +32,34 @@ Policy-driven additions from `decisions.json`:
 - `qaDepth` ≥ `unit-and-integration`: `qa-agent`
 - `securityRequirements` ≠ `none`: `security-reviewer`
 
+Evidence-driven additions — same stack-evidence signal as `pairedSkills`
+above, not gated by any `decisions.json` field (no interview question; a
+UI-bearing layer always gets a verifier, same as it always gets a paired
+skill):
+
+- any layer's stack evidence matches web signals (React / Vue / frontend
+  build tool) and NOT React Native/Expo evidence: `ui-web-verifier`
+- any layer's stack evidence matches `react-native` or `expo`:
+  `ui-mobile-verifier`
+- at most one of each per blueprint, regardless of how many layers match.
+
 Always: one `feature-orchestrator` (templateId `orchestrator`).
 
 Names are derived, not invented — the same inputs must yield the same
 roster: engineer specialists are `<layer-name>-engineer` (layer name from
 the profile, e.g. `frontend-engineer`, `shared-engineer`, `cli-engineer`);
-policy agents keep their templateId as name (`code-reviewer`, `qa-agent`,
-`security-reviewer`); the orchestrator is always `feature-orchestrator`.
+policy and evidence-driven agents keep their templateId as name
+(`code-reviewer`, `qa-agent`, `security-reviewer`, `ui-web-verifier`,
+`ui-mobile-verifier`); the orchestrator is always `feature-orchestrator`.
+
+**Skill prerequisite (not `pairedSkills`):** `ui-web-verifier`/
+`ui-mobile-verifier` depend on the `ui-verify-web`/`ui-verify-ios` optional
+skills (R-55) — static, unslotted, installed via `fcore skills add`, NOT the
+templated `pairedSkills`/skill-instantiator pipeline (those skill ids are not
+in this registry's `skills` map and have no `.template.md`). Don't populate
+`pairedSkills` for these two agents. `fcore-fleet-config` installs the
+matching skill as a generation prerequisite when the roster includes the
+agent, the same way it already does for the lifecycle skills.
 
 ## Slot values (from the profile, per agent)
 
@@ -60,7 +81,15 @@ Orchestrator: `tasks-path` (`tasks.md`), `handoff-log-path`
 | engineer specialists | sonnet | 30 (20 when db-migration paired) | Read, Grep, Glob, Edit, Write, Bash |
 | code-reviewer / security-reviewer | opus | 15 | Read, Grep, Glob |
 | qa-agent | sonnet | 20 | Read, Grep, Glob, Bash |
+| ui-web-verifier | sonnet | 25 | Read, Grep, Glob, Bash, mcp__playwright |
+| ui-mobile-verifier | sonnet | 25 | Read, Grep, Glob, Bash, mcp__ios-simulator |
 | feature-orchestrator | opus | 60 | Read, Grep, Glob, Edit, Write, Bash, Agent |
+
+Server-level MCP names in `tools[]` (`mcp__playwright`, `mcp__ios-simulator`)
+grant every tool that server exposes — verified live against a generated
+`ui-web-verifier`, no need to enumerate individual `mcp__playwright__browser_*`
+names. The MCP server itself still needs `claude mcp add --scope project ...`
+in the target and one-time interactive approval before its tools activate.
 
 `evalRequirements.minGoldens: 2` everywhere. `dispatch_rules` defaults:
 `{"subagent_max_scopes": 2, "agent_team_min_scopes": 3,

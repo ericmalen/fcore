@@ -1,6 +1,7 @@
 // skills.mjs — optional-skill management for the `fcore skills` command.
-// list / add / remove the opt-in lifecycle skills, copying from a fcore checkout
-// and tracking the selection in the project marker's `optionalSkills`.
+// list / add / remove the opt-in skills (lifecycle + UI-verification),
+// copying from a fcore checkout and tracking the selection in the project
+// marker's `optionalSkills`.
 //
 // CLI-only module: lives under bin/lib/, NOT scripts/lib/ (which ships wholesale
 // into projects via the installer allowlist). Reads the registry + marker

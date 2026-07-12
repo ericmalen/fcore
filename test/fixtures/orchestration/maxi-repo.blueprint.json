@@ -60,6 +60,24 @@
       "turnLimit": 15,
       "tools": ["Read", "Grep", "Glob"],
       "evalRequirements": { "minGoldens": 2 }
+    },
+    {
+      "name": "ui-web-verifier",
+      "templateId": "ui-web-verifier",
+      "slots": {},
+      "modelTier": "sonnet",
+      "turnLimit": 25,
+      "tools": ["Read", "Grep", "Glob", "Bash", "mcp__playwright"],
+      "evalRequirements": { "minGoldens": 2 }
+    },
+    {
+      "name": "ui-mobile-verifier",
+      "templateId": "ui-mobile-verifier",
+      "slots": {},
+      "modelTier": "sonnet",
+      "turnLimit": 25,
+      "tools": ["Read", "Grep", "Glob", "Bash", "mcp__ios-simulator"],
+      "evalRequirements": { "minGoldens": 2 }
     }
   ],
   "orchestrator": {
