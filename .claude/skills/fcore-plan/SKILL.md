@@ -1,6 +1,6 @@
 ---
 name: fcore-plan
-description: Phase 2 of fcore setup — author the routing manifest and literals from the extracted inventory, then get human approval. Use after fcore-inventory has run, in a fresh session.
+description: Phase 2 of fcore setup — author the routing manifest and literals from the extracted inventory, then get human approval. Use after fcore-inventory has run, in a fresh session. Authoring only — does not render the project tree (that's fcore-apply).
 ---
 
 # fcore-plan

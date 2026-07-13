@@ -1,6 +1,6 @@
 ---
 name: fcore-inventory
-description: Phase 1 of fcore setup — extract every AI-config surface and sweep the repo for buried AI instructions. Use when starting fcore setup of a repository (starter or existing project), before any planning.
+description: Phase 1 of fcore setup — extract every AI-config surface and sweep the repo for buried AI instructions. Use when starting fcore setup of a repository (starter or existing project), before any planning. Not the recurring drift/maintenance sweep on an already-set-up repo (that's fcore-check).
 ---
 
 # fcore-inventory

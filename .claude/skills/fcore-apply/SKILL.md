@@ -1,6 +1,6 @@
 ---
 name: fcore-apply
-description: Phase 3 of FleetCore setup — deterministically apply the approved manifest and converge the mechanical gates. Use after the setup plan is approved, in a fresh session.
+description: Phase 3 of FleetCore setup — deterministically apply the approved manifest and converge the mechanical gates. Use after the setup plan is approved, in a fresh session. Not the independent verification or final human gate (that's fcore-verify).
 ---
 
 # fcore-apply

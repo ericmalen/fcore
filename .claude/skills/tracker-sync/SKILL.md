@@ -37,10 +37,10 @@ Non-Basic ADO process template? Set `ado.stateMap` (`basic` | `agile`) in
 
 ## Run
 
-Locate an FleetCore root first (same resolution as fcore-check): a fcore checkout
-if you are in one; else the target's `.claude/fcore-onboard/` while setup
-tooling is present; else shallow-clone the FleetCore repo (URL in
-`.claude/fcore.json` → `toolRepo`). Then **always dry-run first**:
+Locate an FleetCore root using the same resolution [fcore-check](../fcore-check/SKILL.md#run-the-audit)
+uses (fcore checkout in progress → target's `.claude/fcore-onboard/` while
+setup tooling is present → shallow-clone at `toolRepo`/`pin` from
+`.claude/fcore.json`). Then **always dry-run first**:
 
 ```
 node <fcore>/scripts/tracker-sync.mjs --target /path/to/project

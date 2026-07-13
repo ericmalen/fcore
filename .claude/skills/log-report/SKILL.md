@@ -31,11 +31,10 @@ separately, never folded into per-agent stats.
 
 ## Run
 
-Locate an FleetCore root first (same resolution as fcore-check): a fcore checkout if you
-are in one; else the target's `.claude/fcore-onboard/` while the setup
-tooling is still present (it carries `scripts/lib/` verbatim); else
-shallow-clone the FleetCore repo (URL in `.claude/fcore.json` → `toolRepo`). From
-that root, with the target's log path as the argument:
+Locate an FleetCore root using the same resolution [fcore-check](../fcore-check/SKILL.md#run-the-audit)
+uses (fcore checkout in progress → target's `.claude/fcore-onboard/` while
+setup tooling is present → shallow-clone at `toolRepo`/`pin` from
+`.claude/fcore.json`). From that root, with the target's log path as the argument:
 
 ```
 node --input-type=module -e '

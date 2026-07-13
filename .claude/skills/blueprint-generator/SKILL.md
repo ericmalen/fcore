@@ -1,6 +1,6 @@
 ---
 name: blueprint-generator
-description: Orchestration discovery step B7 — the rulebook for synthesizing docs/orchestration/blueprint.json from a repo profile plus decisions doc, mapping layers to generic-specialist with optional paired skills, policies to reviewer/QA specialists, and defaults for tiers, turn limits, and tools. Use when synthesizing an orchestration blueprint (typically driven by the plan-synthesizer agent). Not for instantiating templates.
+description: Orchestration discovery step B8 rulebook — the deterministic mapping rules the plan-synthesizer agent (B8) follows to build docs/orchestration/blueprint.json from a repo profile plus decisions doc: layers to generic-specialist with optional paired skills, policies to reviewer/QA specialists, and defaults for tiers, turn limits, and tools. Use when synthesizing an orchestration blueprint (typically driven by the plan-synthesizer agent). Not for instantiating templates, and not the completeness gate on the candidate blueprint (that's handoff-validator, B7).
 ---
 
 # blueprint-generator

@@ -1,6 +1,6 @@
 ---
 name: fcore-verify
-description: Phase 4 of fcore setup — independent verification and final human gate. Use after materialization converged, in a fresh session.
+description: Phase 4 of fcore setup — independent verification and final human gate. Use after materialization converged, in a fresh session. Never verify inline in the authoring session, and never the recurring post-setup audit (that's fcore-check).
 ---
 
 # fcore-verify
@@ -35,10 +35,14 @@ finding); `.setup/report.md` is current.
    `.claude/skills/fcore-apply/`, `.claude/skills/fcore-verify/`, and
    `.claude/agents/setup-verifier.md` (the authoritative list is
    `SETUP_WINDOW_COPIES` in `.claude/fcore-onboard/scripts/lib/baseline.mjs`).
-   KEEP the permanent baseline — the `fcore-check`, `docs-manager`,
-   `git-conventions`, `skill-creator`, `agent-creator`, and `tracker-sync`
-   skills; the orchestration lifecycle skills `checklist-intake`, `log-report`, and
-   `eval-runner`; the `docs-auditor` agent; and the FleetCore marker.
+   KEEP everything else: the permanent baseline (`BASELINE_COPIES` in the same
+   file — `fcore-check`, `docs-manager`, `git-conventions`, `skill-creator`,
+   `agent-creator`, `docs-auditor`) plus whichever optional skills the marker's
+   `optionalSkills` selected (`OPTIONAL_SKILLS` in the same file — up to
+   `checklist-intake`, `log-report`, `eval-runner`, `tracker-sync`,
+   `ui-verify-web`, `ui-verify-ios`); and the FleetCore marker. Don't hand-list
+   names here — the arrays in `baseline.mjs` are the source of truth and this
+   skill has drifted from them before.
 6. **USER GATE 2:** present `.setup/report.md` content (from the last
    pre-removal commit), the verifier matrices, and review instructions:
    `git diff main...fcore-onboard --color-moved=zebra --find-copies-harder`
