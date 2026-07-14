@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "skills": {
+    "react-patterns": {
+      "stackEvidence": ["react"],
+      "notEvidence": ["react native", "expo"],
+      "origin": "ECC",
+      "upstream": "https://github.com/affaan-m/ECC",
+      "upstreamRef": "40927950c49f6e742d341e20ff7b9b7e1e7bfff5",
+      "license": "MIT",
+      "notes": "Rewritten and condensed from the upstream frontend/react-patterns skill: cut to fit the R-20 200-line cap, removed dead cross-links to sibling skills/agents/commands (react-testing, react-performance, react-reviewer, /react-review) that don't exist in a generated FleetCore fleet, trimmed most inline code examples to prose rules."
+    }
+  }
+}

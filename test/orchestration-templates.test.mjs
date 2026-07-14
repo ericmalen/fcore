@@ -9,7 +9,7 @@ import { instantiateTemplate } from '../scripts/lib/orchestration/instantiate.mj
 import { renderDispatchOrder } from '../scripts/lib/orchestration/dispatch-order.mjs';
 import { validateGenerationManifest, validateTaskBacklog } from '../scripts/lib/orchestration/schemas.mjs';
 import { parseTasksMd } from '../scripts/lib/orchestration/parse-tasks.mjs';
-import { planGeneration, manifestFor } from '../scripts/lib/orchestration/scaffold.mjs';
+import { planGeneration, manifestFor, skillSlots } from '../scripts/lib/orchestration/scaffold.mjs';
 
 const FIXTURES = join(import.meta.dirname, 'fixtures', 'orchestration');
 const TEMPLATES = join(import.meta.dirname, '..', 'templates', 'orchestration', 'agents');
@@ -54,7 +54,8 @@ for (const fixture of BLUEPRINTS) {
 }
 
 // C2: each skill template instantiates clean from its paired specialist's
-// blueprint slots alone (no quartet — skills carry no agent identity).
+// blueprint slots alone (no quartet — skills carry no agent identity;
+// agent-only slots like layer-context filtered out via skillSlots).
 const SKILL_TEMPLATES = join(import.meta.dirname, '..', 'templates', 'orchestration', 'skills');
 const registry = JSON.parse(
   readFileSync(join(import.meta.dirname, '..', 'templates', 'orchestration', 'template-registry.json'), 'utf8'),
@@ -69,7 +70,7 @@ for (const [skillId] of Object.entries(registry.skills)) {
     // C2 invariant stated directly, not via the fixture: exactly these 5 slots
     const markers = new Set([...tpl.matchAll(/<!--\s*fcore:slot:([a-z0-9-]+)\s*-->/g)].map((m) => m[1]));
     assert.deepEqual([...markers].sort(), ['conventions', 'layer-path', 'manifest-path', 'stack', 'test-cmd']);
-    const { content, errors } = instantiateTemplate(tpl, specialist.slots);
+    const { content, errors } = instantiateTemplate(tpl, skillSlots(specialist.slots));
     assert.deepEqual(errors, []);
     assert.ok(!content.includes('fcore:slot'));
     assert.match(content, new RegExp(`^name: ${skillId}$`, 'm'));

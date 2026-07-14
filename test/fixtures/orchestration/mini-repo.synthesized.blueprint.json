@@ -6,7 +6,8 @@
       "templateId": "generic-specialist",
       "pairedSkills": [],
       "slots": {
-        "layer-path": ".",
+        "layer-path": "the repository root",
+        "layer-context": "- Build: none detected\n- Manifest: `package.json`\n- Consumes (dispatch order is provider-first): none\n- Consumed by: none\n\nKnown repo gaps:\n- no CI system\n- lint config present but no lint script",
         "stack": "Node.js CLI (zero-dependency)",
         "manifest-path": "package.json",
         "test-cmd": "node --test",
@@ -14,8 +15,17 @@
       },
       "modelTier": "sonnet",
       "turnLimit": 30,
-      "tools": ["Read", "Grep", "Glob", "Edit", "Write", "Bash"],
-      "evalRequirements": { "minGoldens": 2 }
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Edit",
+        "Write",
+        "Bash"
+      ],
+      "evalRequirements": {
+        "minGoldens": 2
+      }
     },
     {
       "name": "code-reviewer",
@@ -26,8 +36,14 @@
       },
       "modelTier": "opus",
       "turnLimit": 15,
-      "tools": ["Read", "Grep", "Glob"],
-      "evalRequirements": { "minGoldens": 2 }
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ],
+      "evalRequirements": {
+        "minGoldens": 2
+      }
     }
   ],
   "orchestrator": {
@@ -40,14 +56,27 @@
     },
     "modelTier": "opus",
     "turnLimit": 60,
-    "tools": ["Read", "Grep", "Glob", "Edit", "Write", "Bash", "Agent"],
-    "evalRequirements": { "minGoldens": 2 }
+    "tools": [
+      "Read",
+      "Grep",
+      "Glob",
+      "Edit",
+      "Write",
+      "Bash",
+      "Agent"
+    ],
+    "evalRequirements": {
+      "minGoldens": 2
+    }
   },
   "dispatch_rules": {
     "subagent_max_scopes": 2,
     "agent_team_min_scopes": 3,
     "agent_team_on_cross_repo": true,
-    "pipeline_when": ["scheduled", "multi_day"],
+    "pipeline_when": [
+      "scheduled",
+      "multi_day"
+    ],
     "routing_policy": "manual",
     "dispatch_order": []
   },

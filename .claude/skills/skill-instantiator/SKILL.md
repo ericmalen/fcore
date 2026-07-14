@@ -23,10 +23,12 @@ its pin would produce a file no manifest version describes (C5).
 
 ## Procedure
 
-1. Slot map = `entry.slots` ONLY — no injected quartet. Skill templates use
-   exactly the `layer-path`, `stack`, `test-cmd`, `manifest-path`, and
-   `conventions` slots; strict substitution rejects anything missing or
-   extra.
+1. Slot map = `skillSlots(entry.slots)` — no injected quartet, and
+   agent-only slots (`layer-context`) filtered out by `skillSlots` from
+   [scaffold.mjs](../../../scripts/lib/orchestration/scaffold.mjs), the same
+   filter planGeneration uses. Skill templates use exactly the `layer-path`,
+   `stack`, `test-cmd`, `manifest-path`, and `conventions` slots; strict
+   substitution rejects anything missing or extra.
 2. Instantiate every paired skill; validate all before writing any. From the
    fcore checkout root:
 
@@ -35,6 +37,7 @@ its pin would produce a file no manifest version describes (C5).
    import { readFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
    import { createHash } from "node:crypto";
    import { instantiateTemplate } from "./scripts/lib/orchestration/instantiate.mjs";
+   import { skillSlots } from "./scripts/lib/orchestration/scaffold.mjs";
    const [bpPath, agentName, target] = process.argv.slice(1);
    const bp = JSON.parse(readFileSync(bpPath, "utf8"));
    const entry = bp.specialists.find((a) => a.name === agentName);
@@ -54,7 +57,7 @@ its pin would produce a file no manifest version describes (C5).
      if (pin && createHash("sha256").update(source, "utf8").digest("hex") !== pin) {
        fails.push(`skill template ${skillId}: source drifted from registry pin — bump version and update sha256`); continue;
      }
-     const { content, errors } = instantiateTemplate(source, entry.slots);
+     const { content, errors } = instantiateTemplate(source, skillSlots(entry.slots));
      if (errors.length) fails.push(`${skillId}:\n  ` + errors.join("\n  "));
      else outputs.push([skillId, content]);
    }

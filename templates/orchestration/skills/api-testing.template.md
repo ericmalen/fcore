@@ -4,12 +4,12 @@ description: Procedure for testing API endpoint changes in the <!-- fcore:slot:s
 ---
 
 How the layer specialist tests endpoint changes in
-`<!-- fcore:slot:layer-path -->` (<!-- fcore:slot:stack -->).
+<!-- fcore:slot:layer-path --> (<!-- fcore:slot:stack -->).
 
 ## Procedure
 
 1. Locate the existing test patterns. Find tests under
-   `<!-- fcore:slot:layer-path -->` that exercise endpoints similar to the
+   <!-- fcore:slot:layer-path --> that exercise endpoints similar to the
    one you changed — same router, same handler style. Read at least one
    end-to-end before writing anything: its setup, fixtures, assertion style,
    and file placement are your pattern. The layer manifest

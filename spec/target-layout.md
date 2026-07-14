@@ -131,18 +131,20 @@ Done only until `tracker-sync` pushes its status and prunes it. The permanent
 record of every completion is the handoff log, not `tasks.md`.
 
 Generated agents and skills land in the standard `.claude/` homes and obey the
-same rules as authored ones. The optional skill tier (R-55) has two families,
-neither in the plain-setup baseline: lifecycle skills (`checklist-intake`,
-`log-report`, `eval-runner`, `tracker-sync`) operate on these orchestration
-surfaces and are dormant until orchestration is generated; UI-verification
-skills (`ui-verify-web`, `ui-verify-ios`) drive a browser or the iOS Simulator
+same rules as authored ones. The optional skill tier (R-55) is not in the
+plain-setup baseline: lifecycle skills (`checklist-intake`, `log-report`,
+`eval-runner`, `tracker-sync`) operate on these orchestration surfaces and
+are dormant until orchestration is generated; UI-verification skills
+(`ui-verify-web`, `ui-verify-ios`) drive a browser or the iOS Simulator
 via an MCP server and are useful immediately, with no orchestration
-prerequisite. Both families are opt-in the same way — selected at setup,
-added via `fcore skills add`, or installed by `fcore-fleet-config` as a
-generation prerequisite: the lifecycle skills unconditionally, the
+prerequisite; stack skills (vendored under `templates/stack-skills/`) are
+framework-specific practice skills. All are opt-in the same way — selected
+at setup, added via `fcore skills add`, or installed by `fcore-fleet-config`
+as a generation prerequisite: the lifecycle skills unconditionally, the
 UI-verification skills conditionally when the generated roster includes the
 matching evidence-driven verifier (`ui-web-verifier` → `ui-verify-web`,
-`ui-mobile-verifier` → `ui-verify-ios`). The discovery/generation meta-assets
+`ui-mobile-verifier` → `ui-verify-ios`), stack skills per profile stack
+match (`matchStackSkills`). The discovery/generation meta-assets
 stay FleetCore-side and are never part of the target layout.
 
 Tracker bridge surfaces (optional, DD-14): tasks linked to a work tracker

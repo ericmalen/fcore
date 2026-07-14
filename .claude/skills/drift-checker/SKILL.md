@@ -31,9 +31,10 @@ Slot maps for re-instantiation, paired via
   `turn-limit` quartet, plus the orchestrator's rendered `dispatch-order`. This
   is the SAME function the scaffolder uses, so re-instantiation here cannot
   drift from what generation wrote — never re-derive the slot map by hand.
-- **skills** (`.claude/skills/<id>/SKILL.md`) — the OWNING specialist's
-  `slots` only, no quartet; the owner is the specialist whose `pairedSkills`
-  lists that skill id in the blueprint.
+- **skills** (`.claude/skills/<id>/SKILL.md`) — `skillSlots(owner.slots)`,
+  imported from scaffold.mjs (drops agent-only slots like `layer-context`),
+  no quartet; the owner is the specialist whose `pairedSkills` lists that
+  skill id in the blueprint.
 - **docs** — verbatim copies; hash the FleetCore doc file directly.
 
 From the fcore checkout root, target path as the argument:
@@ -44,7 +45,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { basename } from "node:path";
 import { instantiateTemplate } from "./scripts/lib/orchestration/instantiate.mjs";
-import { agentSlots } from "./scripts/lib/orchestration/scaffold.mjs";
+import { agentSlots, skillSlots } from "./scripts/lib/orchestration/scaffold.mjs";
 const t = process.argv[1];
 const manifest = JSON.parse(readFileSync(`${t}/docs/orchestration/generation-manifest.json`, "utf8"));
 const bp = JSON.parse(readFileSync(`${t}/docs/orchestration/blueprint.json`, "utf8"));
@@ -61,7 +62,7 @@ for (const en of manifest.generated) {
   } else if (en.path.startsWith(".claude/skills/")) {
     const owner = bp.specialists.find((x) => (x.pairedSkills ?? []).includes(en.templateId));
     if (!owner) { console.log(`ERROR ${en.path}: no owning specialist`); continue; }
-    fresh = sha(instantiateTemplate(readFileSync(`templates/orchestration/skills/${en.templateId}.template.md`, "utf8"), owner.slots).content ?? "");
+    fresh = sha(instantiateTemplate(readFileSync(`templates/orchestration/skills/${en.templateId}.template.md`, "utf8"), skillSlots(owner.slots)).content ?? "");
   } else {
     fresh = sha(readFileSync(`templates/orchestration/docs/${en.templateId}.md`, "utf8"));
   }

@@ -4,12 +4,12 @@ description: Procedure for changing database schema safely in the <!-- fcore:slo
 ---
 
 How the layer specialist changes schema in
-`<!-- fcore:slot:layer-path -->` (<!-- fcore:slot:stack -->).
+<!-- fcore:slot:layer-path --> (<!-- fcore:slot:stack -->).
 
 ## Procedure
 
 1. Locate the migration directory and tooling under
-   `<!-- fcore:slot:layer-path -->`. Read the most recent migration
+   <!-- fcore:slot:layer-path -->. Read the most recent migration
    end-to-end: its naming scheme, up/down structure, and how it is
    registered. That is your pattern. The layer manifest
    (`<!-- fcore:slot:manifest-path -->`) names the migration tooling

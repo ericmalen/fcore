@@ -88,6 +88,22 @@ test('validateRepoProfile: commands must be string or null, never omitted or mis
   ]);
 });
 
+test('validateRepoProfile: conventions values must be single-line', () => {
+  const profile = loadFixture('mini-repo.profile.json');
+  profile.conventions.naming = 'camelCase for variables\nThis is a shift from the last profile.';
+  assert.deepEqual(validateRepoProfile(profile), [
+    'conventions.naming must be a single line (state the convention, not its history — history belongs in gaps[]/analyst report)',
+  ]);
+});
+
+test('validateRepoProfile: conventions values must be <= 240 chars', () => {
+  const profile = loadFixture('mini-repo.profile.json');
+  profile.conventions.branching = 'x'.repeat(241);
+  assert.deepEqual(validateRepoProfile(profile), [
+    'conventions.branching must be <= 240 chars (got 241; state the convention, not its history — history belongs in gaps[]/analyst report)',
+  ]);
+});
+
 test('validateRepoProfile: missing top-level fields all report', () => {
   assert.deepEqual(validateRepoProfile({}), [
     'schemaVersion must be 1 (got undefined)',

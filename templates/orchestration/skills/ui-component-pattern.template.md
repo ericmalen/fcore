@@ -4,12 +4,12 @@ description: Procedure for adding or modifying a component in the <!-- fcore:slo
 ---
 
 How the layer specialist adds or modifies components in
-`<!-- fcore:slot:layer-path -->` (<!-- fcore:slot:stack -->).
+<!-- fcore:slot:layer-path --> (<!-- fcore:slot:stack -->).
 
 ## Procedure
 
 1. Find an existing component as the pattern. Pick one under
-   `<!-- fcore:slot:layer-path -->` that is closest in kind to what you are
+   <!-- fcore:slot:layer-path --> that is closest in kind to what you are
    building — same level (page, container, leaf), similar props surface.
    Read it fully: file layout, prop typing, styling approach, test
    placement. That component is your template; do not invent a new style.

@@ -41,6 +41,18 @@ export function agentSlots(agent, blueprint) {
   return slots;
 }
 
+// Slots only agent templates carry: paired-skill templates receive the same
+// specialist slot map minus these. Exported as the single source of the
+// filter — planGeneration, the drift-checker, and the skill-instantiator all
+// import it rather than hand-copying which keys are agent-only.
+export const AGENT_ONLY_SLOTS = new Set(['layer-context']);
+
+export function skillSlots(slots) {
+  return Object.fromEntries(
+    Object.entries(slots).filter(([key]) => !AGENT_ONLY_SLOTS.has(key)),
+  );
+}
+
 // readTemplate(kind, id) -> template/doc source text, or null when FleetCore
 // has no such file ('agent' | 'skill' | 'doc').
 // Returns { files: [{ path, templateId, templateVersion, content }], errors }.
@@ -109,7 +121,7 @@ export function planGeneration(blueprint, registry, readTemplate) {
         continue;
       }
       if (!checkPin(meta, source, `skill template ${skillId}`)) continue;
-      const { content, errors: instErrors } = instantiateTemplate(source, specialist.slots);
+      const { content, errors: instErrors } = instantiateTemplate(source, skillSlots(specialist.slots));
       if (instErrors.length) {
         instErrors.forEach((m) => e(`skill ${skillId} (for ${specialist.name}): ${m}`));
         continue;
@@ -264,6 +276,55 @@ export function ensureGitignoreCovers(text, dirPath) {
   if (covered) return src;
   const base = src.replace(/\n*$/, '');
   return (base ? `${base}\n` : '') + `${dirPath}/\n`;
+}
+
+// ── inline layer context ────────────────────────────────────────────────────
+//
+// Value for the generic-specialist `layer-context` slot: the layer-specific
+// knowledge discovery captures (commands, dependency edges, repo gaps) that
+// otherwise never reaches generated agents beyond an opaque stack label.
+// Substituted INTO the agent file, so the manifest sha and existing drift
+// machinery cover it for free — no separate file class, no extra rule.
+// Pure function of (profile, layerName): the same profile always yields the
+// same block, so re-computation from a freshly parsed profile (blueprint
+// synthesis, drift-checker, re-scaffold) is byte-identical. Stack and test
+// command are NOT repeated here — they have their own slots.
+
+const LAYER_CONTEXT_LINE_CAP = 15;
+
+export function layerContextSlot(profile, layerName) {
+  const layer = profile.layers.find((l) => l.name === layerName);
+  if (!layer) throw new Error(`layerContextSlot: no layer named "${layerName}" in profile`);
+
+  const fmt = (v) => (v ? `\`${v}\`` : 'none detected');
+  const consumes = profile.internalEdges
+    .filter((e) => e.from === layerName).map((e) => e.to).sort();
+  const consumedBy = profile.internalEdges
+    .filter((e) => e.to === layerName).map((e) => e.from).sort();
+
+  const head = [
+    `- Build: ${fmt(layer.buildCmd)}`,
+    `- Manifest: ${fmt(layer.manifestPath)}`,
+    `- Consumes (dispatch order is provider-first): ${consumes.length ? consumes.join(', ') : 'none'}`,
+    `- Consumed by: ${consumedBy.length ? consumedBy.join(', ') : 'none'}`,
+  ];
+
+  // Gaps get whatever budget remains under the cap; a repo with more gaps
+  // than fit is summarized rather than allowed to bloat the agent file.
+  const gapsBlock = [];
+  if (profile.gaps.length > 0) {
+    const allowedGapLines = LAYER_CONTEXT_LINE_CAP - head.length - 1; // reserve the header line
+    const fitsAll = profile.gaps.length <= allowedGapLines;
+    const shown = fitsAll ? profile.gaps : profile.gaps.slice(0, Math.max(0, allowedGapLines - 1));
+    const omitted = profile.gaps.length - shown.length;
+    gapsBlock.push('', 'Known repo gaps:');
+    for (const g of shown) gapsBlock.push(`- ${g}`);
+    if (omitted > 0) {
+      gapsBlock.push(`- (+${omitted} more — see \`docs/orchestration/repo-profile.json\` gaps[])`);
+    }
+  }
+
+  return [...head, ...gapsBlock].join('\n');
 }
 
 // Manifest for a plan — same entry order as files; validates against

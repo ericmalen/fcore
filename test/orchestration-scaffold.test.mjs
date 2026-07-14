@@ -9,6 +9,7 @@ import {
   renderOrchestrationRouting, upsertManagedRegion,
   ROUTING_REGION_START, ROUTING_REGION_END,
   ensureGitignoreCovers, RUNS_DIR,
+  layerContextSlot, skillSlots, AGENT_ONLY_SLOTS,
 } from '../scripts/lib/orchestration/scaffold.mjs';
 import { validateGenerationManifest } from '../scripts/lib/orchestration/schemas.mjs';
 
@@ -291,4 +292,75 @@ test('findOrphans: unchanged plan orphans nothing', () => {
   const { files } = planGeneration(bp, registry, readTemplate);
   const prior = manifestFor(files);
   assert.deepEqual(findOrphans(prior, files), []);
+});
+
+// ── inline layer context ─────────────────────────────────────────────────────
+
+test('layerContextSlot: multi-layer profile with edges renders commands, deps, gaps', () => {
+  const profile = loadFixture('maxi-repo.profile.json');
+  const block = layerContextSlot(profile, 'api');
+  assert.equal(block, [
+    '- Build: `npm run build --workspace api`',
+    '- Manifest: `apps/api/package.json`',
+    '- Consumes (dispatch order is provider-first): shared',
+    '- Consumed by: none',
+    '',
+    'Known repo gaps:',
+    '- no documented TDD policy',
+    '- no security review gate in CI',
+  ].join('\n'));
+});
+
+test('layerContextSlot: consumed-by is populated for a provider layer', () => {
+  const profile = loadFixture('maxi-repo.profile.json');
+  const block = layerContextSlot(profile, 'shared');
+  assert.match(block, /- Consumes \(dispatch order is provider-first\): none/);
+  assert.match(block, /- Consumed by: api, ui/);
+});
+
+test('layerContextSlot: root layer with null buildCmd reports none detected', () => {
+  const profile = loadFixture('mini-repo.profile.json');
+  const block = layerContextSlot(profile, 'cli');
+  assert.match(block, /- Build: none detected/);
+  assert.match(block, /- Manifest: `package\.json`/);
+  assert.match(block, /- Consumes \(dispatch order is provider-first\): none/);
+  assert.match(block, /- Consumed by: none/);
+});
+
+test('layerContextSlot: unknown layer name throws', () => {
+  const profile = loadFixture('mini-repo.profile.json');
+  assert.throws(() => layerContextSlot(profile, 'nope'), /no layer named "nope"/);
+});
+
+test('layerContextSlot: deterministic — repeat calls are byte-identical', () => {
+  const profile = loadFixture('maxi-repo.profile.json');
+  assert.equal(layerContextSlot(profile, 'api'), layerContextSlot(profile, 'api'));
+});
+
+test('layerContextSlot: many gaps are capped with an overflow note', () => {
+  const profile = loadFixture('mini-repo.profile.json');
+  profile.gaps = Array.from({ length: 80 }, (_, i) => `gap number ${i}`);
+  const block = layerContextSlot(profile, 'cli');
+  const nonBlank = block.split('\n').filter((l) => l.trim() !== '').length;
+  assert.ok(nonBlank <= 15, `expected <= 15 non-blank lines, got ${nonBlank}`);
+  assert.match(block, /more — see `docs\/orchestration\/repo-profile\.json` gaps\[\]\)/);
+});
+
+test('skillSlots: drops agent-only slots and passes everything else through', () => {
+  const slots = {
+    'layer-path': 'apps/api',
+    stack: 'Express',
+    'test-cmd': 'npm test',
+    'manifest-path': 'apps/api/package.json',
+    conventions: 'kebab-case',
+    'layer-context': '- Build: `npm run build`',
+  };
+  assert.deepEqual(skillSlots(slots), {
+    'layer-path': 'apps/api',
+    stack: 'Express',
+    'test-cmd': 'npm test',
+    'manifest-path': 'apps/api/package.json',
+    conventions: 'kebab-case',
+  });
+  assert.ok(AGENT_ONLY_SLOTS.has('layer-context'));
 });

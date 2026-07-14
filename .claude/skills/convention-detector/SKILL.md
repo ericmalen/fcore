@@ -37,3 +37,14 @@ plus a `gaps[]` entry.
 Report `conventions.*` and `ci` values with one line of evidence each, plus
 the `gaps[]` entries. Outputs MUST differ between repos whose conventions
 differ — never normalize a target onto FleetCore conventions.
+
+Each `conventions.*` value is one sentence stating the convention itself,
+plus at most one short parenthetical of evidence (e.g. `"kebab-case files,
+PascalCase components (see src/components/*.tsx)"`). It is fed verbatim into
+agent-facing slots downstream, so it must never carry: comparisons to a
+prior profile run, commit hashes, or other meta-commentary about the
+detection process itself. Overflow evidence and history belong in the
+analyst report; absence of a convention belongs in `gaps[]`, not in a long
+`conventions.*` string. `validateRepoProfile` enforces a single-line,
+240-char cap on these fields — write to fit it, don't rely on it to catch
+verbose output.

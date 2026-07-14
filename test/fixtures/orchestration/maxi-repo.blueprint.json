@@ -4,9 +4,12 @@
     {
       "name": "ui-engineer",
       "templateId": "generic-specialist",
-      "pairedSkills": ["ui-component-pattern"],
+      "pairedSkills": [
+        "ui-component-pattern"
+      ],
       "slots": {
-        "layer-path": "apps/ui",
+        "layer-path": "`apps/ui`",
+        "layer-context": "- Build: `npm run build --workspace ui`\n- Manifest: `apps/ui/package.json`\n- Consumes (dispatch order is provider-first): shared\n- Consumed by: none\n\nKnown repo gaps:\n- no documented TDD policy\n- no security review gate in CI",
         "stack": "React + TypeScript + Vite",
         "manifest-path": "apps/ui/package.json",
         "test-cmd": "npm test --workspace ui",
@@ -14,15 +17,27 @@
       },
       "modelTier": "sonnet",
       "turnLimit": 30,
-      "tools": ["Read", "Grep", "Glob", "Edit", "Write", "Bash"],
-      "evalRequirements": { "minGoldens": 2 }
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Edit",
+        "Write",
+        "Bash"
+      ],
+      "evalRequirements": {
+        "minGoldens": 2
+      }
     },
     {
       "name": "api-engineer",
       "templateId": "generic-specialist",
-      "pairedSkills": ["api-testing"],
+      "pairedSkills": [
+        "api-testing"
+      ],
       "slots": {
-        "layer-path": "apps/api",
+        "layer-path": "`apps/api`",
+        "layer-context": "- Build: `npm run build --workspace api`\n- Manifest: `apps/api/package.json`\n- Consumes (dispatch order is provider-first): shared\n- Consumed by: none\n\nKnown repo gaps:\n- no documented TDD policy\n- no security review gate in CI",
         "stack": "Express + TypeScript",
         "manifest-path": "apps/api/package.json",
         "test-cmd": "npm test --workspace api",
@@ -30,15 +45,27 @@
       },
       "modelTier": "sonnet",
       "turnLimit": 30,
-      "tools": ["Read", "Grep", "Glob", "Edit", "Write", "Bash"],
-      "evalRequirements": { "minGoldens": 2 }
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Edit",
+        "Write",
+        "Bash"
+      ],
+      "evalRequirements": {
+        "minGoldens": 2
+      }
     },
     {
       "name": "db-engineer",
       "templateId": "generic-specialist",
-      "pairedSkills": ["db-migration"],
+      "pairedSkills": [
+        "db-migration"
+      ],
       "slots": {
-        "layer-path": "packages/db",
+        "layer-path": "`packages/db`",
+        "layer-context": "- Build: none detected\n- Manifest: `packages/db/package.json`\n- Consumes (dispatch order is provider-first): none\n- Consumed by: none\n\nKnown repo gaps:\n- no documented TDD policy\n- no security review gate in CI",
         "stack": "Prisma + PostgreSQL",
         "manifest-path": "packages/db/package.json",
         "test-cmd": "npm test --workspace db",
@@ -46,8 +73,17 @@
       },
       "modelTier": "sonnet",
       "turnLimit": 20,
-      "tools": ["Read", "Grep", "Glob", "Edit", "Write", "Bash"],
-      "evalRequirements": { "minGoldens": 2 }
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Edit",
+        "Write",
+        "Bash"
+      ],
+      "evalRequirements": {
+        "minGoldens": 2
+      }
     },
     {
       "name": "code-reviewer",
@@ -58,8 +94,14 @@
       },
       "modelTier": "opus",
       "turnLimit": 15,
-      "tools": ["Read", "Grep", "Glob"],
-      "evalRequirements": { "minGoldens": 2 }
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ],
+      "evalRequirements": {
+        "minGoldens": 2
+      }
     },
     {
       "name": "ui-web-verifier",
@@ -67,8 +109,16 @@
       "slots": {},
       "modelTier": "sonnet",
       "turnLimit": 25,
-      "tools": ["Read", "Grep", "Glob", "Bash", "mcp__playwright"],
-      "evalRequirements": { "minGoldens": 2 }
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "mcp__playwright"
+      ],
+      "evalRequirements": {
+        "minGoldens": 2
+      }
     },
     {
       "name": "ui-mobile-verifier",
@@ -76,8 +126,16 @@
       "slots": {},
       "modelTier": "sonnet",
       "turnLimit": 25,
-      "tools": ["Read", "Grep", "Glob", "Bash", "mcp__ios-simulator"],
-      "evalRequirements": { "minGoldens": 2 }
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "mcp__ios-simulator"
+      ],
+      "evalRequirements": {
+        "minGoldens": 2
+      }
     }
   ],
   "orchestrator": {
@@ -90,16 +148,34 @@
     },
     "modelTier": "opus",
     "turnLimit": 60,
-    "tools": ["Read", "Grep", "Glob", "Edit", "Write", "Bash", "Agent"],
-    "evalRequirements": { "minGoldens": 2 }
+    "tools": [
+      "Read",
+      "Grep",
+      "Glob",
+      "Edit",
+      "Write",
+      "Bash",
+      "Agent"
+    ],
+    "evalRequirements": {
+      "minGoldens": 2
+    }
   },
   "dispatch_rules": {
     "subagent_max_scopes": 2,
     "agent_team_min_scopes": 3,
     "agent_team_on_cross_repo": true,
-    "pipeline_when": ["scheduled", "multi_day"],
+    "pipeline_when": [
+      "scheduled",
+      "multi_day"
+    ],
     "routing_policy": "threshold",
-    "dispatch_order": ["shared", "ui", "api", "db"]
+    "dispatch_order": [
+      "shared",
+      "ui",
+      "api",
+      "db"
+    ]
   },
   "docs": [
     "docs/orchestration/dispatch-rules.md",

@@ -36,7 +36,11 @@ All inspection happens in the project path named by the caller.
      no framework dependencies still needs a non-empty stack: describe the
      runtime role from manifest signals (`bin`, `type`, `engines`), e.g.
      "Node.js CLI (zero-dependency)". Refine with dependency-mapper output
-     when available.
+     when available. Keep it a single-line, `+`-joined technology list —
+     not narrative prose; usage patterns, gotchas, and rationale belong in
+     the analyst report or a `gaps[]` entry, not in this field. It is fed
+     verbatim into agent-facing slots downstream, so bloat there becomes
+     bloat in every generated agent.
    - `manifestPath`: root-relative path of the file that evidences the
      layer's stack — its dependency manifest (`package.json`,
      `pyproject.toml`, `requirements.txt`, `go.mod`, `Cargo.toml`,

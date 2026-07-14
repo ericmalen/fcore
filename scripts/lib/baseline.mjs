@@ -2,18 +2,24 @@
 // and sync-baseline). Setup-window tooling is install-only, never synced.
 
 /**
- * Optional skill tier — opt-in, NOT installed by default. Two families:
- * orchestration-lifecycle skills (dormant until orchestration is generated)
- * and UI-verification skills (useful immediately, no orchestration
- * prerequisite). Selected at setup time (fcore-plan/fcore-apply),
- * post-install via `fcore skills add`, or (lifecycle family only)
- * auto-installed by fcore-fleet-config. Tracked per project in the marker's
- * `optionalSkills`; sync-baseline upgrades only the ones a project selected.
- * Lifecycle sources stay dual-role in `.claude/skills/` (still dogfooded
- * here); UI-verification sources live in `templates/optional-skills/` since
- * FleetCore itself has no web or mobile UI (see AGENTS.md "Do Not"). Either
- * way they ride into the setup window via SETUP_WINDOW_COPIES so
- * fcore-apply can copy selected ones, but never enter BASELINE_COPIES.
+ * Optional skill tier — opt-in, NOT installed by default. One tier, three
+ * install triggers: orchestration-lifecycle skills (dormant until
+ * orchestration is generated; fcore-fleet-config installs unconditionally),
+ * UI-verification skills (useful immediately, no orchestration
+ * prerequisite; fcore-fleet-config installs when the generated roster
+ * includes the matching verifier agent), and stack skills
+ * (framework-specific practice skills; fcore-fleet-config installs per
+ * profile-layer `stack` match, see
+ * scripts/lib/orchestration/stack-skills.mjs). All also selectable at setup
+ * time (fcore-plan/fcore-apply) or post-install via `fcore skills add`.
+ * Tracked per project in the marker's `optionalSkills`; sync-baseline
+ * upgrades only the ones a project selected. Lifecycle sources stay
+ * dual-role in `.claude/skills/` (still dogfooded here); UI-verification
+ * and stack-skill sources live in `templates/optional-skills/` and
+ * `templates/stack-skills/` respectively, since FleetCore itself has no
+ * target stack for them to serve (see AGENTS.md "Do Not"). Either way they
+ * ride into the setup window via SETUP_WINDOW_COPIES so fcore-apply can
+ * copy selected ones, but never enter BASELINE_COPIES.
  * @type {{name: string, src: string, dst: string}[]}
  */
 export const OPTIONAL_SKILLS = [
@@ -23,6 +29,7 @@ export const OPTIONAL_SKILLS = [
   { name: 'tracker-sync', src: '.claude/skills/tracker-sync', dst: '.claude/skills/tracker-sync' },
   { name: 'ui-verify-web', src: 'templates/optional-skills/ui-verify-web', dst: '.claude/skills/ui-verify-web' },
   { name: 'ui-verify-ios', src: 'templates/optional-skills/ui-verify-ios', dst: '.claude/skills/ui-verify-ios' },
+  { name: 'react-patterns', src: 'templates/stack-skills/react-patterns', dst: '.claude/skills/react-patterns' },
 ];
 
 export const OPTIONAL_NAMES = OPTIONAL_SKILLS.map((s) => s.name);

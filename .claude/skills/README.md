@@ -105,6 +105,28 @@ Quality / lifecycle:
   installed at setup).
 - `tracker-sync` — tasks.md ⇄ tracker bridge, ADO work items or GitHub Issues
   (project; installed at setup; DD-14 directional sync).
+- [`stack-skill-scout`](./stack-skill-scout/SKILL.md) — scouts external skills
+  as candidates for the vendored stack-skill catalog
+  ([`templates/stack-skills/`](../../templates/stack-skills/)); propose-only,
+  FleetCore-side only.
+
+**Dev-only imports** — community/ECC skills adapted for FleetCore development;
+FleetCore-side only, never installed (not in the installer allowlist). Origin
+tracked in each skill's `metadata.origin`; bodies edited to fit this repo (not
+vendored-verbatim, so no `UPSTREAM` marker).
+
+- [`agent-harness-construction`](./agent-harness-construction/SKILL.md) —
+  action-space/observation/context-budget design for agent definitions and
+  templates.
+- [`agent-introspection-debugging`](./agent-introspection-debugging/SKILL.md) —
+  capture → diagnose → contained-recovery workflow for failing agent runs
+  (e.g. golden-eval failures).
+- [`skill-comply`](./skill-comply/SKILL.md) — measures whether a skill/rule/
+  agent definition is actually followed at 3 prompt strictness levels
+  (requires Python + uv; dev-only).
+- [`skill-scout`](./skill-scout/SKILL.md) — pre-authoring dedup search before
+  creating a new skill; pairs with `skill-creator`. Distinct from
+  `stack-skill-scout` (catalog growth).
 
 **UI-verification skills** — the other optional (R-55) family, unrelated to
 orchestration and useful immediately (no orchestration prerequisite). Source

@@ -12,8 +12,14 @@ rule does not cover the repo, use `generic-specialist` with `pairedSkills:
 
 ## Specialist selection
 
-One engineer specialist per CODE layer. Every layer uses `templateId:
-generic-specialist`; stack evidence selects optional `pairedSkills`:
+One engineer specialist per CODE layer **with an evidenced (non-null)
+`testCmd`**. A layer whose `testCmd` is `null` (recorded as a profile gap)
+gets NO engineer specialist — its `test-cmd` slot cannot be filled without
+inventing, and inventing is forbidden. Report the omission in synthesis
+output; the layer still appears in `dispatch_rules.dispatch_order` (derived
+from the profile), so its changes route through consuming layers' specialists
+and their reports. Every specialist uses `templateId: generic-specialist`;
+stack evidence selects optional `pairedSkills`:
 
 | Layer evidence (stack/deps) | pairedSkills |
 | --- | --- |
@@ -63,11 +69,32 @@ agent, the same way it already does for the lifecycle skills.
 
 ## Slot values (from the profile, per agent)
 
-Engineer specialists: `layer-path`, `stack`, `test-cmd` (the layer's
-fields; a `null` testCmd blocks synthesis — report, don't invent),
-`manifest-path` (the layer's `manifestPath`; a `null` manifestPath blocks
-synthesis the same way — report, don't invent), `conventions` (joined from
-`conventions.*`, omitting nulls).
+Engineer specialists: `layer-path`, `layer-context`, `stack`,
+`test-cmd` (the layer's fields; a `null` testCmd means the layer gets no
+specialist at all — see Specialist selection; never invent a command),
+`manifest-path` (the layer's `manifestPath`; a `null` manifestPath on a
+specialist-bearing layer blocks synthesis — report, don't invent),
+`conventions` (joined from `conventions.*`, omitting nulls).
+
+- `layer-path`: `` "the repository root" `` when `layer.path === "."`,
+  else `` `path` `` — backticks in the VALUE, not the template, so a
+  single-package layer reads as "under the repository root" rather than
+  "under `.`". Never wrap this slot in template-level backticks.
+- `layer-context`: NEVER hand-composed — compute it by running
+  `layerContextSlot(profile, layer.name)` from
+  [scaffold.mjs](../../../scripts/lib/orchestration/scaffold.mjs), e.g.
+
+  ```sh
+  node -e 'import("<fcore>/scripts/lib/orchestration/scaffold.mjs").then(async (m) => {
+    const profile = JSON.parse(require("node:fs").readFileSync("<target>/docs/orchestration/repo-profile.json", "utf8"));
+    console.log(m.layerContextSlot(profile, process.argv[1]));
+  })' <layer-name>
+  ```
+
+  The block (build cmd, manifest, dependency edges, repo gaps) is inlined
+  into the generated agent under its `## Layer context` section. Agent-only:
+  paired-skill templates never receive it (`skillSlots()` filters it out at
+  instantiation).
 `code-reviewer`: `checklist-path`
 (`docs/orchestration/checklists/review-checklist.md`), `conventions`.
 Orchestrator: `tasks-path` (`tasks.md`), `handoff-log-path`

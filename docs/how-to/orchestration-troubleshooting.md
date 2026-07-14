@@ -53,6 +53,7 @@ safe.
 | Generated agents fail the target audit | Generation bug | `node <fcore>/scripts/audit.mjs --strict` in the target names the R-IDs; file it against the FleetCore template (triage: template defect), don't hand-fix generated files |
 | Old specialist (or its paired skill) still present after its layer was removed | You haven't re-run `/fcore-fleet-config` since the layer disappeared — orphan removal only happens during scaffolding | Re-run `/fcore-fleet-config` (`mode=re-run`); Phase 4 deletes any prior-manifest file absent from the new plan and reports the count. A hand-edited orphan blocks first, as a USER-EDIT conflict, same as any other generated file |
 | Re-scaffold or `drift-checker` fails with `unfilled slot "manifest-path"` | The blueprint predates the `manifest-path` slot (template `generic-specialist` ≥ 1.1.0, paired skills ≥ 1.2.0) — an older `blueprint.json` doesn't carry it | Re-run `/fcore-fleet-config` (`mode=re-run`); Session 1 re-profiles fresh (now including `manifestPath` per layer) and Session 3 re-synthesizes the blueprint with the new slot |
+| Re-scaffold fails with `unfilled slot "layer-context"` | The blueprint predates the `layer-context` slot (template `generic-specialist` ≥ 2.0.0) — an older `blueprint.json` doesn't carry it | Re-run `/fcore-fleet-config` (`mode=re-run`) — Session 3 re-synthesizes the blueprint with the new slot (computed via `layerContextSlot()`, never hand-composed); no profile changes needed |
 
 ## Session 5 — Execute
 

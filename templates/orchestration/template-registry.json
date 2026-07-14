@@ -6,8 +6,8 @@
       "sha256": "23e5340de294198fceca93862c5c4c5d5c43fbe1b448fd4fac5cce6e1df3b077"
     },
     "generic-specialist": {
-      "version": "1.1.1",
-      "sha256": "ae79ad7befdc0f57b560d82d10b1d57081b2ffa03804bba0debdce042947b71d"
+      "version": "2.0.0",
+      "sha256": "270fd9cf39bdabc7253f07b9893efb72a7ead762a6a0f7a9ae4823c26e21b237"
     },
     "code-reviewer": {
       "version": "1.0.2",
@@ -32,32 +32,32 @@
   },
   "skills": {
     "api-testing": {
-      "version": "1.2.1",
+      "version": "2.0.0",
       "stackEvidence": [
         "express",
         "fastify",
         "http server"
       ],
-      "sha256": "77a8262dfc9c2104e653e33a0c2cc4240bf6cbb55360ef080e74bf974610004e"
+      "sha256": "77e4ba58606c35423d7e9c4f4d1acb0e9df545aa5c6b3883011f4c91949a1486"
     },
     "ui-component-pattern": {
-      "version": "1.2.1",
+      "version": "2.0.0",
       "stackEvidence": [
         "react",
         "vue",
         "vite",
         "frontend"
       ],
-      "sha256": "ff3e7794efbd69312d2cfeee07de1ae878d7b820a86f7f3569ad09673350cbe2"
+      "sha256": "b28d3226bcbd021812addf5a921e6c294b5d5212790acaa1cabdddcdc555807d"
     },
     "db-migration": {
-      "version": "1.2.1",
+      "version": "2.0.0",
       "stackEvidence": [
         "prisma",
         "orm",
         "migration"
       ],
-      "sha256": "a06bc08b331c8383d369d4e0c9f90910f7cfef2f429b2a99f7f91808b0b04e0e"
+      "sha256": "4127becbaf7f672b3a4ac3d230abc8165b1312bd3a0effeb72a9ef1fbf54af73"
     }
   },
   "docs": {

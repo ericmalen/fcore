@@ -84,6 +84,28 @@ FleetCore-side only — `install-setup.mjs` never ships this skill.
    user afterward that the matching MCP server (Playwright / iOS Simulator)
    still needs `claude mcp add --scope project ...` in the target — see each
    skill's first-run section; generation doesn't write `.mcp.json`.
+
+   Then, stack skills (same optional tier R-55, profile-match install
+   trigger; framework-practice skills vendored under
+   `templates/stack-skills/`): match the target's freshly written
+   `repo-profile.json` against `templates/stack-skills/catalog.json` via
+   `matchStackSkills` —
+
+   ```
+   node --input-type=module -e '
+   import { readFileSync } from "node:fs";
+   import { matchStackSkills } from "./scripts/lib/orchestration/stack-skills.mjs";
+   const target = process.argv[1];
+   const profile = JSON.parse(readFileSync(`${target}/docs/orchestration/repo-profile.json`, "utf8"));
+   const catalog = JSON.parse(readFileSync("templates/stack-skills/catalog.json", "utf8"));
+   console.log(matchStackSkills(profile, catalog).join("\n"));
+   ' <target>
+   ```
+
+   `fcore skills add <name> <target>` for each matched name (same idempotent
+   install; records each in `optionalSkills`). No matches is a normal
+   outcome, not an error. Report the installed set (or "no stack-skill
+   matches") in the phase summary.
 8. After phase 4: remind the user to review the diff, commit if not already
    committed by the scaffolder session, and merge. Point them to
    `docs/how-to/orchestration-guide.md` § Session 5 for execution (`tasks.md` +
@@ -129,3 +151,5 @@ docs/how-to/orchestration-guide.md
 .claude/agents/scaffolder.md
 .claude/skills/drift-checker/SKILL.md
 [scripts/lib/orchestration/preflight.mjs](../../../scripts/lib/orchestration/preflight.mjs)
+[scripts/lib/orchestration/stack-skills.mjs](../../../scripts/lib/orchestration/stack-skills.mjs)
+[templates/stack-skills/catalog.json](../../../templates/stack-skills/catalog.json)

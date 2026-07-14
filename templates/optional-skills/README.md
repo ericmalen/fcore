@@ -16,3 +16,11 @@ evidence-driven verifier agent — `ui-web-verifier`/`ui-mobile-verifier`).
 
 Each subfolder is a normal skill directory (`SKILL.md`, house style R-17
 through R-26) — audited on the *project* side after install, not here.
+
+Sibling directory `templates/stack-skills/` holds the stack skills — same
+opt-in tier (R-55), different install trigger: vendored, framework-specific
+practice skills matched against a profile layer's `stack`
+(`matchStackSkills`, `scripts/lib/orchestration/stack-skills.mjs`) rather
+than against a fixed verifier agent in the roster. Same reasoning for living
+outside `.claude/skills/`, same install path (`fcore skills add` /
+`fcore-fleet-config`).

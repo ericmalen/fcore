@@ -281,17 +281,25 @@ Optional marker field `optionalSkills` (R-55). Candidate for promotion to
 warning once tagged pins are the norm across set-up projects.
 
 **R-55 · Optional skill tier** · mechanical · audit, info → warning
-Two families of opt-in skills are not installed by default. Lifecycle skills
-`checklist-intake`, `log-report`, `eval-runner`, `tracker-sync` are dormant
-until orchestration is generated. UI-verification skills `ui-verify-web`,
-`ui-verify-ios` drive a browser or the iOS Simulator via an MCP server and
-are useful immediately, with no orchestration prerequisite. A project records
-its chosen set in the marker's `optionalSkills` array; every listed name must
-be present at `.claude/skills/<name>/` (finding when listed-but-missing).
-Optionals are added at setup (fcore-plan selection, materialized by apply),
-by `fcore skills add`, or (lifecycle family only) by fcore-fleet-config;
-sync-baseline upgrades only the selected set and never reports an unselected
-optional as removed.
+One opt-in tier of skills, not installed by default, with three install
+triggers. Lifecycle
+skills `checklist-intake`, `log-report`, `eval-runner`, `tracker-sync` are
+dormant until orchestration is generated. UI-verification skills
+`ui-verify-web`, `ui-verify-ios` drive a browser or the iOS Simulator via an
+MCP server and are useful immediately, with no orchestration prerequisite.
+Stack skills (vendored under `templates/stack-skills/`, cataloged in
+`templates/stack-skills/catalog.json`) are framework-specific practice
+skills matched against a profile layer's `stack` via `matchStackSkills`
+(`scripts/lib/orchestration/stack-skills.mjs`) — e.g. a layer whose stack
+names Prisma installs a Prisma-practice skill alongside the templated
+`db-migration` paired skill. A project records its chosen set in the
+marker's `optionalSkills` array; every listed name must be present at
+`.claude/skills/<name>/` (finding when listed-but-missing). Optionals are
+added at setup (fcore-plan selection, materialized by apply), by
+`fcore skills add`, or (lifecycle and stack families only) by
+fcore-fleet-config — lifecycle unconditionally, stack skills per profile
+match; sync-baseline upgrades only the selected set and never reports an
+unselected optional as removed.
 
 **R-56 · Orchestration routing trigger** · mechanical · audit, warning
 An orchestration-generated project (one with
@@ -352,6 +360,7 @@ three narrow exemptions the rules would otherwise flag:
 | ID | Was | Disposition |
 |---|---|---|
 | R-38..R-41 | prompt-file rules | surface dropped (D-4); essence of R-41 → R-54 |
+| R-58 | orchestration layer context (rules-file variant) | replaced pre-release by the inline `layer-context` slot in generated specialists — covered by manifest/drift machinery, no rule needed |
 
 ## Dropped v1 rules (machinery — no v2 equivalent)
 

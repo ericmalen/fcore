@@ -115,8 +115,18 @@ export function validateRepoProfile(profile) {
     e('conventions must be an object');
   } else {
     for (const field of ['naming', 'branching', 'commitStyle']) {
-      if (!isStringOrNull(profile.conventions[field])) {
+      const value = profile.conventions[field];
+      if (!isStringOrNull(value)) {
         e(`conventions.${field} must be a string or null (null = not detected)`);
+      } else if (typeof value === 'string') {
+        // Hygiene gate: state the convention, not its history — profile-to-
+        // profile deltas, commit hashes, and analyst meta-commentary belong
+        // in gaps[] or the analyst report, not in a slot fed to agent prompts.
+        if (value.includes('\n')) {
+          e(`conventions.${field} must be a single line (state the convention, not its history — history belongs in gaps[]/analyst report)`);
+        } else if (value.length > 240) {
+          e(`conventions.${field} must be <= 240 chars (got ${value.length}; state the convention, not its history — history belongs in gaps[]/analyst report)`);
+        }
       }
     }
   }

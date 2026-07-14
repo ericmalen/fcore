@@ -188,6 +188,15 @@ immediately must be a no-op — any diff on a clean re-run is a bug.
 Re-run the scaffolder after FleetCore template updates; it refuses to overwrite
 hand-edited generated files (conflict report instead — see troubleshooting).
 
+**Layer context.** Each generated specialist carries a `## Layer context`
+section — build command, manifest, internal dependency edges, and known repo
+gaps — composed from `repo-profile.json` at synthesis (the `layer-context`
+slot, `layerContextSlot()` in `scripts/lib/orchestration/scaffold.mjs`) and
+inlined by ordinary slot substitution. So the stack knowledge discovery
+captured (not just an opaque stack label) actually reaches the fleet, and the
+generation manifest's sha covers it like any other generated content — change
+the profile and re-run generation instead of hand-editing.
+
 ### Session 5 — Execute (`feature-orchestrator`)
 
 Open the **project**. Seed or extend `tasks.md` (see
