@@ -78,7 +78,10 @@ agent. The orchestration lifecycle skills (`checklist-intake`, `log-report`,
 `eval-runner`, `tracker-sync`) are optional (R-55, `OPTIONAL_SKILLS`) — opt-in
 per project, dormant until orchestration generation creates their surfaces
 (`docs/orchestration/`, generated agents); `fcore-fleet-config` installs them as
-a prerequisite, or add them with `fcore skills add`. Orchestration
+a prerequisite, or add them with `fcore skills add`. The same optional tier
+also carries the UI skills (`ui-verify-web`, `ui-verify-ios`,
+`frontend-design`, `app-ui-craft`) and profile-matched stack skills — see
+R-55 for the three install triggers. Orchestration
 discovery/generation meta-assets stay FleetCore-side and run from a fcore checkout against
 a target path — see [`spec/target-layout.md`](../../spec/target-layout.md).
 

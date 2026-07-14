@@ -128,12 +128,14 @@ vendored-verbatim, so no `UPSTREAM` marker).
   creating a new skill; pairs with `skill-creator`. Distinct from
   `stack-skill-scout` (catalog growth).
 
-**UI-verification skills** — the other optional (R-55) family, unrelated to
+**UI skills** — the other optional (R-55) family, unrelated to
 orchestration and useful immediately (no orchestration prerequisite). Source
 lives at [`templates/optional-skills/`](../../templates/optional-skills/),
-not here — FleetCore itself has no web or mobile UI to verify. Install into a
-project the same way, via `fcore skills add ui-verify-web` /
-`ui-verify-ios`.
+not here — FleetCore itself has no web or mobile UI. Verification:
+`ui-verify-web` / `ui-verify-ios`. Web generation: `frontend-design`
+(vendored from Anthropic) + `app-ui-craft` (product-UI usability), installed
+alongside `ui-verify-web` by `fcore-fleet-config`. Install into a
+project the same way, via `fcore skills add <name>`.
 
 ## A worked example: `git-conventions`
 

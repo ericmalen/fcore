@@ -284,9 +284,13 @@ warning once tagged pins are the norm across set-up projects.
 One opt-in tier of skills, not installed by default, with three install
 triggers. Lifecycle
 skills `checklist-intake`, `log-report`, `eval-runner`, `tracker-sync` are
-dormant until orchestration is generated. UI-verification skills
-`ui-verify-web`, `ui-verify-ios` drive a browser or the iOS Simulator via an
-MCP server and are useful immediately, with no orchestration prerequisite.
+dormant until orchestration is generated. UI skills are useful immediately,
+with no orchestration prerequisite: verification skills `ui-verify-web`,
+`ui-verify-ios` drive a browser or the iOS Simulator via an MCP server, and
+web generation skills `frontend-design` (visual design; vendored from
+Anthropic, LICENSE.txt alongside) and `app-ui-craft` (product-UI usability:
+forms, tables, states, keyboard access) raise the quality of the UIs agents
+produce in the first place.
 Stack skills (vendored under `templates/stack-skills/`, cataloged in
 `templates/stack-skills/catalog.json`) are framework-specific practice
 skills matched against a profile layer's `stack` via `matchStackSkills`
@@ -296,9 +300,11 @@ names Prisma installs a Prisma-practice skill alongside the templated
 marker's `optionalSkills` array; every listed name must be present at
 `.claude/skills/<name>/` (finding when listed-but-missing). Optionals are
 added at setup (fcore-plan selection, materialized by apply), by
-`fcore skills add`, or (lifecycle and stack families only) by
-fcore-fleet-config — lifecycle unconditionally, stack skills per profile
-match; sync-baseline upgrades only the selected set and never reports an
+`fcore skills add`, or by fcore-fleet-config — lifecycle unconditionally,
+UI skills when the generated roster includes the matching verifier
+(`ui-web-verifier` → `ui-verify-web` + `frontend-design` + `app-ui-craft`;
+`ui-mobile-verifier` → `ui-verify-ios`), stack skills per profile match;
+sync-baseline upgrades only the selected set and never reports an
 unselected optional as removed.
 
 **R-56 · Orchestration routing trigger** · mechanical · audit, warning

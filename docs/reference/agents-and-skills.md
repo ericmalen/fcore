@@ -56,6 +56,7 @@ Shipped per the allowlist in `scripts/lib/baseline.mjs` (consumed by
 | `docs-manager`, `git-conventions`, `agent-creator`, `skill-creator` | Permanent baseline |
 | `checklist-intake`, `log-report`, `eval-runner`, `tracker-sync` | Optional lifecycle (R-55) — opt-in, not in the default baseline; selected at setup, added via `fcore skills add`, or installed by `fcore-fleet-config`. Operate on orchestration surfaces; dormant until orchestration is generated. |
 | `ui-verify-web`, `ui-verify-ios` | Optional UI-verification (R-55) — opt-in, not in the default baseline; selected at setup or added via `fcore skills add`. Drive a browser (Playwright MCP) or the iOS Simulator (ios-simulator-mcp) to verify UI changes. Useful immediately — no orchestration prerequisite. |
+| `frontend-design`, `app-ui-craft` | Optional web-UI generation (R-55) — opt-in, same install paths as UI-verification and installed alongside `ui-verify-web` by `fcore-fleet-config`. `frontend-design` (vendored from Anthropic) steers visual design away from generic AI-generated looks; `app-ui-craft` covers product-UI usability (forms, tables, async states, keyboard access). |
 
 ## Generated per target (orchestration only)
 
@@ -72,7 +73,7 @@ blueprint or FleetCore template and re-scaffold.
 | `code-reviewer` | `code-reviewer` | — |
 | `qa-agent` | `qa-agent` | — |
 | `security-reviewer` | `security-reviewer` | — |
-| `ui-web-verifier` | `ui-web-verifier` | — (requires `ui-verify-web`, installed as a generation prerequisite, not via `pairedSkills`) |
+| `ui-web-verifier` | `ui-web-verifier` | — (requires `ui-verify-web`, installed as a generation prerequisite alongside `frontend-design`/`app-ui-craft`, not via `pairedSkills`) |
 | `ui-mobile-verifier` | `ui-mobile-verifier` | — (requires `ui-verify-ios`, installed as a generation prerequisite, not via `pairedSkills`) |
 
 Roster, slot values, and `pairedSkills` come from `blueprint.json` — one

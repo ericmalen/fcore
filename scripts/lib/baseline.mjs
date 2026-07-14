@@ -29,6 +29,8 @@ export const OPTIONAL_SKILLS = [
   { name: 'tracker-sync', src: '.claude/skills/tracker-sync', dst: '.claude/skills/tracker-sync' },
   { name: 'ui-verify-web', src: 'templates/optional-skills/ui-verify-web', dst: '.claude/skills/ui-verify-web' },
   { name: 'ui-verify-ios', src: 'templates/optional-skills/ui-verify-ios', dst: '.claude/skills/ui-verify-ios' },
+  { name: 'frontend-design', src: 'templates/optional-skills/frontend-design', dst: '.claude/skills/frontend-design' },
+  { name: 'app-ui-craft', src: 'templates/optional-skills/app-ui-craft', dst: '.claude/skills/app-ui-craft' },
   { name: 'react-patterns', src: 'templates/stack-skills/react-patterns', dst: '.claude/skills/react-patterns' },
 ];
 

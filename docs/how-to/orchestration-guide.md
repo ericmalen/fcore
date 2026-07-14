@@ -285,7 +285,10 @@ See [Lifecycle maintenance](#lifecycle-maintenance) below.
 
 `fcore-fleet-config` also conditionally installs `ui-verify-web`/`ui-verify-ios`
 (R-55) — same `fcore skills add` mechanism, but only when the generated
-roster includes `ui-web-verifier`/`ui-mobile-verifier` respectively. Unlike
+roster includes `ui-web-verifier`/`ui-mobile-verifier` respectively. A
+`ui-web-verifier` roster additionally pulls in the web-UI generation pair
+`frontend-design` + `app-ui-craft`, so agents build good UIs rather than
+just verifying bad ones. Unlike
 the lifecycle skills, these aren't installed unconditionally, and the
 matching MCP server (Playwright / iOS Simulator) still needs `claude mcp add
 --scope project ...` in the target — generation doesn't write `.mcp.json`;

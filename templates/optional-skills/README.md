@@ -3,8 +3,16 @@
 Source for optional skills whose `src` differs from their project `dst` in
 the `OPTIONAL_SKILLS` registry (`scripts/lib/baseline.mjs`). Kept out of
 `.claude/skills/` because they have no target here — FleetCore itself has no
-web or mobile UI, so a UI-verification skill would just be dead weight in
-this repo's own context (see `AGENTS.md` "Do Not").
+web or mobile UI, so a UI skill would just be dead weight in this repo's own
+context (see `AGENTS.md` "Do Not").
+
+Two UI families live here. Verification: `ui-verify-web`, `ui-verify-ios`
+(drive a browser / the iOS Simulator via MCP). Web generation:
+`frontend-design` (visual design guidance, vendored from Anthropic's skills
+repo — keep `LICENSE.txt` with it and re-vendor rather than fork) and
+`app-ui-craft` (product-UI usability: forms, tables, async states, keyboard
+access — authored here). The generation pair installs alongside
+`ui-verify-web` so agents build good UIs, not just verify bad ones.
 
 The orchestration-lifecycle optional skills (`checklist-intake`, `log-report`,
 `eval-runner`, `tracker-sync`) stay dual-role in `.claude/skills/` — they're

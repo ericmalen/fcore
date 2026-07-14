@@ -78,9 +78,13 @@ FleetCore-side only — `install-setup.mjs` never ships this skill.
    `optionalSkills`). These back `/checklist-intake`, `/log-report`, `/eval-runner`,
    `/tracker-sync` on the generated surfaces. Then, conditionally on the
    generated roster: if it includes `ui-web-verifier`, also
-   `fcore skills add ui-verify-web <target>`; if it includes
-   `ui-mobile-verifier`, also `fcore skills add ui-verify-ios <target>`.
-   Neither is installed when its verifier isn't in the roster. Remind the
+   `fcore skills add ui-verify-web <target>`, plus the web UI generation
+   pair `fcore skills add frontend-design <target>` and
+   `fcore skills add app-ui-craft <target>` (verification without
+   generation quality leaves agents shipping ugly UIs that merely pass
+   checks); if it includes `ui-mobile-verifier`, also
+   `fcore skills add ui-verify-ios <target>`.
+   None of these are installed when their verifier isn't in the roster. Remind the
    user afterward that the matching MCP server (Playwright / iOS Simulator)
    still needs `claude mcp add --scope project ...` in the target — see each
    skill's first-run section; generation doesn't write `.mcp.json`.

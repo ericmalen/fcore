@@ -71,8 +71,9 @@ exit codes propagate.
 ## Optional skills (`skills`)
 
 Manage the opt-in skills (R-55) — lifecycle (`checklist-intake`, `log-report`,
-`eval-runner`, `tracker-sync`) and UI-verification (`ui-verify-web`,
-`ui-verify-ios`). They are not in the default baseline; each project's
+`eval-runner`, `tracker-sync`), UI-verification (`ui-verify-web`,
+`ui-verify-ios`), web-UI generation (`frontend-design`, `app-ui-craft`), and
+stack skills (`react-patterns`, …). They are not in the default baseline; each project's
 selection is tracked in the marker's `optionalSkills`. Runs against a set-up
 project (path defaults to cwd) and copies from this checkout.
 

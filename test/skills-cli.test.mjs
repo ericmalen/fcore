@@ -73,6 +73,22 @@ test('skills add of a templates-sourced skill (src !== dst) installs at the live
   }
 });
 
+test('skills add installs the web-UI generation pair (vendored LICENSE rides along)', () => {
+  const dir = setUpProject();
+  try {
+    for (const name of ['frontend-design', 'app-ui-craft']) {
+      const r = run(['add', name, dir]);
+      assert.equal(r.status, 0, r.stderr);
+      assert.ok(existsSync(join(dir, `.claude/skills/${name}/SKILL.md`)), `${name} copied`);
+    }
+    assert.ok(existsSync(join(dir, '.claude/skills/frontend-design/LICENSE.txt')),
+      'vendored license copied with frontend-design');
+    assert.deepEqual(readMarker(dir).optionalSkills, ['app-ui-craft', 'frontend-design']);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('skills add is idempotent on a re-add', () => {
   const dir = setUpProject();
   try {
