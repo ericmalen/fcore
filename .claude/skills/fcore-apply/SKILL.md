@@ -52,6 +52,8 @@ Preconditions: `.setup/manifest.json` parses, and
 4. Regenerate the report: `node .claude/fcore-onboard/scripts/report.mjs --root .`
 5. Commit, then tell the user: fresh session → `fcore-verify` (or, with subagents
    enabled, the `fcore-onboard` orchestrator dispatches the next phase automatically).
+   Skipping fcore-verify is not silent — its cleanup commit is what turns off
+   audit R-59; merging without it fails the installed audit-strict CI.
 
 If the iteration count climbs past ~6 without converging, STOP and report the
 blocking pattern to the user (this is pivot-trigger telemetry — record it).

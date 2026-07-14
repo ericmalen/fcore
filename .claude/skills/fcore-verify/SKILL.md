@@ -43,6 +43,9 @@ finding); `.setup/report.md` is current.
    `ui-verify-web`, `ui-verify-ios`); and the FleetCore marker. Don't hand-list
    names here — the arrays in `baseline.mjs` are the source of truth and this
    skill has drifted from them before.
+   Mechanical backstop: audit R-59 fails on any non-`fcore-onboard` branch
+   that still carries these paths — skipping this step turns the merged
+   repo's `audit-strict` CI red.
 6. **USER GATE 2:** present `.setup/report.md` content (from the last
    pre-removal commit), the verifier matrices, and review instructions:
    `git diff main...fcore-onboard --color-moved=zebra --find-copies-harder`

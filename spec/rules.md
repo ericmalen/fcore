@@ -326,6 +326,21 @@ specialists may write during a task. The orchestrator deletes a task's run
 directory at completion; never committed, never manifest-tracked (same class
 as `tasks.md`).
 
+**R-59 · No setup-window residue** · mechanical · audit, error
+Outside the setup window, none of the setup-window tooling exists in the tree:
+`.setup/`, `.claude/fcore-onboard/`,
+`.claude/skills/fcore-{inventory,plan,apply,verify}/`,
+`.claude/agents/setup-verifier.md` — roots derived from `SETUP_WINDOW_COPIES`
+(`scripts/lib/baseline.mjs`) plus `.setup`, one finding per root present.
+fcore-verify step 5 removes these before the human merges; their presence on a
+steady-state branch means the branch was merged without Phase 4. Silent while
+HEAD is on the `fcore-onboard` branch (window open) and in the FleetCore source
+repo itself, where the phase skills are source assets. Non-git roots and
+detached HEAD count as steady state — so a CI build of a not-yet-cleaned
+`fcore-onboard` branch (detached checkouts: ADO always, GitHub PR merge refs)
+is red until verify's cleanup commit lands; that early red is the intended
+merge backstop.
+
 **R-51 · Rule-ID indirection** · mechanical · FleetCore CI
 FleetCore docs, templates, and check metadata reference rules by R-ID only — never by
 file line numbers. Thresholds are never restated without the R-ID alongside
@@ -347,7 +362,8 @@ three narrow exemptions the rules would otherwise flag:
   `.claude/agents/setup-verifier.md` are skipped by the skills/agents/
   reference checks: they exist only between install and the fcore-verify
   teardown, and transient references (e.g. `.setup/report.md`) are legal
-  there.
+  there. The exemption only silences per-file style checks — R-59 separately
+  asserts these paths are *absent* once the window closes.
 - **Payload skeletons.** Files containing `<!-- fcore:slot:` markers are
   template payload, not live configuration, and are excluded from live-config
   checks.

@@ -157,6 +157,7 @@ rejected — PATs are env-only).
 
 | Absent | Why | Rule |
 |---|---|---|
+| `.setup/`, `.claude/fcore-onboard/`, `.claude/skills/fcore-{inventory,plan,apply,verify}/`, `.claude/agents/setup-verifier.md` | setup-window tooling, removed by fcore-verify before merge | R-59 |
 | `.github/prompts/` | dropped (D-4) — slash commands are `user-invocable` skills | R-54 |
 | `.github/chatmodes/` | deprecated upstream → custom agents | R-42 |
 | `.github/skills/`, `.github/agents/` | `.claude/` is the shared home both tools read | R-49 |

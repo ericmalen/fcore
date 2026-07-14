@@ -4,6 +4,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import {
   readFileSync, writeFileSync, mkdirSync, rmSync, existsSync, mkdtempSync, cpSync,
 } from 'node:fs';
@@ -23,6 +24,13 @@ function setup(fixture) {
   const repo = buildFixture(fixture);
   const inv = runInventory({ root: repo, outDir: '.setup', allowDirty: false });
   return { repo, inv };
+}
+
+// Real setup runs on the fcore-onboard branch (fcore-inventory step 1);
+// mid-window fixtures must sit there too or R-59 flags the .setup dir.
+function openSetupWindow(repo) {
+  const r = spawnSync('git', ['checkout', '-q', '-b', 'fcore-onboard'], { cwd: repo, encoding: 'utf8' });
+  assert.equal(r.status, 0, r.stderr);
 }
 
 function writeManifest(repo, manifest) {
@@ -218,6 +226,7 @@ test('starter end-to-end: installs + jsonMerges ⇒ gates pass AND audit clean',
   const { audit } = await import('../scripts/audit.mjs');
   const { repo } = setup('starter-empty');
   try {
+    openSetupWindow(repo);
     mkdirSync(join(repo, '.setup', 'literals'), { recursive: true });
     writeFileSync(join(repo, '.setup', 'literals', 'marker.json'),
       '{ "standard": "1.0.0", "toolRepo": "https://github.com/ericmalen/fcore", "pin": "v1.0.0", "lastSyncedAt": "2026-06-10", "setupAt": "2026-06-10", "githubCodeReview": false }\n');
@@ -258,6 +267,7 @@ test('starter end-to-end + optional skill (R-55) ⇒ installed; gates incl. repr
   const { audit } = await import('../scripts/audit.mjs');
   const { repo } = setup('starter-empty');
   try {
+    openSetupWindow(repo);
     mkdirSync(join(repo, '.setup', 'literals'), { recursive: true });
     // Marker literal selects an optional skill (what fcore-plan authors).
     writeFileSync(join(repo, '.setup', 'literals', 'marker.json'),

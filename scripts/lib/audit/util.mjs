@@ -1,7 +1,7 @@
 // Shared helpers for the v2 audit. Zero-dep, pure where possible.
 
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
-import { join, dirname, basename } from 'node:path';
+import { join, dirname, basename, isAbsolute } from 'node:path';
 import { stripJsonComments } from '../extract.mjs';
 
 export function readSafe(p) {
@@ -22,6 +22,22 @@ export function isGitRepo(root) {
   if (isDir(dot)) return true;
   const txt = readSafe(dot);
   return txt != null && txt.startsWith('gitdir:');
+}
+
+// Current branch name, or null for non-git roots and detached HEAD.
+// Resolves linked-worktree "gitdir:" pointer files (relative or absolute);
+// an unresolvable pointer degrades to null (steady state for R-59).
+export function currentBranch(root) {
+  const dot = join(root, '.git');
+  let gitdir = dot;
+  if (!isDir(dot)) {
+    const txt = readSafe(dot);
+    if (txt == null || !txt.startsWith('gitdir:')) return null;
+    const p = txt.slice('gitdir:'.length).trim();
+    gitdir = isAbsolute(p) ? p : join(root, p);
+  }
+  const m = readSafe(join(gitdir, 'HEAD'))?.match(/^ref: refs\/heads\/(\S+)/);
+  return m ? m[1] : null;
 }
 
 const SKIP_DIRS = new Set([

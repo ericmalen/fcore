@@ -355,6 +355,71 @@ test('R-50: pre-v2.0.0 marker (.claude/agent-base.json) is read transparently, n
   }
 });
 
+// ── R-59 setup-window residue ────────────────────────────────────────────────
+
+const RESIDUE = {
+  '.setup/report.md': '# manifest review\n',
+  '.claude/fcore-onboard/scripts/check.mjs': '// setup tooling\n',
+  '.claude/skills/fcore-inventory/SKILL.md': '---\nname: fcore-inventory\ndescription: setup phase 1\n---\nbody\n',
+  '.claude/agents/setup-verifier.md': '---\nname: setup-verifier\ndescription: setup verifier\n---\nbody\n',
+};
+
+test('R-59: residue on a steady-state branch fires once per root', () => {
+  const repo = makeRepo({ ...CONFORMANT, ...RESIDUE });
+  try {
+    const r = of(audit({ root: repo }), 'R-59');
+    assert.deepEqual(
+      r.map((f) => f.file).sort(),
+      ['.claude/agents/setup-verifier.md', '.claude/fcore-onboard', '.claude/skills/fcore-inventory', '.setup'],
+    );
+    assert.ok(r.every((f) => f.severity === 'error'));
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test('R-59: silent while HEAD is on the fcore-onboard branch (window open)', () => {
+  const repo = makeRepo({ ...CONFORMANT, ...RESIDUE });
+  try {
+    const r = spawnSync('git', ['checkout', '-q', '-b', 'fcore-onboard'], { cwd: repo, encoding: 'utf8' });
+    assert.equal(r.status, 0);
+    assert.equal(of(audit({ root: repo }), 'R-59').length, 0);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test('R-59: silent in the FleetCore source repo shape', () => {
+  const repo = makeRepo({
+    ...CONFORMANT,
+    '.claude/skills/fcore-inventory/SKILL.md': RESIDUE['.claude/skills/fcore-inventory/SKILL.md'],
+    '.claude/agents/setup-verifier.md': RESIDUE['.claude/agents/setup-verifier.md'],
+    '.claude/skills/fcore-onboard/SKILL.md': '---\nname: fcore-onboard\ndescription: setup entry\n---\nbody\n',
+    'scripts/lib/audit/checks.mjs': '// fcore source\n',
+  });
+  try {
+    assert.equal(of(audit({ root: repo }), 'R-59').length, 0);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+test('R-59: linked-worktree gitdir pointer — window branch silent, detached fires', () => {
+  const repo = makeRepo({
+    ...CONFORMANT,
+    ...RESIDUE,
+    '.git': 'gitdir: gitmeta\n',
+    'gitmeta/HEAD': 'ref: refs/heads/fcore-onboard\n',
+  }, { git: false });
+  try {
+    assert.equal(of(audit({ root: repo }), 'R-59').length, 0);
+    writeFileSync(join(repo, 'gitmeta/HEAD'), 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2\n');
+    assert.equal(of(audit({ root: repo }), 'R-59').length, 4);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
+});
+
 // ── R-48 per-asset READMEs + R-54 stray prompt files ────────────────────────
 
 test('R-48: per-asset README fires; vendored skill exempt', () => {

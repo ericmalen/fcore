@@ -6,9 +6,9 @@ import { join, relative, dirname, basename } from 'node:path';
 import {
   readSafe, exists, isDir, isGitRepo, walk, parseFrontmatter, frontmatterKeys,
   nonBlankLines, stripFences, stripInlineCode, lineOf, parseJsonc, finding as F,
-  isSetupTooling, isVendored, isPayloadSkeleton,
+  isSetupTooling, isVendored, isPayloadSkeleton, currentBranch,
 } from './util.mjs';
-import { OPTIONAL_NAMES } from '../baseline.mjs';
+import { OPTIONAL_NAMES, SETUP_WINDOW_COPIES } from '../baseline.mjs';
 import { ROUTING_REGION_START, ROUTING_REGION_END, renderOrchestrationRouting, RUNS_DIR } from '../orchestration/scaffold.mjs';
 
 // ── R-01..R-09: root instructions ───────────────────────────────────────────
@@ -622,6 +622,37 @@ export function checkHygiene(ctx) {
     out.push(F('R-50', 'warning', '.claude/skills/fcore-check', 'Permanent fcore-check skill is not installed (after setup drift surface).'));
   }
 
+  return out;
+}
+
+// ── R-59: no setup-window residue ────────────────────────────────────────────
+
+// Roots derived from SETUP_WINDOW_COPIES (dsts under .claude/fcore-onboard/
+// collapse to that dir) plus .setup — never hand-listed (lists drift; see
+// fcore-verify's own warning about its step-5 list).
+const RESIDUE_ROOTS = [...new Set(['.setup', ...SETUP_WINDOW_COPIES.map(([, dst]) =>
+  dst.startsWith('.claude/fcore-onboard/') ? '.claude/fcore-onboard' : dst)])];
+
+// The FleetCore source checkout carries the phase skills as SOURCE assets. Its
+// signature: the fcore-onboard SKILL (never copied to consumers) AND the audit
+// sources at their repo-root path (consumers only get them under
+// .claude/fcore-onboard/scripts/).
+function isFcoreSourceRepo(root) {
+  return exists(join(root, '.claude', 'skills', 'fcore-onboard', 'SKILL.md'))
+    && exists(join(root, 'scripts', 'lib', 'audit', 'checks.mjs'));
+}
+
+export function checkSetupResidue(ctx) {
+  const { root } = ctx;
+  if (currentBranch(root) === 'fcore-onboard') return []; // setup window open
+  if (isFcoreSourceRepo(root)) return [];
+  const out = [];
+  for (const rel of RESIDUE_ROOTS) {
+    if (exists(join(root, rel))) {
+      out.push(F('R-59', 'error', rel,
+        'Setup-window tooling present outside the setup window — fcore-verify step 5 (git rm before merge) was skipped; remove it (authoritative list: SETUP_WINDOW_COPIES in baseline.mjs).'));
+    }
+  }
   return out;
 }
 

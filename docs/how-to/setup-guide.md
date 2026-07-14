@@ -65,7 +65,7 @@ Prefer zero terminal? Paste ONE prompt instead:
 
 Either way that's the whole setup. The AI installs the tooling, commits it,
 and starts the four-phase flow below. The setup-time tooling is removed again
-before merge; what stays is the permanent baseline — the `fcore-check`, `docs-manager`,
+before merge (enforced post-merge by audit rule R-59); what stays is the permanent baseline — the `fcore-check`, `docs-manager`,
 `git-conventions`, `skill-creator`, and `agent-creator` skills; optionally the
 orchestration lifecycle skills `checklist-intake`, `log-report`, `eval-runner`, and
 `tracker-sync` (dormant until orchestration generation creates their

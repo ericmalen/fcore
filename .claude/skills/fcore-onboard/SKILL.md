@@ -74,7 +74,8 @@ repo is untouched until THEY merge. Abort = delete the branch.
    say. Never let phases silently share one context — that breaks verifier
    independence.
 6. After Gate 2 approval: remind the user to merge and delete the branch
-   themselves; never merge for them.
+   themselves; never merge for them. Merging before fcore-verify's cleanup
+   commit fails the installed audit-strict gate (R-59).
 
 ## Bootstrap handoff (one-prompt flow only)
 

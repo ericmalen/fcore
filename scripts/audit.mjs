@@ -11,7 +11,7 @@ import { readMarker } from './lib/audit/util.mjs';
 import {
   checkRootInstructions, checkShim, checkPathScoping, checkSkills,
   checkAgents, checkReferences, checkClaudeSettings, checkVscodeSettings,
-  checkHygiene, checkOrchestrationRouting, checkOrchestrationRuns,
+  checkHygiene, checkSetupResidue, checkOrchestrationRouting, checkOrchestrationRuns,
 } from './lib/audit/checks.mjs';
 import { flagValue } from './lib/cli-args.mjs';
 
@@ -44,6 +44,7 @@ export function audit({ root, strict = false }) {
     ...checkClaudeSettings(ctx),
     ...checkVscodeSettings(ctx),
     ...checkHygiene(ctx),
+    ...checkSetupResidue(ctx),
     ...checkOrchestrationRouting(ctx),
     ...checkOrchestrationRuns(ctx),
   ];
